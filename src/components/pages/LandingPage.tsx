@@ -29,7 +29,7 @@ const providerInfo = {
     color: "bg-green-500"
   },
   fabric: {
-    name: "FABRIC",
+    name: "FABRIC API",
     description: "Adaptive programmable research infrastructure for networking, cybersecurity, and distributed computing",
     icon: Shield,
     color: "bg-purple-500"

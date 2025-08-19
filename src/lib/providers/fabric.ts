@@ -7,7 +7,7 @@ export class FabricProvider {
     const cilogonToken = TokenStorage.getToken('cilogon');
     
     if (!cilogonToken || !TokenStorage.isTokenValid(cilogonToken)) {
-      throw new Error('Valid CILogon token required for FABRIC authentication');
+      throw new Error('Valid CILogon token required for FABRIC API authentication');
     }
 
     const response = await fetch(`${config.fabric.cmBase}${config.fabric.createPath}`, {
@@ -25,7 +25,7 @@ export class FabricProvider {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`FABRIC token creation failed: ${error}`);
+      throw new Error(`FABRIC API token creation failed: ${error}`);
     }
 
     const tokenResponse = await response.json();
@@ -62,7 +62,7 @@ export class FabricProvider {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`FABRIC token refresh failed: ${error}`);
+      throw new Error(`FABRIC API token refresh failed: ${error}`);
     }
 
     const tokenResponse = await response.json();

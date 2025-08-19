@@ -206,7 +206,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="font-medium">{provider.toUpperCase()}</div>
+                        <div className="font-medium">{provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</div>
                         <div className="text-sm text-muted-foreground">
                           Expires {status.expiresAt.toLocaleDateString()}
                         </div>

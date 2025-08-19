@@ -28,7 +28,7 @@ export const config = {
     usePkce: true
   },
   
-  // FABRIC
+  // FABRIC API
   fabric: {
     cmBase: "https://cm.fabric-testbed.net",
     createPath: "/tokens/create",

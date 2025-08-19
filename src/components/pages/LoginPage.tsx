@@ -169,10 +169,10 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
       }
 
       await FabricProvider.createToken();
-      toast.success("FABRIC authentication successful!");
+      toast.success("FABRIC API authentication successful!");
       onComplete();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "FABRIC authentication failed";
+      const message = error instanceof Error ? error.message : "FABRIC API authentication failed";
       toast.error(message);
       setDeviceFlow({ status: "error", error: message });
     } finally {
@@ -211,7 +211,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
             <div className="p-2 bg-primary rounded-full text-primary-foreground">
               <Icon className="h-5 w-5" />
             </div>
-            Authenticate with {provider.toUpperCase()}
+            Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}
             <Badge variant="secondary">{environment}</Badge>
           </CardTitle>
           <CardDescription>
@@ -355,7 +355,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                   <Alert>
                     <Shield className="h-4 w-4" />
                     <AlertDescription>
-                      FABRIC authentication requires a valid CILogon token. 
+                      FABRIC API authentication requires a valid CILogon token. 
                       Please authenticate with CILogon first if you haven't already.
                     </AlertDescription>
                   </Alert>
@@ -365,7 +365,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                     size="lg" 
                     className="w-full"
                   >
-                    Create FABRIC Token
+                    Create FABRIC API Token
                   </Button>
                 </div>
               )}
@@ -374,7 +374,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                 <Alert>
                   <Clock className="h-4 w-4" />
                   <AlertDescription>
-                    Creating FABRIC token...
+                    Creating FABRIC API token...
                   </AlertDescription>
                 </Alert>
               )}
