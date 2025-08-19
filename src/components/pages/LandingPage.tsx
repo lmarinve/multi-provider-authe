@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Environment, Provider } from "@/lib/config";
 import { Shield, University, Fingerprint, Server, TestTube } from "@phosphor-icons/react";
+import { SDXLogo } from "@/components/SDXLogo";
 
 interface LandingPageProps {
   environment: Environment;
@@ -24,13 +25,13 @@ const providerInfo = {
   },
   orcid: {
     name: "ORCID",
-    description: "Unique persistent identifiers connecting researchers with their contributions and affiliations",
+    description: "Persistent identifiers for researchers, enabling transparent connections between researchers, their contributions, and affiliations",
     icon: Fingerprint,
     color: "bg-green-500"
   },
   fabric: {
     name: "FABRIC API",
-    description: "Adaptive programmable research infrastructure for networking, cybersecurity, and distributed computing",
+    description: "Adaptive programmable research infrastructure for networking, cybersecurity, distributed computing, and science applications",
     icon: Shield,
     color: "bg-purple-500"
   }
@@ -48,7 +49,10 @@ export function LandingPage({
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">SDX Multi Provider Authentication</h1>
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <SDXLogo size={48} />
+          <h1 className="text-3xl font-bold">SDX Multi Provider Authentication</h1>
+        </div>
         <p className="text-muted-foreground">
           Select your environment and identity provider to authenticate with SDX
         </p>
