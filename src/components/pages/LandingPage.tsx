@@ -46,118 +46,115 @@ export function LandingPage({
   const canContinue = selectedProvider;
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-8">
-      <div className="w-full max-w-md mx-auto space-y-8">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="w-full max-w-2xl mx-auto space-y-12">
         {/* Header */}
-        <div className="text-center space-y-6">
-          <div className="space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight">
-              SDX Multi Provider
-            </h1>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground leading-tight">
-              Authentication
-            </h2>
-          </div>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            Select your environment and identity provider
+        <div className="text-center space-y-4">
+          <h1 className="text-5xl font-bold tracking-tight text-foreground">
+            SDX Multi Provider Authentication
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Select your environment and identity provider to continue
           </p>
         </div>
 
-        {/* Environment Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Server className="h-5 w-5" />
-              Environment
-            </CardTitle>
-            <CardDescription>
-              Choose your target environment
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RadioGroup 
-              value={environment} 
-              onValueChange={onEnvironmentChange}
-              className="space-y-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="test" id="test" />
-                <Label htmlFor="test" className="flex items-center gap-2 cursor-pointer">
-                  <TestTube className="h-4 w-4 text-accent" />
-                  Test Environment
-                  <Badge variant="secondary" className="ml-2">Dev</Badge>
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="production" id="production" />
-                <Label htmlFor="production" className="flex items-center gap-2 cursor-pointer">
-                  <Server className="h-4 w-4 text-destructive" />
-                  Production Environment
-                  <Badge variant="destructive" className="ml-2">Live</Badge>
-                </Label>
-              </div>
-            </RadioGroup>
-          </CardContent>
-        </Card>
+        <div className="grid gap-8 md:grid-cols-2">
+          {/* Environment Selection */}
+          <Card className="h-fit">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Server className="h-6 w-6" />
+                Environment
+              </CardTitle>
+              <CardDescription className="text-base">
+                Choose your target environment
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup 
+                value={environment} 
+                onValueChange={onEnvironmentChange}
+                className="space-y-4"
+              >
+                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                  <RadioGroupItem value="test" id="test" />
+                  <Label htmlFor="test" className="flex items-center gap-3 cursor-pointer flex-1">
+                    <TestTube className="h-5 w-5 text-accent" />
+                    <span className="text-base font-medium">Test Environment</span>
+                    <Badge variant="secondary">Dev</Badge>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                  <RadioGroupItem value="production" id="production" />
+                  <Label htmlFor="production" className="flex items-center gap-3 cursor-pointer flex-1">
+                    <Server className="h-5 w-5 text-destructive" />
+                    <span className="text-base font-medium">Production Environment</span>
+                    <Badge variant="destructive">Live</Badge>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </CardContent>
+          </Card>
 
-        {/* Provider Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Identity Provider</CardTitle>
-            <CardDescription>
-              Choose your authentication provider
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {Object.entries(providerInfo).map(([key, info]) => {
-              const provider = key as Provider;
-              const Icon = info.icon;
-              const isSelected = selectedProvider === provider;
-              
-              return (
-                <TooltipProvider key={provider}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={isSelected ? "default" : "outline"}
-                        className={`w-full justify-start p-4 h-auto transition-all ${
-                          isSelected ? 'shadow-md' : 'hover:shadow-sm'
-                        }`}
-                        onClick={() => onProviderSelect(provider)}
-                      >
-                        <div className={`p-2 rounded-lg ${info.color} text-white mr-3`}>
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div className="text-left">
-                          <div className="font-semibold">{info.name}</div>
-                          <div className={`text-sm ${isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
-                            {info.name === "ORCID" 
-                              ? "Researcher identifiers" 
-                              : info.name === "FABRIC API" 
-                              ? "Research infrastructure" 
-                              : "Academic federation"
-                            }
+          {/* Provider Selection */}
+          <Card className="h-fit">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Identity Provider</CardTitle>
+              <CardDescription className="text-base">
+                Choose your authentication provider
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {Object.entries(providerInfo).map(([key, info]) => {
+                const provider = key as Provider;
+                const Icon = info.icon;
+                const isSelected = selectedProvider === provider;
+                
+                return (
+                  <TooltipProvider key={provider}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={isSelected ? "default" : "outline"}
+                          className={`w-full justify-start p-4 h-auto transition-all ${
+                            isSelected ? 'shadow-md' : 'hover:shadow-sm'
+                          }`}
+                          onClick={() => onProviderSelect(provider)}
+                        >
+                          <div className={`p-2 rounded-lg ${info.color} text-white mr-4`}>
+                            <Icon className="h-6 w-6" />
                           </div>
-                        </div>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-xs">
-                      <p className="text-sm">{info.description}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              );
-            })}
-          </CardContent>
-        </Card>
+                          <div className="text-left">
+                            <div className="font-semibold text-base">{info.name}</div>
+                            <div className={`text-sm ${isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                              {info.name === "ORCID" 
+                                ? "Researcher identifiers" 
+                                : info.name === "FABRIC API" 
+                                ? "Research infrastructure" 
+                                : "Academic federation"
+                              }
+                            </div>
+                          </div>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs">
+                        <p className="text-sm">{info.description}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Continue Button */}
-        <div className="pt-4">
+        <div className="flex justify-center pt-6">
           <Button
             size="lg"
             disabled={!canContinue}
             onClick={() => canContinue && onLogin(selectedProvider)}
-            className="w-full"
+            className="w-full max-w-md px-8 py-3 text-lg"
           >
             Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}
           </Button>
