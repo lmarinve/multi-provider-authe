@@ -23,6 +23,7 @@ import {
   Fingerprint,
   Shield
 } from "@phosphor-icons/react";
+import sdxLogo from "@/assets/images/sdx-logo.svg";
 
 interface LoginPageProps {
   provider: Provider;
@@ -200,6 +201,13 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="text-center mb-6">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <img src={sdxLogo} alt="SDX Logo" className="h-10 w-10" />
+          <h1 className="text-2xl font-bold">SDX Multi Provider Authentication</h1>
+        </div>
+      </div>
+      
       <Button variant="ghost" onClick={onBack} className="mb-6">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to selection
