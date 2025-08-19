@@ -5,7 +5,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Environment, Provider } from "@/lib/config";
-import { Shield, University, Fingerprint, Server, TestTube } from "@phosphor-icons/react";
 
 interface LandingPageProps {
   environment: Environment;
@@ -19,7 +18,6 @@ const providerInfo = {
   cilogon: {
     name: "CILogon",
     description: "Academic and research identity federation providing secure access to research resources across institutions.",
-    icon: University,
     color: "bg-blue-500",
     bgColor: "bg-blue-50 hover:bg-blue-100 border-blue-200",
     selectedBgColor: "bg-blue-100 border-blue-300"
@@ -27,7 +25,6 @@ const providerInfo = {
   orcid: {
     name: "ORCID",
     description: "ORCID strives to enable transparent and trustworthy connections between researchers, their contributions, and their affiliations by providing a unique, persistent identifier for individuals to use as they engage in research, scholarship, and innovation activities.\n\nWe do this by providing three interrelated services:\n\n• The ORCID iD: a unique, persistent identifier free of charge to researchers\n• An ORCID record connected to the ORCID iD\n• A set of Application Programming Interfaces (APIs), as well as the services and support of communities of practice that enable interoperability",
-    icon: Fingerprint,
     color: "bg-green-500",
     bgColor: "bg-green-50 hover:bg-green-100 border-green-200",
     selectedBgColor: "bg-green-100 border-green-300"
@@ -35,7 +32,6 @@ const providerInfo = {
   fabric: {
     name: "FABRIC API",
     description: "FABRIC (FABRIC is Adaptive ProgrammaBle Research Infrastructure for Computer Science and Science Applications) is an International infrastructure that enables cutting-edge experimentation and research at-scale in the areas of networking, cybersecurity, distributed computing, storage, virtual reality, 5G, machine learning, and science applications.\n\nThe FABRIC infrastructure is a distributed set of equipment at commercial collocation spaces, national labs and campuses. Each of the 29 FABRIC sites has large amounts of compute and storage, interconnected by high speed, dedicated optical links. It also connects to specialized testbeds (5G/IoT PAWR, NSF Clouds), the Internet and high-performance computing facilities to create a rich environment for a wide variety of experimental activities.",
-    icon: Shield,
     color: "bg-purple-500",
     bgColor: "bg-purple-50 hover:bg-purple-100 border-purple-200",
     selectedBgColor: "bg-purple-100 border-purple-300"
@@ -86,9 +82,6 @@ export function LandingPage({
                 }`}>
                   <RadioGroupItem value="test" id="test" />
                   <Label htmlFor="test" className="flex items-center gap-3 cursor-pointer flex-1">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm">
-                      <TestTube className="h-5 w-5" />
-                    </div>
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-base font-semibold text-gray-900">Test Environment</span>
@@ -105,9 +98,6 @@ export function LandingPage({
                 }`}>
                   <RadioGroupItem value="production" id="production" />
                   <Label htmlFor="production" className="flex items-center gap-3 cursor-pointer flex-1">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-sm">
-                      <Server className="h-5 w-5" />
-                    </div>
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-base font-semibold text-gray-900">Production</span>
@@ -132,7 +122,6 @@ export function LandingPage({
             <CardContent className="space-y-3 p-4 flex-1">
               {Object.entries(providerInfo).map(([key, info]) => {
                 const provider = key as Provider;
-                const Icon = info.icon;
                 const isSelected = selectedProvider === provider;
                 
                 return (
@@ -148,9 +137,6 @@ export function LandingPage({
                           }`}
                           onClick={() => onProviderSelect(provider)}
                         >
-                          <div className={`p-3 rounded-xl ${info.color.replace('bg-', 'bg-gradient-to-br from-').replace('-500', '-500 to-').concat('-600')} text-white mr-4 shadow-sm`}>
-                            <Icon className="h-5 w-5" />
-                          </div>
                           <div className="text-left flex-1 space-y-2">
                             <div className="font-semibold text-base text-gray-900">{info.name}</div>
                             <div className="text-sm text-gray-600">
@@ -191,17 +177,7 @@ export function LandingPage({
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            <div className="flex items-center gap-2">
-              {selectedProvider && (
-                <div className="p-1 rounded-md bg-white/20">
-                  {(() => {
-                    const Icon = providerInfo[selectedProvider].icon;
-                    return <Icon className="h-4 w-4" />;
-                  })()}
-                </div>
-              )}
-              <span>Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}</span>
-            </div>
+            Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}
           </Button>
         </div>
       </div>
