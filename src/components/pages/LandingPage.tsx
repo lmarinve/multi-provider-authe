@@ -64,9 +64,9 @@ export function LandingPage({
           </p>
         </div>
 
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-start">
           {/* Environment Selection */}
-          <Card className="h-fit bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg">
+          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[400px]">
             <CardHeader className="pb-6 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-3 text-xl">
                 <Server className="h-6 w-6" />
@@ -76,7 +76,7 @@ export function LandingPage({
                 Choose your target environment
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-6 flex-1">
               <RadioGroup 
                 value={environment} 
                 onValueChange={onEnvironmentChange}
@@ -123,14 +123,14 @@ export function LandingPage({
           </Card>
 
           {/* Provider Selection */}
-          <Card className="h-fit bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg">
+          <Card className="flex flex-col bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg min-h-[400px]">
             <CardHeader className="pb-6 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
               <CardTitle className="text-xl">Identity Provider</CardTitle>
               <CardDescription className="text-indigo-200 mt-2">
                 Choose your authentication provider
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 p-6">
+            <CardContent className="space-y-4 p-6 flex-1">
               {Object.entries(providerInfo).map(([key, info]) => {
                 const provider = key as Provider;
                 const Icon = info.icon;
