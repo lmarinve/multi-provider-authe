@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Logo } from "@/components/Logo";
 import { Environment, Provider } from "@/lib/config";
 import { Shield, University, Fingerprint, Server, TestTube } from "@phosphor-icons/react";
 
@@ -49,9 +48,6 @@ export function LandingPage({
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
       <div className="text-center mb-8">
-        <div className="flex justify-center mb-4">
-          <Logo className="h-12 w-auto" />
-        </div>
         <h1 className="text-3xl font-bold mb-4">SDX Multi Provider Authentication</h1>
         <p className="text-muted-foreground">
           Select your environment and identity provider to authenticate with SDX
