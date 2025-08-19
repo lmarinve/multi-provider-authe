@@ -18,7 +18,7 @@ interface LandingPageProps {
 const providerInfo = {
   cilogon: {
     name: "CILogon",
-    description: "Academic and research identity federation",
+    description: "Academic and research identity federation providing secure access to research resources across institutions.",
     icon: University,
     color: "bg-blue-500",
     bgColor: "bg-blue-50 hover:bg-blue-100 border-blue-200",
@@ -26,7 +26,7 @@ const providerInfo = {
   },
   orcid: {
     name: "ORCID",
-    description: "ORCID strives to enable transparent and trustworthy connections between researchers, their contributions, and their affiliations by providing a unique, persistent identifier for individuals to use as they engage in research, scholarship, and innovation activities.",
+    description: "ORCID strives to enable transparent and trustworthy connections between researchers, their contributions, and their affiliations by providing a unique, persistent identifier for individuals to use as they engage in research, scholarship, and innovation activities.\n\nWe do this by providing three interrelated services:\n\n• The ORCID iD: a unique, persistent identifier free of charge to researchers\n• An ORCID record connected to the ORCID iD\n• A set of Application Programming Interfaces (APIs), as well as the services and support of communities of practice that enable interoperability",
     icon: Fingerprint,
     color: "bg-green-500",
     bgColor: "bg-green-50 hover:bg-green-100 border-green-200",
@@ -34,7 +34,7 @@ const providerInfo = {
   },
   fabric: {
     name: "FABRIC API",
-    description: "FABRIC (FABRIC is Adaptive ProgrammaBle Research Infrastructure for Computer Science and Science Applications) is an International infrastructure that enables cutting-edge experimentation and research at-scale in the areas of networking, cybersecurity, distributed computing, storage, virtual reality, 5G, machine learning, and science applications.",
+    description: "FABRIC (FABRIC is Adaptive ProgrammaBle Research Infrastructure for Computer Science and Science Applications) is an International infrastructure that enables cutting-edge experimentation and research at-scale in the areas of networking, cybersecurity, distributed computing, storage, virtual reality, 5G, machine learning, and science applications.\n\nThe FABRIC infrastructure is a distributed set of equipment at commercial collocation spaces, national labs and campuses. Each of the 29 FABRIC sites has large amounts of compute and storage, interconnected by high speed, dedicated optical links. It also connects to specialized testbeds (5G/IoT PAWR, NSF Clouds), the Internet and high-performance computing facilities to create a rich environment for a wide variety of experimental activities.",
     icon: Shield,
     color: "bg-purple-500",
     bgColor: "bg-purple-50 hover:bg-purple-100 border-purple-200",
@@ -55,8 +55,8 @@ export function LandingPage({
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-6">
       <div className="w-full max-w-6xl mx-auto space-y-12">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-5xl lg:text-6xl font-bold tracking-tight text-foreground bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-clip-text text-transparent">
+        <div className="text-center space-y-6">
+          <h1 className="text-5xl lg:text-6xl font-bold tracking-tight text-foreground bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-clip-text text-transparent leading-tight">
             SDX Multi Provider Authentication
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -67,12 +67,12 @@ export function LandingPage({
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Environment Selection */}
           <Card className="h-fit bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg">
-            <CardHeader className="pb-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-2 text-xl">
+            <CardHeader className="pb-6 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
+              <CardTitle className="flex items-center gap-3 text-xl">
                 <Server className="h-6 w-6" />
                 Environment
               </CardTitle>
-              <CardDescription className="text-slate-200">
+              <CardDescription className="text-slate-200 mt-2">
                 Choose your target environment
               </CardDescription>
             </CardHeader>
@@ -82,7 +82,7 @@ export function LandingPage({
                 onValueChange={onEnvironmentChange}
                 className="space-y-4"
               >
-                <div className={`flex items-center space-x-3 p-4 rounded-xl transition-all duration-200 ${
+                <div className={`flex items-center space-x-3 p-5 rounded-xl transition-all duration-200 ${
                   environment === "test" 
                     ? "bg-gradient-to-r from-blue-100 to-blue-50 border-2 border-blue-400 shadow-md" 
                     : "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-25 border border-gray-200 hover:border-blue-300 hover:shadow-sm"
@@ -92,13 +92,15 @@ export function LandingPage({
                     <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
                       <TestTube className="h-5 w-5" />
                     </div>
-                    <div className="flex-1">
-                      <span className="text-base font-semibold text-gray-900">Test Environment</span>
-                      <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-800">Dev</Badge>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-semibold text-gray-900">Test Environment</span>
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">Dev</Badge>
+                      </div>
                     </div>
                   </Label>
                 </div>
-                <div className={`flex items-center space-x-3 p-4 rounded-xl transition-all duration-200 ${
+                <div className={`flex items-center space-x-3 p-5 rounded-xl transition-all duration-200 ${
                   environment === "production" 
                     ? "bg-gradient-to-r from-red-100 to-red-50 border-2 border-red-400 shadow-md" 
                     : "bg-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-25 border border-gray-200 hover:border-red-300 hover:shadow-sm"
@@ -108,9 +110,11 @@ export function LandingPage({
                     <div className="p-2 rounded-lg bg-gradient-to-br from-red-500 to-red-600 text-white">
                       <Server className="h-5 w-5" />
                     </div>
-                    <div className="flex-1">
-                      <span className="text-base font-semibold text-gray-900">Production Environment</span>
-                      <Badge variant="destructive" className="ml-2">Live</Badge>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-semibold text-gray-900">Production Environment</span>
+                        <Badge variant="destructive">Live</Badge>
+                      </div>
                     </div>
                   </Label>
                 </div>
@@ -120,9 +124,9 @@ export function LandingPage({
 
           {/* Provider Selection */}
           <Card className="h-fit bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg">
-            <CardHeader className="pb-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
+            <CardHeader className="pb-6 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
               <CardTitle className="text-xl">Identity Provider</CardTitle>
-              <CardDescription className="text-indigo-200">
+              <CardDescription className="text-indigo-200 mt-2">
                 Choose your authentication provider
               </CardDescription>
             </CardHeader>
@@ -138,7 +142,7 @@ export function LandingPage({
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
+                          className={`w-full justify-start p-5 h-auto transition-all duration-200 border-2 rounded-xl ${
                             isSelected 
                               ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
                               : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-gray-200 hover:border-opacity-100`
@@ -148,7 +152,7 @@ export function LandingPage({
                           <div className={`p-3 rounded-xl ${info.color.replace('bg-', 'bg-gradient-to-br from-').replace('-500', '-500 to-').concat('-600')} text-white mr-4 shadow-sm`}>
                             <Icon className="h-6 w-6" />
                           </div>
-                          <div className="text-left flex-1">
+                          <div className="text-left flex-1 space-y-1">
                             <div className="font-semibold text-base text-gray-900">{info.name}</div>
                             <div className="text-sm text-gray-600">
                               {info.name === "ORCID" 
@@ -161,8 +165,12 @@ export function LandingPage({
                           </div>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-xs">
-                        <p className="text-sm">{info.description}</p>
+                      <TooltipContent side="right" className="max-w-md p-4">
+                        <div className="text-sm space-y-2">
+                          {info.description.split('\n').map((line, index) => (
+                            <p key={index} className={line.startsWith('•') ? 'ml-2' : ''}>{line}</p>
+                          ))}
+                        </div>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -173,18 +181,18 @@ export function LandingPage({
         </div>
 
         {/* Continue Button */}
-        <div className="flex justify-center pt-8">
+        <div className="flex justify-center pt-12">
           <Button
             size="lg"
             disabled={!canContinue}
             onClick={() => canContinue && onLogin(selectedProvider)}
-            className={`w-full max-w-md px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-200 ${
+            className={`w-full max-w-md px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-200 ${
               canContinue 
                 ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]" 
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {selectedProvider && (
                 <div className="p-1 rounded-md bg-white/20">
                   {(() => {
@@ -193,7 +201,7 @@ export function LandingPage({
                   })()}
                 </div>
               )}
-              Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}
+              <span>Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}</span>
             </div>
           </Button>
         </div>
