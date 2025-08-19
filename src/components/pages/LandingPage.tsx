@@ -84,10 +84,10 @@ export function LandingPage({
                   <Label htmlFor="test" className="flex items-center gap-3 cursor-pointer flex-1">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-gray-900">Test Environment</span>
+                        <span className="text-base font-semibold text-slate-700">Test Environment</span>
                         <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-sm">Dev</Badge>
                       </div>
-                      <div className="text-sm text-gray-600">Development and testing</div>
+                      <div className="text-sm text-slate-600">Development and testing</div>
                     </div>
                   </Label>
                 </div>
@@ -100,10 +100,10 @@ export function LandingPage({
                   <Label htmlFor="production" className="flex items-center gap-3 cursor-pointer flex-1">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-gray-900">Production</span>
+                        <span className="text-base font-semibold text-slate-700">Production</span>
                         <Badge variant="destructive" className="text-sm">Live</Badge>
                       </div>
-                      <div className="text-sm text-gray-600">Live production environment</div>
+                      <div className="text-sm text-slate-600">Live production environment</div>
                     </div>
                   </Label>
                 </div>
@@ -138,8 +138,8 @@ export function LandingPage({
                           onClick={() => onProviderSelect(provider)}
                         >
                           <div className="text-left flex-1 space-y-2">
-                            <div className="font-semibold text-base text-gray-900">{info.name}</div>
-                            <div className="text-sm text-gray-600">
+                            <div className="font-semibold text-base text-slate-700">{info.name}</div>
+                            <div className="text-sm text-slate-600">
                               {info.name === "ORCID" 
                                 ? "Researcher identifiers" 
                                 : info.name === "FABRIC API" 
