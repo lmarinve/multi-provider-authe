@@ -157,12 +157,12 @@ export function LandingPage({
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent 
-                        side="right" 
-                        align="start"
-                        sideOffset={10}
-                        className="max-w-xs p-3 bg-blue-50 text-blue-800 border border-blue-200 shadow-lg z-50"
+                        side="left" 
+                        align="center"
+                        sideOffset={15}
+                        className="max-w-sm p-3 bg-slate-800 text-white border border-slate-700 shadow-xl z-50"
                         avoidCollisions={true}
-                        collisionPadding={10}
+                        collisionPadding={20}
                       >
                         <div className="text-sm space-y-2">
                           {info.description.split('\n').map((line, index) => (
