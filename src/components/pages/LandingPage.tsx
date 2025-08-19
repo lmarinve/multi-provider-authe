@@ -20,19 +20,25 @@ const providerInfo = {
     name: "CILogon",
     description: "Academic and research identity federation",
     icon: University,
-    color: "bg-blue-500"
+    color: "bg-blue-500",
+    bgColor: "bg-blue-50 hover:bg-blue-100 border-blue-200",
+    selectedBgColor: "bg-blue-100 border-blue-300"
   },
   orcid: {
     name: "ORCID",
-    description: "Persistent identifiers for researchers, enabling transparent connections between researchers, their contributions, and affiliations",
+    description: "ORCID strives to enable transparent and trustworthy connections between researchers, their contributions, and their affiliations by providing a unique, persistent identifier for individuals to use as they engage in research, scholarship, and innovation activities.",
     icon: Fingerprint,
-    color: "bg-green-500"
+    color: "bg-green-500",
+    bgColor: "bg-green-50 hover:bg-green-100 border-green-200",
+    selectedBgColor: "bg-green-100 border-green-300"
   },
   fabric: {
     name: "FABRIC API",
-    description: "Adaptive programmable research infrastructure for networking, cybersecurity, distributed computing, and science applications",
+    description: "FABRIC (FABRIC is Adaptive ProgrammaBle Research Infrastructure for Computer Science and Science Applications) is an International infrastructure that enables cutting-edge experimentation and research at-scale in the areas of networking, cybersecurity, distributed computing, storage, virtual reality, 5G, machine learning, and science applications.",
     icon: Shield,
-    color: "bg-purple-500"
+    color: "bg-purple-500",
+    bgColor: "bg-purple-50 hover:bg-purple-100 border-purple-200",
+    selectedBgColor: "bg-purple-100 border-purple-300"
   }
 } as const;
 
@@ -76,7 +82,11 @@ export function LandingPage({
                 onValueChange={onEnvironmentChange}
                 className="space-y-4"
               >
-                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                  environment === "test" 
+                    ? "bg-blue-50 border border-blue-300" 
+                    : "bg-gray-50 hover:bg-blue-50 border border-transparent hover:border-blue-200"
+                }`}>
                   <RadioGroupItem value="test" id="test" />
                   <Label htmlFor="test" className="flex items-center gap-3 cursor-pointer flex-1">
                     <TestTube className="h-5 w-5 text-accent" />
@@ -84,7 +94,11 @@ export function LandingPage({
                     <Badge variant="secondary">Dev</Badge>
                   </Label>
                 </div>
-                <div className="flex items-center space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                <div className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                  environment === "production" 
+                    ? "bg-red-50 border border-red-300" 
+                    : "bg-gray-50 hover:bg-red-50 border border-transparent hover:border-red-200"
+                }`}>
                   <RadioGroupItem value="production" id="production" />
                   <Label htmlFor="production" className="flex items-center gap-3 cursor-pointer flex-1">
                     <Server className="h-5 w-5 text-destructive" />
@@ -115,9 +129,11 @@ export function LandingPage({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant={isSelected ? "default" : "outline"}
-                          className={`w-full justify-start p-4 h-auto transition-all ${
-                            isSelected ? 'shadow-md' : 'hover:shadow-sm'
+                          variant="ghost"
+                          className={`w-full justify-start p-4 h-auto transition-all border ${
+                            isSelected 
+                              ? `${info.selectedBgColor} shadow-md` 
+                              : `${info.bgColor} hover:shadow-sm`
                           }`}
                           onClick={() => onProviderSelect(provider)}
                         >
@@ -125,8 +141,8 @@ export function LandingPage({
                             <Icon className="h-6 w-6" />
                           </div>
                           <div className="text-left">
-                            <div className="font-semibold text-base">{info.name}</div>
-                            <div className={`text-sm ${isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
+                            <div className="font-semibold text-base text-foreground">{info.name}</div>
+                            <div className="text-sm text-muted-foreground">
                               {info.name === "ORCID" 
                                 ? "Researcher identifiers" 
                                 : info.name === "FABRIC API" 
