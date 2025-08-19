@@ -1,6 +1,6 @@
-import { config } from "../config";
-import { TokenData, BackendPayload } from "../types";
-import { decodeJWT } from "../token-storage";
+import { config } from "@/lib/config";
+import { TokenData, BackendPayload } from "@/lib/types";
+import { decodeJWT } from "@/lib/token-storage";
 
 export async function sendTokenToBackend(
   token: TokenData,

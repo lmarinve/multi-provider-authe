@@ -1,6 +1,6 @@
-import { config } from "./config";
-import { TokenData, DeviceFlowResponse, TokenResponse } from "./types";
-import { TokenStorage } from "./token-storage";
+import { config } from "@/lib/config";
+import { TokenData, DeviceFlowResponse, TokenResponse } from "@/lib/types";
+import { TokenStorage } from "@/lib/token-storage";
 
 export class CILogonProvider {
   static async startDeviceFlow(): Promise<DeviceFlowResponse> {

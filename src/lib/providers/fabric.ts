@@ -1,6 +1,6 @@
-import { config } from "../config";
-import { TokenData } from "../types";
-import { TokenStorage } from "../token-storage";
+import { config } from "@/lib/config";
+import { TokenData } from "@/lib/types";
+import { TokenStorage } from "@/lib/token-storage";
 
 export class FabricProvider {
   static async createToken(): Promise<TokenData> {

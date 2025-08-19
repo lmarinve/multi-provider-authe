@@ -1,6 +1,6 @@
-import { config } from "../config";
-import { TokenData, TokenResponse } from "../types";
-import { TokenStorage } from "../token-storage";
+import { config } from "@/lib/config";
+import { TokenData, TokenResponse } from "@/lib/types";
+import { TokenStorage } from "@/lib/token-storage";
 
 function generateCodeVerifier(): string {
   const array = new Uint8Array(32);

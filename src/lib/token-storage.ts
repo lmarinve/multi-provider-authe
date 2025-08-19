@@ -1,4 +1,4 @@
-import { TokenData } from "./types";
+import { TokenData, TokenClaims } from "@/lib/types";
 
 const TOKEN_KEYS = {
   cilogon: "auth.cilogon",
