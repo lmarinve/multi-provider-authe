@@ -66,52 +66,54 @@ export function LandingPage({
 
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 items-start">
           {/* Environment Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[112px]">
-            <CardHeader className="pb-1 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg py-1">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Server className="h-3 w-3" />
-                Environment
-              </CardTitle>
+          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[450px]">
+            <CardHeader className="pb-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
+              <CardTitle className="text-lg">Environment</CardTitle>
+              <CardDescription className="text-slate-200 mt-1">
+                Choose your target environment
+              </CardDescription>
             </CardHeader>
-            <CardContent className="p-1 flex-1">
+            <CardContent className="space-y-4 p-5 flex-1">
               <RadioGroup 
                 value={environment} 
                 onValueChange={onEnvironmentChange}
-                className="space-y-1"
+                className="space-y-6"
               >
-                <div className={`flex items-center space-x-2 p-1 rounded-lg transition-all duration-200 ${
+                <div className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 ${
                   environment === "test" 
-                    ? "bg-gradient-to-r from-blue-100 to-blue-50 border-2 border-blue-400 shadow-md" 
-                    : "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-25 border border-gray-200 hover:border-blue-300 hover:shadow-sm"
+                    ? "bg-gradient-to-r from-blue-100 to-blue-50 border-blue-400 shadow-lg transform scale-[1.02]" 
+                    : "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-25 border-gray-200 hover:border-blue-300 hover:shadow-md"
                 }`}>
                   <RadioGroupItem value="test" id="test" />
-                  <Label htmlFor="test" className="flex items-center gap-1 cursor-pointer flex-1">
-                    <div className="p-1 rounded-md bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                      <TestTube className="h-2 w-2" />
+                  <Label htmlFor="test" className="flex items-center gap-3 cursor-pointer flex-1">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-sm">
+                      <TestTube className="h-5 w-5" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs font-semibold text-gray-900">Test</span>
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs py-0 px-1">Dev</Badge>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-semibold text-gray-900">Test Environment</span>
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-sm">Dev</Badge>
                       </div>
+                      <div className="text-sm text-gray-600">Development and testing</div>
                     </div>
                   </Label>
                 </div>
-                <div className={`flex items-center space-x-2 p-1 rounded-lg transition-all duration-200 ${
+                <div className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 ${
                   environment === "production" 
-                    ? "bg-gradient-to-r from-red-100 to-red-50 border-2 border-red-400 shadow-md" 
-                    : "bg-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-25 border border-gray-200 hover:border-red-300 hover:shadow-sm"
+                    ? "bg-gradient-to-r from-red-100 to-red-50 border-red-400 shadow-lg transform scale-[1.02]" 
+                    : "bg-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-25 border-gray-200 hover:border-red-300 hover:shadow-md"
                 }`}>
                   <RadioGroupItem value="production" id="production" />
-                  <Label htmlFor="production" className="flex items-center gap-1 cursor-pointer flex-1">
-                    <div className="p-1 rounded-md bg-gradient-to-br from-red-500 to-red-600 text-white">
-                      <Server className="h-2 w-2" />
+                  <Label htmlFor="production" className="flex items-center gap-3 cursor-pointer flex-1">
+                    <div className="p-3 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-sm">
+                      <Server className="h-5 w-5" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs font-semibold text-gray-900">Production</span>
-                        <Badge variant="destructive" className="text-xs py-0 px-1">Live</Badge>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-semibold text-gray-900">Production</span>
+                        <Badge variant="destructive" className="text-sm">Live</Badge>
                       </div>
+                      <div className="text-sm text-gray-600">Live production environment</div>
                     </div>
                   </Label>
                 </div>
