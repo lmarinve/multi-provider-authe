@@ -1,9 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Check } from "lucide-react";
 import { Environment, Provider } from "@/lib/config";
 
 interface LandingPageProps {
@@ -70,18 +70,19 @@ export function LandingPage({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 p-4 flex-1">
-              <RadioGroup 
-                value={environment} 
-                onValueChange={onEnvironmentChange}
-                className="space-y-3"
-              >
-                <div className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 ${
-                  environment === "test" 
-                    ? "bg-gradient-to-r from-blue-100 to-blue-50 border-blue-400 shadow-lg transform scale-[1.02]" 
-                    : "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-25 border-gray-200 hover:border-blue-300 hover:shadow-md"
-                }`}>
-                  <RadioGroupItem value="test" id="test" />
-                  <Label htmlFor="test" className="flex items-center gap-3 cursor-pointer flex-1">
+              <div className="space-y-3">
+                <div 
+                  className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 cursor-pointer ${
+                    environment === "test" 
+                      ? "bg-gradient-to-r from-blue-100 to-blue-50 border-blue-400 shadow-lg transform scale-[1.02]" 
+                      : "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-25 border-gray-200 hover:border-blue-300 hover:shadow-md"
+                  }`}
+                  onClick={() => onEnvironmentChange("test")}
+                >
+                  <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-green-500 bg-white">
+                    {environment === "test" && <Check className="w-3 h-3 text-green-600" />}
+                  </div>
+                  <Label className="flex items-center gap-3 cursor-pointer flex-1">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-base font-semibold text-slate-700">Test Environment</span>
@@ -91,13 +92,18 @@ export function LandingPage({
                     </div>
                   </Label>
                 </div>
-                <div className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 ${
-                  environment === "production" 
-                    ? "bg-gradient-to-r from-red-100 to-red-50 border-red-400 shadow-lg transform scale-[1.02]" 
-                    : "bg-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-25 border-gray-200 hover:border-red-300 hover:shadow-md"
-                }`}>
-                  <RadioGroupItem value="production" id="production" />
-                  <Label htmlFor="production" className="flex items-center gap-3 cursor-pointer flex-1">
+                <div 
+                  className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 cursor-pointer ${
+                    environment === "production" 
+                      ? "bg-gradient-to-r from-red-100 to-red-50 border-red-400 shadow-lg transform scale-[1.02]" 
+                      : "bg-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-25 border-gray-200 hover:border-red-300 hover:shadow-md"
+                  }`}
+                  onClick={() => onEnvironmentChange("production")}
+                >
+                  <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-green-500 bg-white">
+                    {environment === "production" && <Check className="w-3 h-3 text-green-600" />}
+                  </div>
+                  <Label className="flex items-center gap-3 cursor-pointer flex-1">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-base font-semibold text-slate-700">Production</span>
@@ -107,7 +113,7 @@ export function LandingPage({
                     </div>
                   </Label>
                 </div>
-              </RadioGroup>
+              </div>
             </CardContent>
           </Card>
 
@@ -150,7 +156,7 @@ export function LandingPage({
                           </div>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-md p-4">
+                      <TooltipContent side="right" className="max-w-md p-4 bg-white text-gray-800 border border-gray-200 shadow-lg">
                         <div className="text-sm space-y-2">
                           {info.description.split('\n').map((line, index) => (
                             <p key={index} className={line.startsWith('•') ? 'ml-2' : ''}>{line}</p>
