@@ -52,7 +52,7 @@ export function LandingPage({
         <div className="flex justify-center mb-4">
           <Logo className="h-12 w-auto" />
         </div>
-        <h1 className="text-3xl font-bold mb-4">Atlantic Wave SDX</h1>
+        <h1 className="text-3xl font-bold mb-4">SDX Multi Provider Authentication</h1>
         <p className="text-muted-foreground">
           Select your environment and identity provider to authenticate with SDX
         </p>
