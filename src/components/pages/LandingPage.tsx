@@ -56,7 +56,10 @@ export function LandingPage({
           </p>
         </div>
 
-        <div className="grid gap-16 grid-cols-1 lg:grid-cols-2 items-start">
+        <div className="grid gap-16 grid-cols-1 lg:grid-cols-2 items-start relative">
+          {/* Vertical divider line - only visible on large screens */}
+          <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent transform -translate-x-1/2"></div>
+          
           {/* Environment Selection */}
           <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg">
             <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
