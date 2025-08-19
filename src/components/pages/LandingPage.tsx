@@ -160,8 +160,9 @@ export function LandingPage({
                         side="right" 
                         align="start"
                         sideOffset={10}
-                        className="max-w-md p-4 bg-blue-50 text-blue-800 border border-blue-200 shadow-lg z-50"
-                        avoidCollisions={false}
+                        className="max-w-xs p-3 bg-blue-50 text-blue-800 border border-blue-200 shadow-lg z-50"
+                        avoidCollisions={true}
+                        collisionPadding={10}
                       >
                         <div className="text-sm space-y-2">
                           {info.description.split('\n').map((line, index) => (
