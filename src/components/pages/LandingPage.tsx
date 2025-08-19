@@ -53,7 +53,7 @@ export function LandingPage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-3">
-      <div className="w-full max-w-4xl mx-auto space-y-6">
+      <div className="w-full max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-clip-text text-transparent leading-tight">
@@ -64,7 +64,7 @@ export function LandingPage({
           </p>
         </div>
 
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 lg:gap-8 items-start">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 items-start">
           {/* Environment Selection */}
           <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[300px]">
             <CardHeader className="pb-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
