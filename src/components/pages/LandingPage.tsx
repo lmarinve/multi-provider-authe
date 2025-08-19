@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Environment, Provider } from "@/lib/config";
 import { Shield, University, Fingerprint, Server, TestTube } from "@phosphor-icons/react";
-import sdxLogo from "@/assets/images/sdx-logo.svg";
 
 interface LandingPageProps {
   environment: Environment;
@@ -49,10 +48,7 @@ export function LandingPage({
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
       <div className="text-center mb-8">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <img src={sdxLogo} alt="SDX Logo" className="h-12 w-12" />
-          <h1 className="text-3xl font-bold">SDX Multi Provider Authentication</h1>
-        </div>
+        <h1 className="text-3xl font-bold mb-4">SDX Multi Provider Authentication</h1>
         <p className="text-muted-foreground">
           Select your environment and identity provider to authenticate with SDX
         </p>

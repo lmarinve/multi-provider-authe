@@ -24,7 +24,6 @@ import {
   Fingerprint,
   Shield
 } from "@phosphor-icons/react";
-import sdxLogo from "@/assets/images/sdx-logo.svg";
 
 interface TokenPageProps {
   environment: Environment;
@@ -150,10 +149,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img src={sdxLogo} alt="SDX Logo" className="h-10 w-10" />
-            <h1 className="text-2xl font-bold">SDX Multi Provider Authentication</h1>
-          </div>
+          <h1 className="text-2xl font-bold">SDX Multi Provider Authentication</h1>
         </div>
         
         <Button variant="ghost" onClick={onBack} className="mb-6">
@@ -181,10 +177,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="text-center mb-6">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <img src={sdxLogo} alt="SDX Logo" className="h-10 w-10" />
-          <h1 className="text-2xl font-bold">SDX Multi Provider Authentication</h1>
-        </div>
+        <h1 className="text-2xl font-bold">SDX Multi Provider Authentication</h1>
       </div>
       
       <Button variant="ghost" onClick={onBack} className="mb-6">
