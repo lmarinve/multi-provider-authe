@@ -199,30 +199,32 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
   const timeRemaining = getTimeRemaining();
 
   return (
-    <div className="container mx-auto px-6 py-12 max-w-2xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">SDX Multi Provider Authentication</h1>
+    <div className="container mx-auto px-6 py-16 max-w-3xl">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
+          SDX Multi Provider Authentication
+        </h1>
       </div>
       
-      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2">
-        <ArrowLeft className="h-4 w-4 mr-2" />
+      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base">
+        <ArrowLeft className="h-5 w-5 mr-2" />
         Back to selection
       </Button>
 
-      <Card className="shadow-sm">
-        <CardHeader className="pb-6">
-          <CardTitle className="flex items-center gap-3">
-            <div className="p-2 bg-primary rounded-full text-primary-foreground">
-              <Icon className="h-5 w-5" />
+      <Card className="shadow-lg border-2 border-border/20">
+        <CardHeader className="pb-8">
+          <CardTitle className="flex items-center gap-4 text-2xl">
+            <div className="p-3 bg-primary rounded-xl text-primary-foreground">
+              <Icon className="h-6 w-6" />
             </div>
-            Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}
-            <Badge variant="secondary">{environment}</Badge>
+            <span>Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</span>
+            <Badge variant="secondary" className="ml-auto text-sm px-3 py-1">{environment}</Badge>
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-lg mt-2">
             Complete the authentication flow to obtain your token
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-8 pt-0">
+        <CardContent className="space-y-10 pt-0">
           {provider === "cilogon" && (
             <>
               {deviceFlow.status === "idle" && (
@@ -230,32 +232,33 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                   onClick={startCILogonFlow} 
                   disabled={isLoading} 
                   size="lg" 
-                  className="w-full"
+                  className="w-full py-4 text-lg font-semibold"
                 >
                   Start CILogon Device Flow
                 </Button>
               )}
 
               {deviceFlow.status === "polling" && (
-                <div className="space-y-6">
-                  <Alert>
-                    <Clock className="h-4 w-4" />
-                    <AlertDescription>
+                <div className="space-y-8">
+                  <Alert className="border-2 border-primary/20 bg-primary/5">
+                    <Clock className="h-5 w-5 text-primary" />
+                    <AlertDescription className="text-base ml-2">
                       Please visit the verification URL and enter the user code below.
                       Waiting for authentication...
                     </AlertDescription>
                   </Alert>
 
-                  <div className="grid gap-6">
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium">Verification URL</Label>
-                      <div className="flex items-center gap-3">
-                        <code className="flex-1 p-4 bg-muted rounded-md text-sm font-mono">
+                  <div className="grid gap-8">
+                    <div className="space-y-4">
+                      <Label className="text-base font-semibold text-foreground">Verification URL</Label>
+                      <div className="flex items-center gap-4">
+                        <code className="flex-1 p-4 bg-muted rounded-xl text-base font-mono border-2 border-border/20">
                           {deviceFlow.verificationUri}
                         </code>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="px-4 py-2 border-2 border-border/20 hover:border-primary/30"
                           onClick={() => copyToClipboard(deviceFlow.verificationUri!)}
                         >
                           <Copy className="h-4 w-4" />
@@ -263,6 +266,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                         <Button
                           variant="outline"
                           size="sm"
+                          className="px-4 py-2 border-2 border-border/20 hover:border-primary/30"
                           onClick={() => window.open(deviceFlow.verificationUri, "_blank")}
                         >
                           <ExternalLink className="h-4 w-4" />
@@ -270,15 +274,16 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label className="text-sm font-medium">User Code</Label>
-                      <div className="flex items-center gap-3">
-                        <code className="flex-1 p-4 bg-muted rounded-md text-xl font-mono tracking-widest text-center font-bold">
+                    <div className="space-y-4">
+                      <Label className="text-base font-semibold text-foreground">User Code</Label>
+                      <div className="flex items-center gap-4">
+                        <code className="flex-1 p-6 bg-accent/10 rounded-xl text-2xl font-mono tracking-widest text-center font-bold border-2 border-accent/20 text-accent">
                           {deviceFlow.userCode}
                         </code>
                         <Button
                           variant="outline"
                           size="sm"
+                          className="px-4 py-2 border-2 border-border/20 hover:border-accent/30"
                           onClick={() => copyToClipboard(deviceFlow.userCode!)}
                         >
                           <Copy className="h-4 w-4" />
@@ -287,12 +292,12 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                     </div>
 
                     {timeRemaining && (
-                      <div className="space-y-3">
-                        <div className="flex justify-between text-sm">
-                          <span>Time remaining</span>
-                          <span className="font-mono">{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}</span>
+                      <div className="space-y-4">
+                        <div className="flex justify-between text-base">
+                          <span className="font-semibold">Time remaining</span>
+                          <span className="font-mono text-primary">{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}</span>
                         </div>
-                        <Progress value={(timeRemaining / 600) * 100} className="h-2" />
+                        <Progress value={(timeRemaining / 600) * 100} className="h-3" />
                       </div>
                     )}
                   </div>
@@ -300,18 +305,18 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
               )}
 
               {deviceFlow.status === "success" && (
-                <Alert>
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert className="border-2 border-accent/20 bg-accent/5">
+                  <CheckCircle className="h-5 w-5 text-accent" />
+                  <AlertDescription className="text-base ml-2">
                     Authentication successful! Redirecting...
                   </AlertDescription>
                 </Alert>
               )}
 
               {deviceFlow.status === "error" && (
-                <Alert variant="destructive">
-                  <XCircle className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert variant="destructive" className="border-2 border-destructive/20">
+                  <XCircle className="h-5 w-5" />
+                  <AlertDescription className="text-base ml-2">
                     {deviceFlow.error}
                   </AlertDescription>
                 </Alert>
@@ -326,24 +331,24 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                   onClick={startORCIDFlow} 
                   disabled={isLoading} 
                   size="lg" 
-                  className="w-full"
+                  className="w-full py-4 text-lg font-semibold"
                 >
                   Login with ORCID
                 </Button>
               )}
 
               {isLoading && (
-                <Alert>
-                  <Clock className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert className="border-2 border-primary/20 bg-primary/5">
+                  <Clock className="h-5 w-5 text-primary" />
+                  <AlertDescription className="text-base ml-2">
                     Processing ORCID authentication...
                   </AlertDescription>
                 </Alert>
               )}
 
               {deviceFlow.status === "error" && (
-                <Alert variant="destructive">
-                  <XCircle className="h-4 w-4" />
+                <Alert variant="destructive" className="border-2 border-destructive/20">
+                  <XCircle className="h-5 w-5" />
                   <AlertDescription>
                     {deviceFlow.error}
                   </AlertDescription>

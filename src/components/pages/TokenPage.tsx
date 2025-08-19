@@ -147,25 +147,27 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
   if (availableTokens.length === 0) {
     return (
-      <div className="container mx-auto px-6 py-12 max-w-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">SDX Multi Provider Authentication</h1>
+      <div className="container mx-auto px-6 py-16 max-w-3xl">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
+            SDX Multi Provider Authentication
+          </h1>
         </div>
         
-        <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2">
-          <ArrowLeft className="h-4 w-4 mr-2" />
+        <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base">
+          <ArrowLeft className="h-5 w-5 mr-2" />
           Back to selection
         </Button>
 
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle>No Valid Tokens</CardTitle>
-            <CardDescription>
+        <Card className="shadow-lg border-2 border-border/20">
+          <CardHeader className="pb-8">
+            <CardTitle className="text-2xl">No Valid Tokens</CardTitle>
+            <CardDescription className="text-lg mt-2">
               You don't have any valid tokens. Please authenticate with a provider first.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
-            <Button onClick={onBack} className="w-full" size="lg">
+            <Button onClick={onBack} className="w-full py-4 text-lg font-semibold" size="lg">
               Go Back to Authentication
             </Button>
           </CardContent>
@@ -175,26 +177,28 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
   }
 
   return (
-    <div className="container mx-auto px-6 py-12 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">SDX Multi Provider Authentication</h1>
+    <div className="container mx-auto px-6 py-16 max-w-6xl">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
+          SDX Multi Provider Authentication
+        </h1>
       </div>
       
-      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2">
-        <ArrowLeft className="h-4 w-4 mr-2" />
+      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base">
+        <ArrowLeft className="h-5 w-5 mr-2" />
         Back to selection
       </Button>
 
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid lg:grid-cols-2 gap-10">
         {/* Token Selection */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-6">
-            <CardTitle>Available Tokens</CardTitle>
-            <CardDescription>
+        <Card className="shadow-lg border-2 border-border/20">
+          <CardHeader className="pb-8">
+            <CardTitle className="text-2xl">Available Tokens</CardTitle>
+            <CardDescription className="text-lg mt-2">
               Select a token to view details and send to backend
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 pt-0">
+          <CardContent className="space-y-6 pt-0">
             {availableTokens.map(([provider, token]) => {
               const Icon = providerIcons[provider as keyof typeof providerIcons];
               const status = getTokenStatus(token);
@@ -203,33 +207,35 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
               return (
                 <div
                   key={provider}
-                  className={`p-5 rounded-lg border cursor-pointer transition-all hover:shadow-sm ${
-                    isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"
+                  className={`p-6 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md ${
+                    isSelected 
+                      ? "border-primary bg-primary/5 shadow-md" 
+                      : "border-border/20 hover:border-primary/30 hover:bg-primary/5"
                   }`}
                   onClick={() => setSelectedToken(token)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="p-2.5 bg-primary rounded-full text-primary-foreground">
-                        <Icon className="h-4 w-4" />
+                      <div className="p-3 bg-primary rounded-xl text-primary-foreground">
+                        <Icon className="h-6 w-6" />
                       </div>
                       <div>
-                        <div className="font-medium text-base">{provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</div>
-                        <div className="text-sm text-muted-foreground mt-1">
+                        <div className="font-semibold text-lg">{provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</div>
+                        <div className="text-base text-muted-foreground mt-1">
                           Expires {status.expiresAt.toLocaleDateString()}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       {status.isExpiringSoon && (
-                        <Badge variant="destructive" className="text-xs">
+                        <Badge variant="destructive" className="text-sm px-3 py-1">
                           Expiring Soon
                         </Badge>
                       )}
                       {status.isValid ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <CheckCircle className="h-6 w-6 text-accent" />
                       ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
+                        <XCircle className="h-6 w-6 text-destructive" />
                       )}
                     </div>
                   </div>
@@ -241,24 +247,24 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
         {/* Token Details */}
         {selectedToken && claims && (
-          <Card className="shadow-sm">
-            <CardHeader className="pb-6">
-              <CardTitle className="flex items-center gap-2">
+          <Card className="shadow-lg border-2 border-border/20">
+            <CardHeader className="pb-8">
+              <CardTitle className="flex items-center gap-3 text-2xl">
                 Token Details
-                <Badge variant="secondary">{environment}</Badge>
+                <Badge variant="secondary" className="text-sm px-3 py-1">{environment}</Badge>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-lg mt-2">
                 Claims and metadata for the selected token
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 pt-0">
-              <div className="space-y-5">
+            <CardContent className="space-y-8 pt-0">
+              <div className="space-y-6">
                 {claims.sub && (
-                  <div className="flex items-start gap-3">
-                    <User className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                    <User className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium mb-1">Subject</div>
-                      <div className="text-sm text-muted-foreground break-all">
+                      <div className="text-base font-semibold mb-2 text-foreground">Subject</div>
+                      <div className="text-base text-muted-foreground break-all">
                         {claims.sub}
                       </div>
                     </div>
@@ -266,11 +272,11 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 )}
 
                 {claims.email && (
-                  <div className="flex items-start gap-3">
-                    <At className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                    <At className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium mb-1">Email</div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-base font-semibold mb-2 text-foreground">Email</div>
+                      <div className="text-base text-muted-foreground">
                         {claims.email}
                       </div>
                     </div>
@@ -278,66 +284,74 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 )}
 
                 {claims.iss && (
-                  <div className="flex items-start gap-3">
-                    <Shield className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                    <Shield className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-medium mb-1">Issuer</div>
-                      <div className="text-sm text-muted-foreground break-all">
+                      <div className="text-base font-semibold mb-2 text-foreground">Issuer</div>
+                      <div className="text-base text-muted-foreground break-all">
                         {claims.iss}
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                  <Calendar className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium mb-1">Issued At</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-base font-semibold mb-2 text-foreground">Issued At</div>
+                    <div className="text-base text-muted-foreground">
                       {formatDate(selectedToken.issued_at)}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <Clock className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                  <Clock className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium mb-1">Expires At</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-base font-semibold mb-2 text-foreground">Expires At</div>
+                    <div className="text-base text-muted-foreground">
                       {formatDate(selectedToken.issued_at + selectedToken.expires_in)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="my-8" />
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <Button
                   onClick={handleSendToBackend}
                   disabled={isSending}
-                  className="w-full"
+                  className="w-full py-4 text-lg font-semibold"
                   size="lg"
                 >
                   {isSending ? (
                     <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      <RefreshCw className="h-5 w-5 mr-3 animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Send className="h-4 w-4 mr-2" />
+                      <Send className="h-5 w-5 mr-3" />
                       Send Token to Backend
                     </>
                   )}
                 </Button>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" onClick={handleSwitchEnvironment}>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleSwitchEnvironment}
+                    className="py-3 text-base font-medium border-2 border-border/20 hover:border-primary/30"
+                  >
                     Switch to {environment === "test" ? "Production" : "Test"}
                   </Button>
-                  <Button variant="outline" onClick={handleClearAllTokens}>
-                    <Trash className="h-4 w-4 mr-2" />
+                  <Button 
+                    variant="outline" 
+                    onClick={handleClearAllTokens}
+                    className="py-3 text-base font-medium border-2 border-destructive/20 hover:border-destructive/30 text-destructive hover:text-destructive"
+                  >
+                    <Trash className="h-5 w-5 mr-2" />
                     Clear All Tokens
                   </Button>
                 </div>
@@ -348,18 +362,18 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       </div>
 
       {/* Backend Configuration Info */}
-      <Card className="mt-8 shadow-sm">
-        <CardHeader>
-          <CardTitle>Current Configuration</CardTitle>
+      <Card className="mt-12 shadow-lg border-2 border-border/20">
+        <CardHeader className="pb-6">
+          <CardTitle className="text-2xl">Current Configuration</CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
-          <div className="grid md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <div className="font-medium">Environment</div>
+          <div className="grid md:grid-cols-2 gap-8 text-base">
+            <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
+              <div className="font-semibold text-foreground mb-2">Environment</div>
               <div className="text-muted-foreground">{environment}</div>
             </div>
-            <div>
-              <div className="font-medium">Backend URL</div>
+            <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
+              <div className="font-semibold text-foreground mb-2">Backend URL</div>
               <div className="text-muted-foreground break-all">
                 {environment === "test" 
                   ? "https://sdxapi.atlanticwave-sdx.ai/" 
