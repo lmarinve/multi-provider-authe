@@ -53,7 +53,7 @@ export function LandingPage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-3">
-      <div className="w-full max-w-6xl mx-auto space-y-6">
+      <div className="w-1/2 mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-clip-text text-transparent leading-tight">
