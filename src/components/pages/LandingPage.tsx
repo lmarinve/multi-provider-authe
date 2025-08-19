@@ -24,7 +24,7 @@ const providerInfo = {
   },
   orcid: {
     name: "ORCID",
-    description: "Researcher identifier system",
+    description: "Unique persistent identifiers connecting researchers with their contributions and affiliations",
     icon: Fingerprint,
     color: "bg-green-500"
   },
