@@ -50,10 +50,15 @@ export function LandingPage({
       <div className="w-full max-w-md mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-6">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground">
-            SDX Multi Provider Authentication
-          </h1>
-          <p className="text-muted-foreground text-lg">
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight">
+              SDX Multi Provider
+            </h1>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground leading-tight">
+              Authentication
+            </h2>
+          </div>
+          <p className="text-muted-foreground text-lg leading-relaxed">
             Select your environment and identity provider
           </p>
         </div>
