@@ -48,9 +48,9 @@ export function LandingPage({
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">Multi-Provider Authentication</h1>
+        <h1 className="text-3xl font-bold mb-2">SDX Multi Provider Authentication</h1>
         <p className="text-muted-foreground">
-          Select your environment and identity provider to authenticate
+          Select your environment and identity provider to authenticate with SDX
         </p>
       </div>
 
