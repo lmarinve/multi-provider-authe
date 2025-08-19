@@ -52,7 +52,7 @@ export function LandingPage({
   const canContinue = selectedProvider;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-3">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-3 pt-8">
       <div className="w-1/2 mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
