@@ -66,18 +66,18 @@ export function LandingPage({
 
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 items-start">
           {/* Environment Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[450px]">
-            <CardHeader className="pb-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
+          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg">
+            <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
               <CardTitle className="text-lg">Environment</CardTitle>
               <CardDescription className="text-slate-200 mt-1">
                 Choose your target environment
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 p-5 flex-1">
+            <CardContent className="space-y-4 p-4 flex-1">
               <RadioGroup 
                 value={environment} 
                 onValueChange={onEnvironmentChange}
-                className="space-y-6"
+                className="space-y-3"
               >
                 <div className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 ${
                   environment === "test" 
@@ -122,14 +122,14 @@ export function LandingPage({
           </Card>
 
           {/* Provider Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg min-h-[450px]">
-            <CardHeader className="pb-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
+          <Card className="flex flex-col bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg">
+            <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
               <CardTitle className="text-lg">Identity Provider</CardTitle>
               <CardDescription className="text-indigo-200 mt-1">
                 Choose your authentication provider
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 p-5 flex-1">
+            <CardContent className="space-y-3 p-4 flex-1">
               {Object.entries(providerInfo).map(([key, info]) => {
                 const provider = key as Provider;
                 const Icon = info.icon;
