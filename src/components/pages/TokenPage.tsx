@@ -147,25 +147,25 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
   if (availableTokens.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold">SDX Multi Provider Authentication</h1>
+      <div className="container mx-auto px-6 py-12 max-w-2xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold tracking-tight">SDX Multi Provider Authentication</h1>
         </div>
         
-        <Button variant="ghost" onClick={onBack} className="mb-6">
+        <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to selection
         </Button>
 
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>No Valid Tokens</CardTitle>
             <CardDescription>
               You don't have any valid tokens. Please authenticate with a provider first.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button onClick={onBack} className="w-full">
+          <CardContent className="pt-4">
+            <Button onClick={onBack} className="w-full" size="lg">
               Go Back to Authentication
             </Button>
           </CardContent>
@@ -175,26 +175,26 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">SDX Multi Provider Authentication</h1>
+    <div className="container mx-auto px-6 py-12 max-w-4xl">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">SDX Multi Provider Authentication</h1>
       </div>
       
-      <Button variant="ghost" onClick={onBack} className="mb-6">
+      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to selection
       </Button>
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-8">
         {/* Token Selection */}
-        <Card>
-          <CardHeader>
+        <Card className="shadow-sm">
+          <CardHeader className="pb-6">
             <CardTitle>Available Tokens</CardTitle>
             <CardDescription>
               Select a token to view details and send to backend
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4 pt-0">
             {availableTokens.map(([provider, token]) => {
               const Icon = providerIcons[provider as keyof typeof providerIcons];
               const status = getTokenStatus(token);
@@ -203,19 +203,19 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
               return (
                 <div
                   key={provider}
-                  className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                    isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                  className={`p-5 rounded-lg border cursor-pointer transition-all hover:shadow-sm ${
+                    isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"
                   }`}
                   onClick={() => setSelectedToken(token)}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary rounded-full text-primary-foreground">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2.5 bg-primary rounded-full text-primary-foreground">
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <div className="font-medium">{provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="font-medium text-base">{provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</div>
+                        <div className="text-sm text-muted-foreground mt-1">
                           Expires {status.expiresAt.toLocaleDateString()}
                         </div>
                       </div>
@@ -227,9 +227,9 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                         </Badge>
                       )}
                       {status.isValid ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-5 w-5 text-green-500" />
                       ) : (
-                        <XCircle className="h-4 w-4 text-red-500" />
+                        <XCircle className="h-5 w-5 text-red-500" />
                       )}
                     </div>
                   </div>
@@ -241,8 +241,8 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
         {/* Token Details */}
         {selectedToken && claims && (
-          <Card>
-            <CardHeader>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-6">
               <CardTitle className="flex items-center gap-2">
                 Token Details
                 <Badge variant="secondary">{environment}</Badge>
@@ -251,13 +251,13 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 Claims and metadata for the selected token
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
+            <CardContent className="space-y-6 pt-0">
+              <div className="space-y-5">
                 {claims.sub && (
-                  <div className="flex items-center gap-3">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <div className="text-sm font-medium">Subject</div>
+                  <div className="flex items-start gap-3">
+                    <User className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium mb-1">Subject</div>
                       <div className="text-sm text-muted-foreground break-all">
                         {claims.sub}
                       </div>
@@ -266,10 +266,10 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 )}
 
                 {claims.email && (
-                  <div className="flex items-center gap-3">
-                    <At className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <div className="text-sm font-medium">Email</div>
+                  <div className="flex items-start gap-3">
+                    <At className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium mb-1">Email</div>
                       <div className="text-sm text-muted-foreground">
                         {claims.email}
                       </div>
@@ -278,10 +278,10 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 )}
 
                 {claims.iss && (
-                  <div className="flex items-center gap-3">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <div className="text-sm font-medium">Issuer</div>
+                  <div className="flex items-start gap-3">
+                    <Shield className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium mb-1">Issuer</div>
                       <div className="text-sm text-muted-foreground break-all">
                         {claims.iss}
                       </div>
@@ -289,20 +289,20 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                   </div>
                 )}
 
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <div className="text-sm font-medium">Issued At</div>
+                <div className="flex items-start gap-3">
+                  <Calendar className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium mb-1">Issued At</div>
                     <div className="text-sm text-muted-foreground">
                       {formatDate(selectedToken.issued_at)}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <div className="text-sm font-medium">Expires At</div>
+                <div className="flex items-start gap-3">
+                  <Clock className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium mb-1">Expires At</div>
                     <div className="text-sm text-muted-foreground">
                       {formatDate(selectedToken.issued_at + selectedToken.expires_in)}
                     </div>
@@ -312,7 +312,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
               <Separator />
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <Button
                   onClick={handleSendToBackend}
                   disabled={isSending}
@@ -332,7 +332,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                   )}
                 </Button>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <Button variant="outline" onClick={handleSwitchEnvironment}>
                     Switch to {environment === "test" ? "Production" : "Test"}
                   </Button>
@@ -348,11 +348,11 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       </div>
 
       {/* Backend Configuration Info */}
-      <Card className="mt-6">
+      <Card className="mt-8 shadow-sm">
         <CardHeader>
           <CardTitle>Current Configuration</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <div className="grid md:grid-cols-2 gap-4 text-sm">
             <div>
               <div className="font-medium">Environment</div>

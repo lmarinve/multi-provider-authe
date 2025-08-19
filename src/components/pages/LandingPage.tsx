@@ -46,16 +46,16 @@ export function LandingPage({
   const canContinue = selectedProvider;
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-2xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-4">SDX Multi Provider Authentication</h1>
-        <p className="text-muted-foreground">
+    <div className="container mx-auto px-6 py-16 max-w-2xl">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-6 tracking-tight">SDX Multi Provider Authentication</h1>
+        <p className="text-muted-foreground text-lg leading-relaxed">
           Select your environment and identity provider to authenticate with SDX
         </p>
       </div>
 
-      <Card className="mb-6">
-        <CardHeader>
+      <Card className="mb-8 shadow-sm">
+        <CardHeader className="pb-6">
           <CardTitle className="flex items-center gap-2">
             <Server className="h-5 w-5" />
             Environment
@@ -64,19 +64,19 @@ export function LandingPage({
             Choose the target environment for your authentication
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <RadioGroup value={environment} onValueChange={onEnvironmentChange}>
-            <div className="flex items-center space-x-2">
+        <CardContent className="pt-0">
+          <RadioGroup value={environment} onValueChange={onEnvironmentChange} className="space-y-4">
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
               <RadioGroupItem value="test" id="test" />
-              <Label htmlFor="test" className="flex items-center gap-2">
+              <Label htmlFor="test" className="flex items-center gap-2 cursor-pointer flex-1">
                 <TestTube className="h-4 w-4" />
                 Test Environment
                 <Badge variant="secondary">Development</Badge>
               </Label>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 p-3 rounded-lg border border-transparent hover:border-border transition-colors">
               <RadioGroupItem value="production" id="production" />
-              <Label htmlFor="production" className="flex items-center gap-2">
+              <Label htmlFor="production" className="flex items-center gap-2 cursor-pointer flex-1">
                 <Server className="h-4 w-4" />
                 Production Environment
                 <Badge variant="destructive">Live</Badge>
@@ -86,15 +86,15 @@ export function LandingPage({
         </CardContent>
       </Card>
 
-      <Card className="mb-8">
-        <CardHeader>
+      <Card className="mb-12 shadow-sm">
+        <CardHeader className="pb-6">
           <CardTitle>Identity Provider</CardTitle>
           <CardDescription>
             Choose your preferred authentication provider
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-3">
+        <CardContent className="pt-0">
+          <div className="grid gap-4">
             {Object.entries(providerInfo).map(([key, info]) => {
               const provider = key as Provider;
               const Icon = info.icon;
@@ -107,22 +107,22 @@ export function LandingPage({
                       <Button
                         variant={isSelected ? "default" : "outline"}
                         size="lg"
-                        className="w-full justify-start p-6 h-auto"
+                        className="w-full justify-start p-6 h-auto min-h-20 transition-all hover:shadow-md"
                         onClick={() => onProviderSelect(provider)}
                       >
-                        <div className={`p-2 rounded-full ${info.color} text-white mr-4`}>
-                          <Icon className="h-5 w-5" />
+                        <div className={`p-3 rounded-full ${info.color} text-white mr-4 flex-shrink-0`}>
+                          <Icon className="h-6 w-6" />
                         </div>
-                        <div className="text-left">
-                          <div className="font-semibold">{info.name}</div>
-                          <div className="text-sm text-muted-foreground">
+                        <div className="text-left flex-1">
+                          <div className="font-semibold text-base mb-1">{info.name}</div>
+                          <div className="text-sm text-muted-foreground leading-relaxed">
                             {info.description}
                           </div>
                         </div>
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{info.description}</p>
+                      <p className="max-w-xs">{info.description}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -137,6 +137,7 @@ export function LandingPage({
           size="lg"
           disabled={!canContinue}
           onClick={() => canContinue && onLogin(selectedProvider)}
+          className="px-8 py-3 text-base font-medium min-w-64"
         >
           Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}
         </Button>

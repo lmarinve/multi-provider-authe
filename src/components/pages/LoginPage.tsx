@@ -199,18 +199,18 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
   const timeRemaining = getTimeRemaining();
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">SDX Multi Provider Authentication</h1>
+    <div className="container mx-auto px-6 py-12 max-w-2xl">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">SDX Multi Provider Authentication</h1>
       </div>
       
-      <Button variant="ghost" onClick={onBack} className="mb-6">
+      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to selection
       </Button>
 
-      <Card>
-        <CardHeader>
+      <Card className="shadow-sm">
+        <CardHeader className="pb-6">
           <CardTitle className="flex items-center gap-3">
             <div className="p-2 bg-primary rounded-full text-primary-foreground">
               <Icon className="h-5 w-5" />
@@ -222,7 +222,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
             Complete the authentication flow to obtain your token
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-8 pt-0">
           {provider === "cilogon" && (
             <>
               {deviceFlow.status === "idle" && (
@@ -237,7 +237,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
               )}
 
               {deviceFlow.status === "polling" && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Alert>
                     <Clock className="h-4 w-4" />
                     <AlertDescription>
@@ -246,11 +246,11 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                     </AlertDescription>
                   </Alert>
 
-                  <div className="grid gap-4">
-                    <div className="space-y-2">
+                  <div className="grid gap-6">
+                    <div className="space-y-3">
                       <Label className="text-sm font-medium">Verification URL</Label>
-                      <div className="flex items-center gap-2">
-                        <code className="flex-1 p-3 bg-muted rounded-md text-sm">
+                      <div className="flex items-center gap-3">
+                        <code className="flex-1 p-4 bg-muted rounded-md text-sm font-mono">
                           {deviceFlow.verificationUri}
                         </code>
                         <Button
@@ -270,10 +270,10 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <Label className="text-sm font-medium">User Code</Label>
-                      <div className="flex items-center gap-2">
-                        <code className="flex-1 p-3 bg-muted rounded-md text-lg font-mono tracking-wider text-center">
+                      <div className="flex items-center gap-3">
+                        <code className="flex-1 p-4 bg-muted rounded-md text-xl font-mono tracking-widest text-center font-bold">
                           {deviceFlow.userCode}
                         </code>
                         <Button
@@ -287,12 +287,12 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                     </div>
 
                     {timeRemaining && (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                           <span>Time remaining</span>
-                          <span>{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}</span>
+                          <span className="font-mono">{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}</span>
                         </div>
-                        <Progress value={(timeRemaining / 600) * 100} />
+                        <Progress value={(timeRemaining / 600) * 100} className="h-2" />
                       </div>
                     )}
                   </div>
@@ -355,7 +355,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
           {provider === "fabric" && (
             <>
               {deviceFlow.status === "idle" && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Alert>
                     <Shield className="h-4 w-4" />
                     <AlertDescription>
