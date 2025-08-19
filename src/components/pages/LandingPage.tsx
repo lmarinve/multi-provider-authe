@@ -52,68 +52,68 @@ export function LandingPage({
   const canContinue = selectedProvider;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-6xl mx-auto space-y-12">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-3">
+      <div className="w-full max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center space-y-6">
-          <h1 className="text-5xl lg:text-6xl font-bold tracking-tight text-foreground bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-clip-text text-transparent leading-tight">
+        <div className="text-center space-y-3">
+          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-clip-text text-transparent leading-tight">
             SDX Multi Provider Authentication
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Select your environment and identity provider to continue
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8 items-start">
+        <div className="grid gap-4 lg:grid-cols-2 lg:gap-6 items-start">
           {/* Environment Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[400px]">
-            <CardHeader className="pb-6 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
-              <CardTitle className="flex items-center gap-3 text-xl">
-                <Server className="h-6 w-6" />
+          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[300px]">
+            <CardHeader className="pb-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Server className="h-5 w-5" />
                 Environment
               </CardTitle>
-              <CardDescription className="text-slate-200 mt-2">
+              <CardDescription className="text-slate-200 mt-1">
                 Choose your target environment
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6 flex-1">
+            <CardContent className="p-4 flex-1">
               <RadioGroup 
                 value={environment} 
                 onValueChange={onEnvironmentChange}
-                className="space-y-4"
+                className="space-y-3"
               >
-                <div className={`flex items-center space-x-3 p-5 rounded-xl transition-all duration-200 ${
+                <div className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${
                   environment === "test" 
                     ? "bg-gradient-to-r from-blue-100 to-blue-50 border-2 border-blue-400 shadow-md" 
                     : "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-25 border border-gray-200 hover:border-blue-300 hover:shadow-sm"
                 }`}>
                   <RadioGroupItem value="test" id="test" />
-                  <Label htmlFor="test" className="flex items-center gap-3 cursor-pointer flex-1">
+                  <Label htmlFor="test" className="flex items-center gap-2 cursor-pointer flex-1">
                     <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                      <TestTube className="h-5 w-5" />
+                      <TestTube className="h-4 w-4" />
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-gray-900">Test Environment</span>
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">Dev</Badge>
+                        <span className="text-sm font-semibold text-gray-900">Test Environment</span>
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">Dev</Badge>
                       </div>
                     </div>
                   </Label>
                 </div>
-                <div className={`flex items-center space-x-3 p-5 rounded-xl transition-all duration-200 ${
+                <div className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 ${
                   environment === "production" 
                     ? "bg-gradient-to-r from-red-100 to-red-50 border-2 border-red-400 shadow-md" 
                     : "bg-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-25 border border-gray-200 hover:border-red-300 hover:shadow-sm"
                 }`}>
                   <RadioGroupItem value="production" id="production" />
-                  <Label htmlFor="production" className="flex items-center gap-3 cursor-pointer flex-1">
+                  <Label htmlFor="production" className="flex items-center gap-2 cursor-pointer flex-1">
                     <div className="p-2 rounded-lg bg-gradient-to-br from-red-500 to-red-600 text-white">
-                      <Server className="h-5 w-5" />
+                      <Server className="h-4 w-4" />
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-gray-900">Production Environment</span>
-                        <Badge variant="destructive">Live</Badge>
+                        <span className="text-sm font-semibold text-gray-900">Production Environment</span>
+                        <Badge variant="destructive" className="text-xs">Live</Badge>
                       </div>
                     </div>
                   </Label>
@@ -123,14 +123,14 @@ export function LandingPage({
           </Card>
 
           {/* Provider Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg min-h-[400px]">
-            <CardHeader className="pb-6 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
-              <CardTitle className="text-xl">Identity Provider</CardTitle>
-              <CardDescription className="text-indigo-200 mt-2">
+          <Card className="flex flex-col bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg min-h-[300px]">
+            <CardHeader className="pb-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
+              <CardTitle className="text-lg">Identity Provider</CardTitle>
+              <CardDescription className="text-indigo-200 mt-1">
                 Choose your authentication provider
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 p-6 flex-1">
+            <CardContent className="space-y-3 p-4 flex-1">
               {Object.entries(providerInfo).map(([key, info]) => {
                 const provider = key as Provider;
                 const Icon = info.icon;
@@ -142,19 +142,19 @@ export function LandingPage({
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start p-5 h-auto transition-all duration-200 border-2 rounded-xl ${
+                          className={`w-full justify-start p-3 h-auto transition-all duration-200 border-2 rounded-xl ${
                             isSelected 
                               ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
                               : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-gray-200 hover:border-opacity-100`
                           }`}
                           onClick={() => onProviderSelect(provider)}
                         >
-                          <div className={`p-3 rounded-xl ${info.color.replace('bg-', 'bg-gradient-to-br from-').replace('-500', '-500 to-').concat('-600')} text-white mr-4 shadow-sm`}>
-                            <Icon className="h-6 w-6" />
+                          <div className={`p-2 rounded-xl ${info.color.replace('bg-', 'bg-gradient-to-br from-').replace('-500', '-500 to-').concat('-600')} text-white mr-3 shadow-sm`}>
+                            <Icon className="h-4 w-4" />
                           </div>
                           <div className="text-left flex-1 space-y-1">
-                            <div className="font-semibold text-base text-gray-900">{info.name}</div>
-                            <div className="text-sm text-gray-600">
+                            <div className="font-semibold text-sm text-gray-900">{info.name}</div>
+                            <div className="text-xs text-gray-600">
                               {info.name === "ORCID" 
                                 ? "Researcher identifiers" 
                                 : info.name === "FABRIC API" 
@@ -181,23 +181,23 @@ export function LandingPage({
         </div>
 
         {/* Continue Button */}
-        <div className="flex justify-center pt-8">
+        <div className="flex justify-center pt-4">
           <Button
             size="lg"
             disabled={!canContinue}
             onClick={() => canContinue && onLogin(selectedProvider)}
-            className={`w-full max-w-md px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-200 ${
+            className={`w-full max-w-md px-6 py-4 text-base font-semibold rounded-xl transition-all duration-200 ${
               canContinue 
                 ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]" 
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {selectedProvider && (
                 <div className="p-1 rounded-md bg-white/20">
                   {(() => {
                     const Icon = providerInfo[selectedProvider].icon;
-                    return <Icon className="h-5 w-5" />;
+                    return <Icon className="h-4 w-4" />;
                   })()}
                 </div>
               )}
