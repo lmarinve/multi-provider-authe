@@ -66,7 +66,7 @@ export function LandingPage({
 
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 items-start">
           {/* Environment Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[112px]">
+          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[224px]">
             <CardHeader className="pb-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg py-2">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Server className="h-4 w-4" />
