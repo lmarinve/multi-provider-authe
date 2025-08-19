@@ -158,13 +158,13 @@ export function LandingPage({
                       </TooltipTrigger>
                       <TooltipContent 
                         side="right" 
-                        align="center"
-                        sideOffset={15}
-                        className="max-w-xs p-2 bg-slate-800 text-slate-100 border border-slate-600 shadow-xl z-50 text-xs"
-                        avoidCollisions={true}
-                        collisionPadding={10}
+                        align="start"
+                        sideOffset={20}
+                        className="max-w-sm p-3 bg-gray-900 text-white border-0 shadow-2xl z-[9999] text-xs rounded-lg font-normal"
+                        avoidCollisions={false}
+                        sticky="always"
                       >
-                        <div className="text-xs space-y-1 leading-relaxed">
+                        <div className="text-xs leading-normal space-y-1">
                           {info.description.split('\n').map((line, index) => (
                             <p key={index} className={`${line.startsWith('•') ? 'ml-2' : ''} ${line.trim() === '' ? 'h-1' : ''}`}>
                               {line}
