@@ -30,7 +30,7 @@ const providerInfo = {
   },
   fabric: {
     name: "FABRIC",
-    description: "National research infrastructure",
+    description: "Adaptive programmable research infrastructure for networking, cybersecurity, and distributed computing",
     icon: Shield,
     color: "bg-purple-500"
   }
