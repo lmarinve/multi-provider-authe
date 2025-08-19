@@ -66,53 +66,50 @@ export function LandingPage({
 
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 items-start">
           {/* Environment Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[224px]">
-            <CardHeader className="pb-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg py-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Server className="h-4 w-4" />
+          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg min-h-[112px]">
+            <CardHeader className="pb-1 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg py-1">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <Server className="h-3 w-3" />
                 Environment
               </CardTitle>
-              <CardDescription className="text-slate-200 mt-0 text-sm">
-                Choose your target environment
-              </CardDescription>
             </CardHeader>
-            <CardContent className="p-2 flex-1">
+            <CardContent className="p-1 flex-1">
               <RadioGroup 
                 value={environment} 
                 onValueChange={onEnvironmentChange}
-                className="space-y-2"
+                className="space-y-1"
               >
-                <div className={`flex items-center space-x-2 p-2 rounded-lg transition-all duration-200 ${
+                <div className={`flex items-center space-x-2 p-1 rounded-lg transition-all duration-200 ${
                   environment === "test" 
                     ? "bg-gradient-to-r from-blue-100 to-blue-50 border-2 border-blue-400 shadow-md" 
                     : "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-25 border border-gray-200 hover:border-blue-300 hover:shadow-sm"
                 }`}>
                   <RadioGroupItem value="test" id="test" />
-                  <Label htmlFor="test" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <Label htmlFor="test" className="flex items-center gap-1 cursor-pointer flex-1">
                     <div className="p-1 rounded-md bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                      <TestTube className="h-3 w-3" />
+                      <TestTube className="h-2 w-2" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-gray-900">Test Environment</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-semibold text-gray-900">Test</span>
                         <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs py-0 px-1">Dev</Badge>
                       </div>
                     </div>
                   </Label>
                 </div>
-                <div className={`flex items-center space-x-2 p-2 rounded-lg transition-all duration-200 ${
+                <div className={`flex items-center space-x-2 p-1 rounded-lg transition-all duration-200 ${
                   environment === "production" 
                     ? "bg-gradient-to-r from-red-100 to-red-50 border-2 border-red-400 shadow-md" 
                     : "bg-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-25 border border-gray-200 hover:border-red-300 hover:shadow-sm"
                 }`}>
                   <RadioGroupItem value="production" id="production" />
-                  <Label htmlFor="production" className="flex items-center gap-2 cursor-pointer flex-1">
+                  <Label htmlFor="production" className="flex items-center gap-1 cursor-pointer flex-1">
                     <div className="p-1 rounded-md bg-gradient-to-br from-red-500 to-red-600 text-white">
-                      <Server className="h-3 w-3" />
+                      <Server className="h-2 w-2" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-gray-900">Production Environment</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-semibold text-gray-900">Production</span>
                         <Badge variant="destructive" className="text-xs py-0 px-1">Live</Badge>
                       </div>
                     </div>
@@ -123,14 +120,14 @@ export function LandingPage({
           </Card>
 
           {/* Provider Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg min-h-[300px]">
+          <Card className="flex flex-col bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg min-h-[450px]">
             <CardHeader className="pb-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
               <CardTitle className="text-lg">Identity Provider</CardTitle>
               <CardDescription className="text-indigo-200 mt-1">
                 Choose your authentication provider
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3 p-4 flex-1">
+            <CardContent className="space-y-4 p-5 flex-1">
               {Object.entries(providerInfo).map(([key, info]) => {
                 const provider = key as Provider;
                 const Icon = info.icon;
@@ -142,19 +139,19 @@ export function LandingPage({
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start p-3 h-auto transition-all duration-200 border-2 rounded-xl ${
+                          className={`w-full justify-start p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
                             isSelected 
                               ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
                               : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-gray-200 hover:border-opacity-100`
                           }`}
                           onClick={() => onProviderSelect(provider)}
                         >
-                          <div className={`p-2 rounded-xl ${info.color.replace('bg-', 'bg-gradient-to-br from-').replace('-500', '-500 to-').concat('-600')} text-white mr-3 shadow-sm`}>
-                            <Icon className="h-4 w-4" />
+                          <div className={`p-3 rounded-xl ${info.color.replace('bg-', 'bg-gradient-to-br from-').replace('-500', '-500 to-').concat('-600')} text-white mr-4 shadow-sm`}>
+                            <Icon className="h-5 w-5" />
                           </div>
-                          <div className="text-left flex-1 space-y-1">
-                            <div className="font-semibold text-sm text-gray-900">{info.name}</div>
-                            <div className="text-xs text-gray-600">
+                          <div className="text-left flex-1 space-y-2">
+                            <div className="font-semibold text-base text-gray-900">{info.name}</div>
+                            <div className="text-sm text-gray-600">
                               {info.name === "ORCID" 
                                 ? "Researcher identifiers" 
                                 : info.name === "FABRIC API" 
