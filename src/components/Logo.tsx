@@ -8,7 +8,7 @@ export function Logo({ className = "h-10 w-auto" }: LogoProps) {
   return (
     <img
       src={sdxLogo}
-      alt="SDX Logo"
+      alt="Atlantic Wave SDX Logo"
       className={className}
     />
   );
