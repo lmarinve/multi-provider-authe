@@ -157,16 +157,18 @@ export function LandingPage({
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent 
-                        side="left" 
+                        side="right" 
                         align="center"
                         sideOffset={15}
-                        className="max-w-sm p-3 bg-slate-800 text-white border border-slate-700 shadow-xl z-50"
+                        className="max-w-xs p-2 bg-slate-800 text-slate-100 border border-slate-600 shadow-xl z-50 text-xs"
                         avoidCollisions={true}
-                        collisionPadding={20}
+                        collisionPadding={10}
                       >
-                        <div className="text-sm space-y-2">
+                        <div className="text-xs space-y-1 leading-relaxed">
                           {info.description.split('\n').map((line, index) => (
-                            <p key={index} className={line.startsWith('•') ? 'ml-2' : ''}>{line}</p>
+                            <p key={index} className={`${line.startsWith('•') ? 'ml-2' : ''} ${line.trim() === '' ? 'h-1' : ''}`}>
+                              {line}
+                            </p>
                           ))}
                         </div>
                       </TooltipContent>
