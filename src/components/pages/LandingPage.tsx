@@ -156,7 +156,13 @@ export function LandingPage({
                           </div>
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-md p-4 bg-white text-gray-800 border border-gray-200 shadow-lg">
+                      <TooltipContent 
+                        side="right" 
+                        align="start"
+                        sideOffset={10}
+                        className="max-w-md p-4 bg-blue-50 text-blue-800 border border-blue-200 shadow-lg z-50"
+                        avoidCollisions={false}
+                      >
                         <div className="text-sm space-y-2">
                           {info.description.split('\n').map((line, index) => (
                             <p key={index} className={line.startsWith('•') ? 'ml-2' : ''}>{line}</p>
