@@ -11,21 +11,21 @@ interface LandingPageProps {
 const providerInfo = {
   cilogon: {
     name: "CILogon",
-    color: "bg-blue-500",
-    bgColor: "bg-blue-50 hover:bg-blue-100 border-blue-200",
-    selectedBgColor: "bg-blue-100 border-blue-300"
+    color: "bg-[rgb(50,135,200)]",
+    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(220,238,248)] border-[rgb(120,176,219)]",
+    selectedBgColor: "bg-[rgb(220,238,248)] border-[rgb(64,143,204)]"
   },
   orcid: {
     name: "ORCID",
-    color: "bg-green-500",
-    bgColor: "bg-green-50 hover:bg-green-100 border-green-200",
-    selectedBgColor: "bg-green-100 border-green-300"
+    color: "bg-[rgb(50,135,200)]",
+    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(220,238,248)] border-[rgb(120,176,219)]",
+    selectedBgColor: "bg-[rgb(220,238,248)] border-[rgb(64,143,204)]"
   },
   fabric: {
     name: "FABRIC API",
-    color: "bg-purple-500",
-    bgColor: "bg-purple-50 hover:bg-purple-100 border-purple-200",
-    selectedBgColor: "bg-purple-100 border-purple-300"
+    color: "bg-[rgb(50,135,200)]",
+    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(220,238,248)] border-[rgb(120,176,219)]",
+    selectedBgColor: "bg-[rgb(220,238,248)] border-[rgb(64,143,204)]"
   }
 } as const;
 
@@ -52,43 +52,44 @@ export function LandingPage({
         </div>
 
         {/* Provider Selection */}
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-lg">
-          <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg text-center">
-            <CardTitle className="text-lg">Identity Provider</CardTitle>
-            <CardDescription className="text-orange-100 mt-1">
+        <Card className="bg-gradient-to-br from-[rgb(236,244,250)] to-[rgb(220,238,248)] border-[rgb(120,176,219)] shadow-lg">
+          <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-[rgb(50,135,200)] to-[rgb(64,143,204)] text-white rounded-t-lg text-center">
+            <CardDescription className="text-[rgb(236,244,250)] mt-1">
               Select an Identity Provider
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 p-4">
-            {Object.entries(providerInfo).map(([key, info]) => {
-              const provider = key as Provider;
-              const isSelected = selectedProvider === provider;
-              
-              return (
-                <Button
-                  key={provider}
-                  variant="ghost"
-                  className={`w-full justify-start p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
-                    isSelected 
-                      ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
-                      : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-gray-200 hover:border-opacity-100`
-                  }`}
-                  onClick={() => onProviderSelect(provider)}
-                >
-                  <div className="text-left flex-1 space-y-2">
-                    <div className="font-semibold text-base text-slate-700">{info.name}</div>
-                    <div className="text-sm text-slate-600">
-                      {info.name === "ORCID" 
-                        ? "Researcher identifiers" 
-                        : info.name === "FABRIC API" 
-                        ? "Research infrastructure" 
-                        : "Academic federation"
-                      }
+          <CardContent className="space-y-3 p-4 flex flex-col items-center">
+            <div className="w-full max-w-md space-y-3">
+              {Object.entries(providerInfo).map(([key, info]) => {
+                const provider = key as Provider;
+                const isSelected = selectedProvider === provider;
+                
+                return (
+                  <Button
+                    key={provider}
+                    variant="ghost"
+                    className={`w-full justify-start p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
+                      isSelected 
+                        ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
+                        : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-[rgb(120,176,219)] hover:border-opacity-100`
+                    }`}
+                    onClick={() => onProviderSelect(provider)}
+                  >
+                    <div className="text-left flex-1 space-y-2">
+                      <div className="font-semibold text-base text-[rgb(64,143,204)]">{info.name}</div>
+                      <div className="text-sm text-[rgb(50,135,200)]">
+                        {info.name === "ORCID" 
+                          ? "Researcher identifiers" 
+                          : info.name === "FABRIC API" 
+                          ? "Research infrastructure" 
+                          : "Academic federation"
+                        }
+                      </div>
                     </div>
-                  </div>
-                </Button>
-              );
-            })}
+                  </Button>
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
 
@@ -100,7 +101,7 @@ export function LandingPage({
             onClick={() => canContinue && onLogin(selectedProvider)}
             className={`w-full max-w-md px-6 py-4 text-base font-semibold rounded-xl transition-all duration-200 ${
               canContinue 
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]" 
+                ? "bg-gradient-to-r from-[rgb(50,135,200)] to-[rgb(64,143,204)] hover:from-[rgb(64,143,204)] hover:to-[rgb(50,135,200)] text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]" 
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
