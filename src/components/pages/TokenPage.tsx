@@ -148,11 +148,57 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
   if (availableTokens.length === 0) {
     return (
       <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-[rgb(50,135,200)] mb-4">
-            SDX Multi Provider Authentication
-          </h1>
+      {/* Header */}
+      <div className="text-center space-y-4 mb-12">
+        <div className="flex flex-col items-center space-y-6">
+          {/* Title and Logo in same line */}
+          <div className="flex items-center justify-center gap-6">
+            {/* Logo placeholder */}
+            <div className="w-16 h-16 bg-[rgb(50,135,200)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+              <span className="text-[rgb(255,255,255)] font-bold text-xs">LOGO</span>
+            </div>
+            
+            {/* Title with custom colors and slightly increased size */}
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
+              <span 
+                className="px-2 py-1 rounded-md"
+                style={{ 
+                  color: 'rgb(50, 135, 200)', 
+                  backgroundColor: 'rgb(255, 255, 255)' 
+                }}
+              >
+                AtlanticWave
+              </span>
+              <span 
+                className="px-2 py-1 rounded-md"
+                style={{ 
+                  color: 'rgb(255, 255, 255)', 
+                  backgroundColor: 'rgb(255, 255, 255)' 
+                }}
+              >
+                -
+              </span>
+              <span 
+                className="px-3 py-1 rounded-md font-bold"
+                style={{ 
+                  color: 'rgb(255, 255, 255)', 
+                  backgroundColor: 'rgb(120, 176, 219)' 
+                }}
+              >
+                SDX
+              </span>
+            </h1>
+          </div>
+          
+          {/* Subtitle with maximum size reduction and Deep Blue color */}
+          <h2 
+            className="text-[0.5rem] font-light uppercase tracking-wide opacity-70"
+            style={{ color: 'rgb(64, 143, 204)' }}
+          >
+            International Distributed Software-Defined Exchange
+          </h2>
         </div>
+      </div>
         
         <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
           <ArrowLeft className="h-5 w-5 mr-2" />
@@ -178,10 +224,56 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
   return (
     <div className="container mx-auto px-6 py-16 max-w-6xl bg-[rgb(255,255,255)] min-h-screen">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight text-[rgb(50,135,200)] mb-4">
-          SDX Multi Provider Authentication
-        </h1>
+      {/* Header */}
+      <div className="text-center space-y-4 mb-12">
+        <div className="flex flex-col items-center space-y-6">
+          {/* Title and Logo in same line */}
+          <div className="flex items-center justify-center gap-6">
+            {/* Logo placeholder */}
+            <div className="w-16 h-16 bg-[rgb(50,135,200)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+              <span className="text-[rgb(255,255,255)] font-bold text-xs">LOGO</span>
+            </div>
+            
+            {/* Title with custom colors and slightly increased size */}
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
+              <span 
+                className="px-2 py-1 rounded-md"
+                style={{ 
+                  color: 'rgb(50, 135, 200)', 
+                  backgroundColor: 'rgb(255, 255, 255)' 
+                }}
+              >
+                AtlanticWave
+              </span>
+              <span 
+                className="px-2 py-1 rounded-md"
+                style={{ 
+                  color: 'rgb(255, 255, 255)', 
+                  backgroundColor: 'rgb(255, 255, 255)' 
+                }}
+              >
+                -
+              </span>
+              <span 
+                className="px-3 py-1 rounded-md font-bold"
+                style={{ 
+                  color: 'rgb(255, 255, 255)', 
+                  backgroundColor: 'rgb(120, 176, 219)' 
+                }}
+              >
+                SDX
+              </span>
+            </h1>
+          </div>
+          
+          {/* Subtitle with maximum size reduction and Deep Blue color */}
+          <h2 
+            className="text-[0.5rem] font-light uppercase tracking-wide opacity-70"
+            style={{ color: 'rgb(64, 143, 204)' }}
+          >
+            International Distributed Software-Defined Exchange
+          </h2>
+        </div>
       </div>
       
       <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
