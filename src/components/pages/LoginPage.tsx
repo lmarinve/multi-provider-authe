@@ -238,10 +238,12 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
       </Button>
 
       <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
-        <CardHeader className="pb-8">
-          <CardTitle className="flex items-center gap-4 text-2xl text-[rgb(64,143,204)]">
-            <span>Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</span>
-            <Badge variant="secondary" className="ml-auto text-sm px-3 py-1 bg-[rgb(120,176,219)] text-[rgb(255,255,255)]">{environment}</Badge>
+        <CardHeader className="pb-8 text-center">
+          <div className="flex justify-center items-center gap-4 mb-2">
+            <Badge variant="secondary" className="text-sm px-3 py-1 bg-[rgb(120,176,219)] text-[rgb(255,255,255)]">{environment}</Badge>
+          </div>
+          <CardTitle className="text-2xl text-[rgb(64,143,204)]">
+            Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}
           </CardTitle>
           <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
             Complete the authentication flow to obtain your token
