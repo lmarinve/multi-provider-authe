@@ -9,21 +9,7 @@ import { Environment } from "@/lib/config";
 import { TokenData, TokenClaims } from "@/lib/types";
 import { TokenStorage, decodeJWT } from "@/lib/token-storage";
 import { sendTokenToBackend } from "@/lib/backend";
-import { 
-  ArrowLeft, 
-  Clock, 
-  User, 
-  At, 
-  Calendar,
-  Send,
-  Trash,
-  RefreshCw,
-  CheckCircle,
-  XCircle,
-  University,
-  Fingerprint,
-  Shield
-} from "@phosphor-icons/react";
+
 
 interface TokenPageProps {
   environment: Environment;
@@ -31,11 +17,7 @@ interface TokenPageProps {
   onBack: () => void;
 }
 
-const providerIcons = {
-  cilogon: University,
-  orcid: Fingerprint,
-  fabric: Shield,
-};
+
 
 export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPageProps) {
   const [tokens, setTokens] = useState<{
@@ -151,44 +133,36 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       {/* Header */}
       <div className="text-center space-y-4 mb-12">
         <div className="flex flex-col items-center space-y-6">
-          {/* Title and Logo in same line */}
-          <div className="flex items-center justify-center gap-6">
-            {/* Logo placeholder */}
-            <div className="w-16 h-16 bg-[rgb(50,135,200)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-[rgb(255,255,255)] font-bold text-xs">LOGO</span>
-            </div>
-            
-            {/* Title with custom colors and slightly increased size */}
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
-              <span 
-                className="px-2 py-1 rounded-md"
-                style={{ 
-                  color: 'rgb(50, 135, 200)', 
-                  backgroundColor: 'rgb(255, 255, 255)' 
-                }}
-              >
-                AtlanticWave
-              </span>
-              <span 
-                className="px-2 py-1 rounded-md"
-                style={{ 
-                  color: 'rgb(255, 255, 255)', 
-                  backgroundColor: 'rgb(255, 255, 255)' 
-                }}
-              >
-                -
-              </span>
-              <span 
-                className="px-3 py-1 rounded-md font-bold"
-                style={{ 
-                  color: 'rgb(255, 255, 255)', 
-                  backgroundColor: 'rgb(120, 176, 219)' 
-                }}
-              >
-                SDX
-              </span>
-            </h1>
-          </div>
+          {/* Title with custom colors and slightly increased size */}
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
+            <span 
+              className="px-2 py-1 rounded-md"
+              style={{ 
+                color: 'rgb(50, 135, 200)', 
+                backgroundColor: 'rgb(255, 255, 255)' 
+              }}
+            >
+              AtlanticWave
+            </span>
+            <span 
+              className="px-2 py-1 rounded-md"
+              style={{ 
+                color: 'rgb(255, 255, 255)', 
+                backgroundColor: 'rgb(255, 255, 255)' 
+              }}
+            >
+              -
+            </span>
+            <span 
+              className="px-3 py-1 rounded-md font-bold"
+              style={{ 
+                color: 'rgb(255, 255, 255)', 
+                backgroundColor: 'rgb(120, 176, 219)' 
+              }}
+            >
+              SDX
+            </span>
+          </h1>
           
           {/* Subtitle with maximum size reduction and Deep Blue color */}
           <h2 
@@ -201,8 +175,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       </div>
         
         <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to selection
+          ← Back to selection
         </Button>
 
         <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
@@ -227,44 +200,36 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       {/* Header */}
       <div className="text-center space-y-4 mb-12">
         <div className="flex flex-col items-center space-y-6">
-          {/* Title and Logo in same line */}
-          <div className="flex items-center justify-center gap-6">
-            {/* Logo placeholder */}
-            <div className="w-16 h-16 bg-[rgb(50,135,200)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-[rgb(255,255,255)] font-bold text-xs">LOGO</span>
-            </div>
-            
-            {/* Title with custom colors and slightly increased size */}
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
-              <span 
-                className="px-2 py-1 rounded-md"
-                style={{ 
-                  color: 'rgb(50, 135, 200)', 
-                  backgroundColor: 'rgb(255, 255, 255)' 
-                }}
-              >
-                AtlanticWave
-              </span>
-              <span 
-                className="px-2 py-1 rounded-md"
-                style={{ 
-                  color: 'rgb(255, 255, 255)', 
-                  backgroundColor: 'rgb(255, 255, 255)' 
-                }}
-              >
-                -
-              </span>
-              <span 
-                className="px-3 py-1 rounded-md font-bold"
-                style={{ 
-                  color: 'rgb(255, 255, 255)', 
-                  backgroundColor: 'rgb(120, 176, 219)' 
-                }}
-              >
-                SDX
-              </span>
-            </h1>
-          </div>
+          {/* Title with custom colors and slightly increased size */}
+          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
+            <span 
+              className="px-2 py-1 rounded-md"
+              style={{ 
+                color: 'rgb(50, 135, 200)', 
+                backgroundColor: 'rgb(255, 255, 255)' 
+              }}
+            >
+              AtlanticWave
+            </span>
+            <span 
+              className="px-2 py-1 rounded-md"
+              style={{ 
+                color: 'rgb(255, 255, 255)', 
+                backgroundColor: 'rgb(255, 255, 255)' 
+              }}
+            >
+              -
+            </span>
+            <span 
+              className="px-3 py-1 rounded-md font-bold"
+              style={{ 
+                color: 'rgb(255, 255, 255)', 
+                backgroundColor: 'rgb(120, 176, 219)' 
+              }}
+            >
+              SDX
+            </span>
+          </h1>
           
           {/* Subtitle with maximum size reduction and Deep Blue color */}
           <h2 
@@ -277,8 +242,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       </div>
       
       <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
-        <ArrowLeft className="h-5 w-5 mr-2" />
-        Back to selection
+        ← Back to selection
       </Button>
 
       <div className="grid lg:grid-cols-2 gap-10">
@@ -292,7 +256,6 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
           </CardHeader>
           <CardContent className="space-y-6 pt-0">
             {availableTokens.map(([provider, token]) => {
-              const Icon = providerIcons[provider as keyof typeof providerIcons];
               const status = getTokenStatus(token);
               const isSelected = selectedToken?.provider === provider;
 
@@ -308,8 +271,8 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-primary rounded-xl text-primary-foreground">
-                        <Icon className="h-6 w-6" />
+                      <div className="p-3 bg-primary rounded-xl text-primary-foreground font-bold text-sm">
+                        {provider === 'fabric' ? 'F' : provider.charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <div className="font-semibold text-lg">{provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</div>
@@ -325,9 +288,9 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                         </Badge>
                       )}
                       {status.isValid ? (
-                        <CheckCircle className="h-6 w-6 text-accent" />
+                        <span className="text-accent text-2xl">✓</span>
                       ) : (
-                        <XCircle className="h-6 w-6 text-destructive" />
+                        <span className="text-destructive text-2xl">✗</span>
                       )}
                     </div>
                   </div>
@@ -353,7 +316,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
               <div className="space-y-6">
                 {claims.sub && (
                   <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                    <User className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <span className="text-primary mt-1 flex-shrink-0 font-bold">👤</span>
                     <div className="min-w-0 flex-1">
                       <div className="text-base font-semibold mb-2 text-foreground">Subject</div>
                       <div className="text-base text-muted-foreground break-all">
@@ -365,7 +328,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
                 {claims.email && (
                   <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                    <At className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <span className="text-primary mt-1 flex-shrink-0 font-bold">📧</span>
                     <div className="min-w-0 flex-1">
                       <div className="text-base font-semibold mb-2 text-foreground">Email</div>
                       <div className="text-base text-muted-foreground">
@@ -377,7 +340,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
                 {claims.iss && (
                   <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                    <Shield className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <span className="text-primary mt-1 flex-shrink-0 font-bold">🛡️</span>
                     <div className="min-w-0 flex-1">
                       <div className="text-base font-semibold mb-2 text-foreground">Issuer</div>
                       <div className="text-base text-muted-foreground break-all">
@@ -388,7 +351,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 )}
 
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <Calendar className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                  <span className="text-primary mt-1 flex-shrink-0 font-bold">📅</span>
                   <div className="min-w-0 flex-1">
                     <div className="text-base font-semibold mb-2 text-foreground">Issued At</div>
                     <div className="text-base text-muted-foreground">
@@ -398,7 +361,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 </div>
 
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <Clock className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                  <span className="text-primary mt-1 flex-shrink-0 font-bold">⏰</span>
                   <div className="min-w-0 flex-1">
                     <div className="text-base font-semibold mb-2 text-foreground">Expires At</div>
                     <div className="text-base text-muted-foreground">
@@ -419,13 +382,11 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 >
                   {isSending ? (
                     <>
-                      <RefreshCw className="h-5 w-5 mr-3 animate-spin" />
-                      Sending...
+                      ⟳ Sending...
                     </>
                   ) : (
                     <>
-                      <Send className="h-5 w-5 mr-3" />
-                      Send Token to Backend
+                      📤 Send Token to Backend
                     </>
                   )}
                 </Button>
@@ -443,8 +404,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                     onClick={handleClearAllTokens}
                     className="py-3 text-base font-medium border-2 border-destructive/20 hover:border-destructive/30 text-destructive hover:text-destructive"
                   >
-                    <Trash className="h-5 w-5 mr-2" />
-                    Clear All Tokens
+                    🗑️ Clear All Tokens
                   </Button>
                 </div>
               </div>
