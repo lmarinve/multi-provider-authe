@@ -394,7 +394,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Create FABRIC API Token
+                    Login with FABRIC API
                   </Button>
                 </div>
               )}
@@ -403,7 +403,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Creating FABRIC API token...
+                    Logging in with FABRIC API...
                   </AlertDescription>
                 </Alert>
               )}

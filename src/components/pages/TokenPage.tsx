@@ -261,7 +261,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
                     <div className="flex items-center gap-4">
                       <div>
                         <div className="font-semibold text-lg" style={{ color: 'rgb(64, 143, 204)' }}>
-                          {provider === 'fabric' ? 'Create FABRIC API Token' : provider.toUpperCase()}
+                          {provider === 'fabric' ? 'Login with FABRIC API' : provider.toUpperCase()}
                         </div>
                         <div className="text-base mt-1" style={{ color: 'rgb(50, 135, 200)' }}>
                           Expires {status.expiresAt.toLocaleDateString()}
