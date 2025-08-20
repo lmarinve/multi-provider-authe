@@ -45,21 +45,18 @@ export function LandingPage({
             <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 bg-clip-text text-transparent leading-tight">
               AtlanticWave SDX
             </h1>
-            <h2 className="text-lg lg:text-xl font-medium text-blue-600 uppercase tracking-wide">
+            <h2 className="text-base lg:text-lg font-medium text-blue-600 uppercase tracking-wide">
               International Distributed Software-Defined Exchange
             </h2>
           </div>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed pt-4">
-            Select an Identity Provider and continue
-          </p>
         </div>
 
         {/* Provider Selection */}
-        <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg">
-          <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-lg">
+          <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-t-lg text-center">
             <CardTitle className="text-lg">Identity Provider</CardTitle>
-            <CardDescription className="text-indigo-200 mt-1">
-              Choose your authentication provider
+            <CardDescription className="text-orange-100 mt-1">
+              Select an Identity Provider
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 p-4">
