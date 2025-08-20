@@ -5,21 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Environment } from "@/lib/config";
 import { TokenData, TokenClaims } from "@/lib/types";
 import { TokenStorage, decodeJWT } from "@/lib/token-storage";
 import { sendTokenToBackend } from "@/lib/backend";
 
-
 interface TokenPageProps {
-  environment: Environment;
-  onEnvironmentChange: (env: Environment) => void;
   onBack: () => void;
 }
 
-
-
-export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPageProps) {
+export function TokenPage({ onBack }: TokenPageProps) {
   const [tokens, setTokens] = useState<{
     cilogon?: TokenData;
     orcid?: TokenData;
@@ -73,7 +67,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
     setIsSending(true);
     try {
-      const response = await sendTokenToBackend(selectedToken, environment);
+      const response = await sendTokenToBackend(selectedToken);
       
       if (response.ok) {
         const result = await response.json();
@@ -99,12 +93,6 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
     setSelectedToken(null);
     setClaims(null);
     toast.success("All tokens cleared");
-  };
-
-  const handleSwitchEnvironment = () => {
-    const newEnv = environment === "test" ? "production" : "test";
-    onEnvironmentChange(newEnv);
-    toast.success(`Switched to ${newEnv} environment`);
   };
 
   const formatDate = (timestamp: number) => {
@@ -304,11 +292,8 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
         {selectedToken && claims && (
           <Card className="shadow-lg border-2 border-border/20">
             <CardHeader className="pb-8">
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                Token Details
-                <Badge variant="secondary" className="text-sm px-3 py-1">{environment}</Badge>
-              </CardTitle>
-              <CardDescription className="text-lg mt-2">
+              <CardTitle className="text-2xl text-[rgb(64,143,204)]">Token Details</CardTitle>
+              <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
                 Claims and metadata for the selected token
               </CardDescription>
             </CardHeader>
@@ -372,7 +357,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 <Button
                   onClick={handleSendToBackend}
                   disabled={isSending}
-                  className="w-full py-4 text-lg font-semibold"
+                  className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   size="lg"
                 >
                   {isSending ? (
@@ -386,22 +371,13 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                   )}
                 </Button>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleSwitchEnvironment}
-                    className="py-3 text-base font-medium border-2 border-border/20 hover:border-primary/30"
-                  >
-                    Switch to {environment === "test" ? "Production" : "Test"}
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleClearAllTokens}
-                    className="py-3 text-base font-medium border-2 border-destructive/20 hover:border-destructive/30 text-destructive hover:text-destructive"
-                  >
-                    Clear All Tokens
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={handleClearAllTokens}
+                  className="w-full py-3 text-base font-medium border-2 border-destructive/20 hover:border-destructive/30 text-destructive hover:text-destructive"
+                >
+                  Clear All Tokens
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -409,24 +385,15 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       </div>
 
       {/* Backend Configuration Info */}
-      <Card className="mt-12 shadow-lg border-2 border-border/20">
+      <Card className="mt-12 shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
         <CardHeader className="pb-6">
-          <CardTitle className="text-2xl">Current Configuration</CardTitle>
+          <CardTitle className="text-2xl text-[rgb(64,143,204)]">Current Configuration</CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
-          <div className="grid md:grid-cols-2 gap-8 text-base">
-            <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
-              <div className="font-semibold text-foreground mb-2">Environment</div>
-              <div className="text-muted-foreground">{environment}</div>
-            </div>
-            <div className="p-4 rounded-xl bg-muted/30 border border-border/20">
-              <div className="font-semibold text-foreground mb-2">Backend URL</div>
-              <div className="text-muted-foreground break-all">
-                {environment === "test" 
-                  ? "https://sdxapi.atlanticwave-sdx.ai/" 
-                  : "https://sdxapi.atlanticwave-sdx.ai/"
-                }
-              </div>
+          <div className="p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
+            <div className="font-semibold text-[rgb(64,143,204)] mb-2">Backend URL</div>
+            <div className="text-[rgb(50,135,200)] break-all">
+              https://sdxapi.atlanticwave-sdx.ai/
             </div>
           </div>
         </CardContent>

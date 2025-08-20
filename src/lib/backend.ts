@@ -3,17 +3,15 @@ import { TokenData, BackendPayload } from "@/lib/types";
 import { decodeJWT } from "@/lib/token-storage";
 
 export async function sendTokenToBackend(
-  token: TokenData,
-  environment: "test" | "production"
+  token: TokenData
 ): Promise<Response> {
-  const baseUrl = config.backend[environment];
+  const baseUrl = config.backend.baseUrl;
   const url = `${baseUrl}${config.tokenHandoffPath}`;
 
   const claims = decodeJWT(token.id_token);
 
   const payload: BackendPayload = {
     provider: token.provider,
-    environment,
     id_token: token.id_token,
     refresh_token: token.refresh_token,
     expires_in: token.expires_in,
@@ -32,7 +30,6 @@ export async function sendTokenToBackend(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Env": environment,
       "X-Provider": token.provider,
       "Authorization": `Bearer ${token.id_token}`,
     },

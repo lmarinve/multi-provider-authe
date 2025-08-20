@@ -35,7 +35,6 @@ export interface TokenResponse {
 
 export interface BackendPayload {
   provider: "cilogon" | "orcid" | "fabric";
-  environment: "test" | "production";
   id_token: string;
   refresh_token?: string;
   expires_in: number;
@@ -45,7 +44,6 @@ export interface BackendPayload {
 }
 
 export type AuthState = {
-  environment: "test" | "production";
   selectedProvider?: "cilogon" | "orcid" | "fabric";
   tokens: {
     cilogon?: TokenData;

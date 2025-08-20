@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Environment, Provider } from "@/lib/config";
+import { Provider } from "@/lib/config";
 import { TokenData, DeviceFlowState } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
 import { CILogonProvider } from "@/lib/providers/cilogon";
@@ -23,12 +23,11 @@ import {
 
 interface LoginPageProps {
   provider: Provider;
-  environment: Environment;
   onComplete: () => void;
   onBack: () => void;
 }
 
-export function LoginPage({ provider, environment, onComplete, onBack }: LoginPageProps) {
+export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const [deviceFlow, setDeviceFlow] = useState<DeviceFlowState>({ status: "idle" });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -240,13 +239,10 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
 
       <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
         <CardHeader className="pb-8 text-center">
-          <div className="flex justify-center items-center gap-4 mb-2">
-            <Badge variant="secondary" className="text-sm px-3 py-1 bg-[rgb(120,176,219)] text-[rgb(255,255,255)]">{environment}</Badge>
-          </div>
-          <CardTitle className="text-2xl text-[rgb(64,143,204)]">
+          <CardTitle className="text-2xl text-[rgb(64,143,204)] text-center">
             Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}
           </CardTitle>
-          <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
+          <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)] text-center">
             Complete the authentication flow to obtain your token
           </CardDescription>
         </CardHeader>
@@ -357,7 +353,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                   onClick={startORCIDFlow} 
                   disabled={isLoading} 
                   size="lg" 
-                  className="w-full py-4 text-lg font-semibold"
+                  className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                 >
                   Login with ORCID
                 </Button>

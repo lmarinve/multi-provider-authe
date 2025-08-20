@@ -1,12 +1,8 @@
-// Environment configuration
+// Application configuration
 export const config = {
-  environments: ["test", "production"] as const,
-  defaultEnv: "test" as const,
-  
-  // Backend URLs
+  // Backend URL
   backend: {
-    test: "https://sdxapi.atlanticwave-sdx.ai/",
-    production: "https://sdxapi.atlanticwave-sdx.ai/"
+    baseUrl: "https://sdxapi.atlanticwave-sdx.ai/"
   },
   tokenHandoffPath: "/auth/oidc-token",
   
@@ -39,5 +35,4 @@ export const config = {
   }
 } as const;
 
-export type Environment = typeof config.environments[number];
 export type Provider = "cilogon" | "orcid" | "fabric";

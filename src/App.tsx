@@ -5,13 +5,12 @@ import { LandingPage } from "@/components/pages/LandingPage";
 import { LoginPage } from "@/components/pages/LoginPage";
 import { TokenPage } from "@/components/pages/TokenPage";
 import { config } from "@/lib/config";
-import { Provider, Environment } from "@/lib/config";
+import { Provider } from "@/lib/config";
 
 type Page = "landing" | "login" | "token";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("landing");
-  const [environment, setEnvironment] = useKV<Environment>("auth.environment", config.defaultEnv);
   const [selectedProvider, setSelectedProvider] = useState<Provider | undefined>();
   const [loginProvider, setLoginProvider] = useState<Provider | undefined>();
 
@@ -86,7 +85,6 @@ function App() {
       {currentPage === "login" && loginProvider && (
         <LoginPage
           provider={loginProvider}
-          environment={environment}
           onComplete={handleLoginComplete}
           onBack={handleBackToLanding}
         />
@@ -94,8 +92,6 @@ function App() {
       
       {currentPage === "token" && (
         <TokenPage
-          environment={environment}
-          onEnvironmentChange={setEnvironment}
           onBack={handleBackToLanding}
         />
       )}
