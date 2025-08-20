@@ -37,7 +37,7 @@ export function LandingPage({
   const canContinue = selectedProvider;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-3 pt-8">
+    <div className="min-h-screen bg-white p-3 pt-8">
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
