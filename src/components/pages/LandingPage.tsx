@@ -65,9 +65,9 @@ export function LandingPage({
               </h1>
             </div>
             
-            {/* Subtitle with 60% size reduction and Deep Blue color */}
+            {/* Subtitle with 80% size reduction and Deep Blue color */}
             <h2 
-              className="text-[0.5rem] font-medium uppercase tracking-wide"
+              className="text-[0.25rem] font-medium uppercase tracking-wide"
               style={{ color: 'rgb(64, 143, 204)' }}
             >
               International Distributed Software-Defined Exchange
