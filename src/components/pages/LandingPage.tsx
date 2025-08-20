@@ -45,7 +45,7 @@ export function LandingPage({
             <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 bg-clip-text text-transparent leading-tight">
               AtlanticWave SDX
             </h1>
-            <h2 className="text-xs lg:text-sm font-medium text-blue-600 uppercase tracking-wide">
+            <h2 className="text-[6px] lg:text-[7px] font-medium text-blue-600 uppercase tracking-wide">
               International Distributed Software-Defined Exchange
             </h2>
           </div>
@@ -68,14 +68,14 @@ export function LandingPage({
                   <Button
                     key={provider}
                     variant="ghost"
-                    className={`w-full justify-start p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
+                    className={`w-full justify-center p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
                       isSelected 
                         ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
                         : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-[rgb(120,176,219)] hover:border-opacity-100`
                     }`}
                     onClick={() => onProviderSelect(provider)}
                   >
-                    <div className="text-left flex-1 space-y-2">
+                    <div className="text-center flex-1 space-y-2">
                       <div className="font-semibold text-base text-[rgb(64,143,204)]">{info.name}</div>
                       <div className="text-sm text-[rgb(50,135,200)]">
                         {info.name === "ORCID" 
