@@ -133,10 +133,10 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       {/* Header */}
       <div className="text-center space-y-4 mb-12">
         <div className="flex flex-col items-center space-y-6">
-          {/* Title with custom colors and slightly increased size */}
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
+          {/* Title with custom colors */}
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight leading-tight flex items-center gap-1">
             <span 
-              className="px-2 py-1 rounded-md"
+              className="px-3 py-1 rounded-md"
               style={{ 
                 color: 'rgb(50, 135, 200)', 
                 backgroundColor: 'rgb(255, 255, 255)' 
@@ -145,7 +145,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
               AtlanticWave
             </span>
             <span 
-              className="px-2 py-1 rounded-md"
+              className="px-1 py-1"
               style={{ 
                 color: 'rgb(255, 255, 255)', 
                 backgroundColor: 'rgb(255, 255, 255)' 
@@ -154,7 +154,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
               -
             </span>
             <span 
-              className="px-3 py-1 rounded-md font-bold"
+              className="px-4 py-1 rounded-md font-bold"
               style={{ 
                 color: 'rgb(255, 255, 255)', 
                 backgroundColor: 'rgb(120, 176, 219)' 
@@ -164,9 +164,9 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
             </span>
           </h1>
           
-          {/* Subtitle with maximum size reduction and Deep Blue color */}
+          {/* Subtitle with very small size and Deep Blue color */}
           <h2 
-            className="text-[0.5rem] font-light uppercase tracking-wide opacity-70"
+            className="text-xs font-light uppercase tracking-wide opacity-70"
             style={{ color: 'rgb(64, 143, 204)' }}
           >
             International Distributed Software-Defined Exchange
@@ -200,10 +200,10 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
       {/* Header */}
       <div className="text-center space-y-4 mb-12">
         <div className="flex flex-col items-center space-y-6">
-          {/* Title with custom colors and slightly increased size */}
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
+          {/* Title with custom colors */}
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight leading-tight flex items-center gap-1">
             <span 
-              className="px-2 py-1 rounded-md"
+              className="px-3 py-1 rounded-md"
               style={{ 
                 color: 'rgb(50, 135, 200)', 
                 backgroundColor: 'rgb(255, 255, 255)' 
@@ -212,7 +212,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
               AtlanticWave
             </span>
             <span 
-              className="px-2 py-1 rounded-md"
+              className="px-1 py-1"
               style={{ 
                 color: 'rgb(255, 255, 255)', 
                 backgroundColor: 'rgb(255, 255, 255)' 
@@ -221,7 +221,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
               -
             </span>
             <span 
-              className="px-3 py-1 rounded-md font-bold"
+              className="px-4 py-1 rounded-md font-bold"
               style={{ 
                 color: 'rgb(255, 255, 255)', 
                 backgroundColor: 'rgb(120, 176, 219)' 
@@ -231,9 +231,9 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
             </span>
           </h1>
           
-          {/* Subtitle with maximum size reduction and Deep Blue color */}
+          {/* Subtitle with very small size and Deep Blue color */}
           <h2 
-            className="text-[0.5rem] font-light uppercase tracking-wide opacity-70"
+            className="text-xs font-light uppercase tracking-wide opacity-70"
             style={{ color: 'rgb(64, 143, 204)' }}
           >
             International Distributed Software-Defined Exchange
@@ -316,7 +316,6 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
               <div className="space-y-6">
                 {claims.sub && (
                   <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                    <span className="text-primary mt-1 flex-shrink-0 font-bold">👤</span>
                     <div className="min-w-0 flex-1">
                       <div className="text-base font-semibold mb-2 text-foreground">Subject</div>
                       <div className="text-base text-muted-foreground break-all">
@@ -328,7 +327,6 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
                 {claims.email && (
                   <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                    <span className="text-primary mt-1 flex-shrink-0 font-bold">📧</span>
                     <div className="min-w-0 flex-1">
                       <div className="text-base font-semibold mb-2 text-foreground">Email</div>
                       <div className="text-base text-muted-foreground">
@@ -340,7 +338,6 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
                 {claims.iss && (
                   <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                    <span className="text-primary mt-1 flex-shrink-0 font-bold">🛡️</span>
                     <div className="min-w-0 flex-1">
                       <div className="text-base font-semibold mb-2 text-foreground">Issuer</div>
                       <div className="text-base text-muted-foreground break-all">
@@ -351,7 +348,6 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 )}
 
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <span className="text-primary mt-1 flex-shrink-0 font-bold">📅</span>
                   <div className="min-w-0 flex-1">
                     <div className="text-base font-semibold mb-2 text-foreground">Issued At</div>
                     <div className="text-base text-muted-foreground">
@@ -361,7 +357,6 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 </div>
 
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
-                  <span className="text-primary mt-1 flex-shrink-0 font-bold">⏰</span>
                   <div className="min-w-0 flex-1">
                     <div className="text-base font-semibold mb-2 text-foreground">Expires At</div>
                     <div className="text-base text-muted-foreground">
@@ -382,11 +377,11 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                 >
                   {isSending ? (
                     <>
-                      ⟳ Sending...
+                      Sending...
                     </>
                   ) : (
                     <>
-                      📤 Send Token to Backend
+                      Send Token to Backend
                     </>
                   )}
                 </Button>
@@ -404,7 +399,7 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
                     onClick={handleClearAllTokens}
                     className="py-3 text-base font-medium border-2 border-destructive/20 hover:border-destructive/30 text-destructive hover:text-destructive"
                   >
-                    🗑️ Clear All Tokens
+                    Clear All Tokens
                   </Button>
                 </div>
               </div>
