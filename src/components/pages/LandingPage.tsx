@@ -1,14 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Check } from "lucide-react";
-import { Environment, Provider } from "@/lib/config";
+import { Provider } from "@/lib/config";
 
 interface LandingPageProps {
-  environment: Environment;
   selectedProvider?: Provider;
-  onEnvironmentChange: (env: Environment) => void;
   onProviderSelect: (provider: Provider) => void;
   onLogin: (provider: Provider) => void;
 }
@@ -35,9 +30,7 @@ const providerInfo = {
 } as const;
 
 export function LandingPage({
-  environment,
   selectedProvider,
-  onEnvironmentChange,
   onProviderSelect,
   onLogin
 }: LandingPageProps) {
@@ -45,116 +38,62 @@ export function LandingPage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-3 pt-8">
-      <div className="w-1/2 mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-8">
         {/* Header */}
-        <div className="text-center space-y-3">
-          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-clip-text text-transparent leading-tight">
-            SDX Multi Provider Authentication
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Select your environment and identity provider to continue
+        <div className="text-center space-y-4">
+          <div className="space-y-2">
+            <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 bg-clip-text text-transparent leading-tight">
+              AtlanticWave SDX
+            </h1>
+            <h2 className="text-lg lg:text-xl font-medium text-blue-600 uppercase tracking-wide">
+              International Distributed Software-Defined Exchange
+            </h2>
+          </div>
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed pt-4">
+            Select an Identity Provider and continue
           </p>
         </div>
 
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 items-start">
-          
-          {/* Environment Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 shadow-lg">
-            <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-t-lg">
-              <CardTitle className="text-lg">Environment</CardTitle>
-              <CardDescription className="text-slate-200 mt-1">
-                Choose your target environment
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 p-4 flex-1">
-              <div className="space-y-3">
-                <div 
-                  className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 cursor-pointer ${
-                    environment === "test" 
-                      ? "bg-gradient-to-r from-blue-100 to-blue-50 border-blue-400 shadow-lg transform scale-[1.02]" 
-                      : "bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-25 border-gray-200 hover:border-blue-300 hover:shadow-md"
+        {/* Provider Selection */}
+        <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg">
+          <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
+            <CardTitle className="text-lg">Identity Provider</CardTitle>
+            <CardDescription className="text-indigo-200 mt-1">
+              Choose your authentication provider
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 p-4">
+            {Object.entries(providerInfo).map(([key, info]) => {
+              const provider = key as Provider;
+              const isSelected = selectedProvider === provider;
+              
+              return (
+                <Button
+                  key={provider}
+                  variant="ghost"
+                  className={`w-full justify-start p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
+                    isSelected 
+                      ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
+                      : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-gray-200 hover:border-opacity-100`
                   }`}
-                  onClick={() => onEnvironmentChange("test")}
+                  onClick={() => onProviderSelect(provider)}
                 >
-                  <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-green-500 bg-white">
-                    {environment === "test" && <Check className="w-3 h-3 text-green-600" />}
+                  <div className="text-left flex-1 space-y-2">
+                    <div className="font-semibold text-base text-slate-700">{info.name}</div>
+                    <div className="text-sm text-slate-600">
+                      {info.name === "ORCID" 
+                        ? "Researcher identifiers" 
+                        : info.name === "FABRIC API" 
+                        ? "Research infrastructure" 
+                        : "Academic federation"
+                      }
+                    </div>
                   </div>
-                  <Label className="flex items-center gap-3 cursor-pointer flex-1">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-slate-700">Test Environment</span>
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-sm">Dev</Badge>
-                      </div>
-                      <div className="text-sm text-slate-600">Development and testing</div>
-                    </div>
-                  </Label>
-                </div>
-                <div 
-                  className={`flex items-center space-x-4 p-6 rounded-xl transition-all duration-200 border-2 cursor-pointer ${
-                    environment === "production" 
-                      ? "bg-gradient-to-r from-red-100 to-red-50 border-red-400 shadow-lg transform scale-[1.02]" 
-                      : "bg-white hover:bg-gradient-to-r hover:from-red-50 hover:to-red-25 border-gray-200 hover:border-red-300 hover:shadow-md"
-                  }`}
-                  onClick={() => onEnvironmentChange("production")}
-                >
-                  <div className="flex items-center justify-center w-5 h-5 rounded-full border-2 border-green-500 bg-white">
-                    {environment === "production" && <Check className="w-3 h-3 text-green-600" />}
-                  </div>
-                  <Label className="flex items-center gap-3 cursor-pointer flex-1">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold text-slate-700">Production</span>
-                        <Badge variant="destructive" className="text-sm">Live</Badge>
-                      </div>
-                      <div className="text-sm text-slate-600">Live production environment</div>
-                    </div>
-                  </Label>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Provider Selection */}
-          <Card className="flex flex-col bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 shadow-lg">
-            <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-t-lg">
-              <CardTitle className="text-lg">Identity Provider</CardTitle>
-              <CardDescription className="text-indigo-200 mt-1">
-                Choose your authentication provider
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 p-4 flex-1">
-              {Object.entries(providerInfo).map(([key, info]) => {
-                const provider = key as Provider;
-                const isSelected = selectedProvider === provider;
-                
-                return (
-                  <Button
-                    key={provider}
-                    variant="ghost"
-                    className={`w-full justify-start p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
-                      isSelected 
-                        ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
-                        : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-gray-200 hover:border-opacity-100`
-                    }`}
-                    onClick={() => onProviderSelect(provider)}
-                  >
-                    <div className="text-left flex-1 space-y-2">
-                      <div className="font-semibold text-base text-slate-700">{info.name}</div>
-                      <div className="text-sm text-slate-600">
-                        {info.name === "ORCID" 
-                          ? "Researcher identifiers" 
-                          : info.name === "FABRIC API" 
-                          ? "Research infrastructure" 
-                          : "Academic federation"
-                        }
-                      </div>
-                    </div>
-                  </Button>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </div>
+                </Button>
+              );
+            })}
+          </CardContent>
+        </Card>
 
         {/* Continue Button */}
         <div className="flex justify-center pt-4">

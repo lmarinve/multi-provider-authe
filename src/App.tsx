@@ -77,9 +77,7 @@ function App() {
       
       {currentPage === "landing" && (
         <LandingPage
-          environment={environment}
           selectedProvider={selectedProvider}
-          onEnvironmentChange={setEnvironment}
           onProviderSelect={setSelectedProvider}
           onLogin={handleLogin}
         />
