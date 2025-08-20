@@ -252,19 +252,18 @@ export function TokenPage({ onBack }: TokenPageProps) {
                   key={provider}
                   className={`p-6 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md ${
                     isSelected 
-                      ? "border-primary bg-primary/5 shadow-md" 
-                      : "border-border/20 hover:border-primary/30 hover:bg-primary/5"
+                      ? "border-[rgb(50,135,200)] bg-[rgb(236,244,250)] shadow-md" 
+                      : "border-[rgb(120,176,219)] hover:border-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
                   }`}
                   onClick={() => setSelectedToken(token)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="p-3 bg-primary rounded-xl text-primary-foreground font-bold text-sm">
-                        {provider === 'fabric' ? 'F' : provider.charAt(0).toUpperCase()}
-                      </div>
                       <div>
-                        <div className="font-semibold text-lg">{provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</div>
-                        <div className="text-base text-muted-foreground mt-1">
+                        <div className="font-semibold text-lg" style={{ color: 'rgb(64, 143, 204)' }}>
+                          {provider === 'fabric' ? 'Create FABRIC API Token' : provider.toUpperCase()}
+                        </div>
+                        <div className="text-base mt-1" style={{ color: 'rgb(50, 135, 200)' }}>
                           Expires {status.expiresAt.toLocaleDateString()}
                         </div>
                       </div>
@@ -276,7 +275,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
                         </Badge>
                       )}
                       {status.isValid ? (
-                        <span className="text-accent text-2xl">✓</span>
+                        <span style={{ color: 'rgb(50, 135, 200)' }} className="text-2xl">✓</span>
                       ) : (
                         <span className="text-destructive text-2xl">✗</span>
                       )}
@@ -290,7 +289,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
 
         {/* Token Details */}
         {selectedToken && claims && (
-          <Card className="shadow-lg border-2 border-border/20">
+          <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
             <CardHeader className="pb-8">
               <CardTitle className="text-2xl text-[rgb(64,143,204)]">Token Details</CardTitle>
               <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
@@ -300,10 +299,10 @@ export function TokenPage({ onBack }: TokenPageProps) {
             <CardContent className="space-y-8 pt-0">
               <div className="space-y-6">
                 {claims.sub && (
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
                     <div className="min-w-0 flex-1">
-                      <div className="text-base font-semibold mb-2 text-foreground">Subject</div>
-                      <div className="text-base text-muted-foreground break-all">
+                      <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Subject</div>
+                      <div className="text-base break-all" style={{ color: 'rgb(50, 135, 200)' }}>
                         {claims.sub}
                       </div>
                     </div>
@@ -311,10 +310,10 @@ export function TokenPage({ onBack }: TokenPageProps) {
                 )}
 
                 {claims.email && (
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
                     <div className="min-w-0 flex-1">
-                      <div className="text-base font-semibold mb-2 text-foreground">Email</div>
-                      <div className="text-base text-muted-foreground">
+                      <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Email</div>
+                      <div className="text-base" style={{ color: 'rgb(50, 135, 200)' }}>
                         {claims.email}
                       </div>
                     </div>
@@ -322,29 +321,29 @@ export function TokenPage({ onBack }: TokenPageProps) {
                 )}
 
                 {claims.iss && (
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
                     <div className="min-w-0 flex-1">
-                      <div className="text-base font-semibold mb-2 text-foreground">Issuer</div>
-                      <div className="text-base text-muted-foreground break-all">
+                      <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Issuer</div>
+                      <div className="text-base break-all" style={{ color: 'rgb(50, 135, 200)' }}>
                         {claims.iss}
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
                   <div className="min-w-0 flex-1">
-                    <div className="text-base font-semibold mb-2 text-foreground">Issued At</div>
-                    <div className="text-base text-muted-foreground">
+                    <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Issued At</div>
+                    <div className="text-base" style={{ color: 'rgb(50, 135, 200)' }}>
                       {formatDate(selectedToken.issued_at)}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/30 border border-border/20">
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
                   <div className="min-w-0 flex-1">
-                    <div className="text-base font-semibold mb-2 text-foreground">Expires At</div>
-                    <div className="text-base text-muted-foreground">
+                    <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Expires At</div>
+                    <div className="text-base" style={{ color: 'rgb(50, 135, 200)' }}>
                       {formatDate(selectedToken.issued_at + selectedToken.expires_in)}
                     </div>
                   </div>
@@ -374,7 +373,11 @@ export function TokenPage({ onBack }: TokenPageProps) {
                 <Button 
                   variant="outline" 
                   onClick={handleClearAllTokens}
-                  className="w-full py-3 text-base font-medium border-2 border-destructive/20 hover:border-destructive/30 text-destructive hover:text-destructive"
+                  className="w-full py-3 text-base font-medium border-2 text-destructive hover:text-destructive"
+                  style={{ 
+                    borderColor: 'rgb(200, 50, 50)', 
+                    color: 'rgb(200, 50, 50)' 
+                  }}
                 >
                   Clear All Tokens
                 </Button>
