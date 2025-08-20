@@ -49,10 +49,10 @@ export function LandingPage({
                 <span className="text-white font-bold text-xs">LOGO</span>
               </div>
               
-              {/* Title with custom colors and 40% size reduction */}
-              <h1 className="text-lg lg:text-xl font-bold tracking-tight leading-tight flex items-center gap-3">
-                <span style={{ color: 'rgb(50, 135, 200)' }}>Atlantic</span>
-                <span style={{ color: 'rgb(64, 143, 204)' }}>Wave</span>
+              {/* Title with custom colors and slightly increased size */}
+              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
+                <span style={{ color: 'rgb(50, 135, 200)' }}>AtlanticWave</span>
+                <span style={{ color: 'rgb(64, 143, 204)' }}>-</span>
                 <span 
                   className="px-3 py-1 rounded-md font-bold"
                   style={{ 
