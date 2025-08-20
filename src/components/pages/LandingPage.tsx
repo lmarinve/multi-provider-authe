@@ -42,18 +42,36 @@ export function LandingPage({
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex flex-col items-center space-y-6">
-            {/* Logo placeholder - replace with your logo */}
-            <div className="w-32 h-32 bg-gradient-to-br from-[rgb(50,135,200)] to-[rgb(64,143,204)] rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">YOUR LOGO</span>
-            </div>
-            <div className="space-y-3">
-              <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 bg-clip-text text-transparent leading-tight">
-                AtlanticWave SDX
+            {/* Title and Logo in same line */}
+            <div className="flex items-center justify-center gap-6">
+              {/* Logo placeholder */}
+              <div className="w-16 h-16 bg-gradient-to-br from-[rgb(50,135,200)] to-[rgb(64,143,204)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                <span className="text-white font-bold text-xs">LOGO</span>
+              </div>
+              
+              {/* Title with custom colors and 40% size reduction */}
+              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-1">
+                <span style={{ color: 'rgb(50, 135, 200)' }}>Atlantic</span>
+                <span style={{ color: 'rgb(64, 143, 204)' }}>Wave</span>
+                <span 
+                  className="px-2 py-1 rounded-md font-bold"
+                  style={{ 
+                    color: 'rgb(255, 255, 255)', 
+                    backgroundColor: 'rgb(120, 176, 219)' 
+                  }}
+                >
+                  SDX
+                </span>
               </h1>
-              <h2 className="text-sm lg:text-base font-medium text-blue-600 uppercase tracking-wide">
-                International Distributed Software-Defined Exchange
-              </h2>
             </div>
+            
+            {/* Subtitle with 60% size reduction and Deep Blue color */}
+            <h2 
+              className="text-xs lg:text-sm font-medium uppercase tracking-wide"
+              style={{ color: 'rgb(64, 143, 204)' }}
+            >
+              International Distributed Software-Defined Exchange
+            </h2>
           </div>
         </div>
 
