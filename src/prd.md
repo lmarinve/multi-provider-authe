@@ -1,4 +1,4 @@
-# SDX Multi Provider Authentication - Product Requirements Document
+# AtlanticWave-SDX Multi Provider Authentication - Product Requirements Document
 
 ## Core Purpose & Success
 

@@ -13,15 +13,11 @@ import { CILogonProvider } from "@/lib/providers/cilogon";
 import { ORCIDProvider } from "@/lib/providers/orcid";
 import { FabricProvider } from "@/lib/providers/fabric";
 import { 
-  ArrowLeft, 
   Copy, 
   ExternalLink, 
   CheckCircle, 
   XCircle, 
-  Clock,
-  University,
-  Fingerprint,
-  Shield
+  Clock
 } from "@phosphor-icons/react";
 
 interface LoginPageProps {
@@ -30,12 +26,6 @@ interface LoginPageProps {
   onComplete: () => void;
   onBack: () => void;
 }
-
-const providerIcons = {
-  cilogon: University,
-  orcid: Fingerprint,
-  fabric: Shield,
-};
 
 export function LoginPage({ provider, environment, onComplete, onBack }: LoginPageProps) {
   const [deviceFlow, setDeviceFlow] = useState<DeviceFlowState>({ status: "idle" });
@@ -195,28 +185,61 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
     return Math.ceil(remaining / 1000);
   };
 
-  const Icon = providerIcons[provider];
   const timeRemaining = getTimeRemaining();
 
   return (
     <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight text-[rgb(50,135,200)] mb-4">
-          SDX Multi Provider Authentication
-        </h1>
+      {/* Header */}
+      <div className="text-center space-y-4 mb-12">
+        <div className="flex flex-col items-center space-y-6">
+          {/* Title with custom colors */}
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight leading-tight flex items-center gap-1">
+            <span 
+              className="px-3 py-1 rounded-md"
+              style={{ 
+                color: 'rgb(50, 135, 200)', 
+                backgroundColor: 'rgb(255, 255, 255)' 
+              }}
+            >
+              AtlanticWave
+            </span>
+            <span 
+              className="px-1 py-1"
+              style={{ 
+                color: 'rgb(255, 255, 255)', 
+                backgroundColor: 'rgb(255, 255, 255)' 
+              }}
+            >
+              -
+            </span>
+            <span 
+              className="px-4 py-1 rounded-md font-bold"
+              style={{ 
+                color: 'rgb(255, 255, 255)', 
+                backgroundColor: 'rgb(120, 176, 219)' 
+              }}
+            >
+              SDX
+            </span>
+          </h1>
+          
+          {/* Subtitle with very small size and Deep Blue color */}
+          <h2 
+            className="text-xs font-light uppercase tracking-wide opacity-70"
+            style={{ color: 'rgb(64, 143, 204)' }}
+          >
+            International Distributed Software-Defined Exchange
+          </h2>
+        </div>
       </div>
       
       <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
-        <ArrowLeft className="h-5 w-5 mr-2" />
-        Back to selection
+        ← Back to selection
       </Button>
 
       <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
         <CardHeader className="pb-8">
           <CardTitle className="flex items-center gap-4 text-2xl text-[rgb(64,143,204)]">
-            <div className="p-3 bg-[rgb(50,135,200)] rounded-xl text-[rgb(255,255,255)]">
-              <Icon className="h-6 w-6" />
-            </div>
             <span>Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</span>
             <Badge variant="secondary" className="ml-auto text-sm px-3 py-1 bg-[rgb(120,176,219)] text-[rgb(255,255,255)]">{environment}</Badge>
           </CardTitle>
