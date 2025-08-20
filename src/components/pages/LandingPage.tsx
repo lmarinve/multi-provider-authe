@@ -45,7 +45,7 @@ export function LandingPage({
             <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 bg-clip-text text-transparent leading-tight">
               AtlanticWave SDX
             </h1>
-            <h2 className="text-base lg:text-lg font-medium text-blue-600 uppercase tracking-wide">
+            <h2 className="text-xs lg:text-sm font-medium text-blue-600 uppercase tracking-wide">
               International Distributed Software-Defined Exchange
             </h2>
           </div>
@@ -58,8 +58,8 @@ export function LandingPage({
               Select an Identity Provider
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 p-4 flex flex-col items-center">
-            <div className="w-full max-w-md space-y-3">
+          <CardContent className="space-y-3 p-4 flex flex-col items-center justify-center">
+            <div className="w-full max-w-md space-y-3 mx-auto">
               {Object.entries(providerInfo).map(([key, info]) => {
                 const provider = key as Provider;
                 const isSelected = selectedProvider === provider;
