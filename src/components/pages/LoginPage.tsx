@@ -17,7 +17,8 @@ import {
   ExternalLink, 
   CheckCircle, 
   XCircle, 
-  Clock
+  Clock,
+  Shield
 } from "@phosphor-icons/react";
 
 interface LoginPageProps {
