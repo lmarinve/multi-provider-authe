@@ -12,20 +12,20 @@ const providerInfo = {
   cilogon: {
     name: "CILogon",
     color: "bg-[rgb(50,135,200)]",
-    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(220,238,248)] border-[rgb(120,176,219)]",
-    selectedBgColor: "bg-[rgb(220,238,248)] border-[rgb(64,143,204)]"
+    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(236,244,250)] border-[rgb(120,176,219)]",
+    selectedBgColor: "bg-[rgb(236,244,250)] border-[rgb(64,143,204)]"
   },
   orcid: {
     name: "ORCID",
     color: "bg-[rgb(50,135,200)]",
-    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(220,238,248)] border-[rgb(120,176,219)]",
-    selectedBgColor: "bg-[rgb(220,238,248)] border-[rgb(64,143,204)]"
+    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(236,244,250)] border-[rgb(120,176,219)]",
+    selectedBgColor: "bg-[rgb(236,244,250)] border-[rgb(64,143,204)]"
   },
   fabric: {
     name: "FABRIC API",
     color: "bg-[rgb(50,135,200)]",
-    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(220,238,248)] border-[rgb(120,176,219)]",
-    selectedBgColor: "bg-[rgb(220,238,248)] border-[rgb(64,143,204)]"
+    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(236,244,250)] border-[rgb(120,176,219)]",
+    selectedBgColor: "bg-[rgb(236,244,250)] border-[rgb(64,143,204)]"
   }
 } as const;
 
@@ -45,8 +45,8 @@ export function LandingPage({
             {/* Title and Logo in same line */}
             <div className="flex items-center justify-center gap-6">
               {/* Logo placeholder */}
-              <div className="w-16 h-16 bg-gradient-to-br from-[rgb(50,135,200)] to-[rgb(64,143,204)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                <span className="text-white font-bold text-xs">LOGO</span>
+              <div className="w-16 h-16 bg-[rgb(50,135,200)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                <span className="text-[rgb(255,255,255)] font-bold text-xs">LOGO</span>
               </div>
               
               {/* Title with custom colors and slightly increased size */}
@@ -92,8 +92,8 @@ export function LandingPage({
         </div>
 
         {/* Provider Selection */}
-        <Card className="bg-gradient-to-br from-[rgb(236,244,250)] to-[rgb(220,238,248)] border-[rgb(120,176,219)] shadow-lg">
-          <CardHeader className="pb-3 pt-4 px-4 bg-gradient-to-r from-[rgb(50,135,200)] to-[rgb(64,143,204)] text-white rounded-t-lg text-center">
+        <Card className="bg-[rgb(236,244,250)] border-[rgb(120,176,219)] shadow-lg">
+          <CardHeader className="pb-3 pt-4 px-4 bg-[rgb(50,135,200)] text-white rounded-t-lg text-center">
             <CardDescription className="text-[rgb(236,244,250)] mt-1">
               Select an Identity Provider
             </CardDescription>
@@ -111,7 +111,7 @@ export function LandingPage({
                     className={`w-full justify-center p-4 h-auto transition-all duration-200 border-2 rounded-xl ${
                       isSelected 
                         ? `${info.selectedBgColor} shadow-lg border-opacity-100 transform scale-[1.02]` 
-                        : `bg-white ${info.bgColor.replace('bg-', 'hover:bg-')} hover:shadow-md border-[rgb(120,176,219)] hover:border-opacity-100`
+                        : `bg-[rgb(255,255,255)] hover:bg-[rgb(236,244,250)] hover:shadow-md border-[rgb(120,176,219)] hover:border-opacity-100`
                     }`}
                     onClick={() => onProviderSelect(provider)}
                   >
@@ -141,8 +141,8 @@ export function LandingPage({
             onClick={() => canContinue && onLogin(selectedProvider)}
             className={`w-full max-w-md px-6 py-4 text-base font-semibold rounded-xl transition-all duration-200 ${
               canContinue 
-                ? "bg-gradient-to-r from-[rgb(50,135,200)] to-[rgb(64,143,204)] hover:from-[rgb(64,143,204)] hover:to-[rgb(50,135,200)] text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]" 
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                ? "bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)] shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]" 
+                : "bg-[rgb(120,176,219)] text-[rgb(255,255,255)] opacity-50 cursor-not-allowed"
             }`}
           >
             Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}

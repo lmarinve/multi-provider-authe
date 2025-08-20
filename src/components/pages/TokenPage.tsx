@@ -147,27 +147,27 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
 
   if (availableTokens.length === 0) {
     return (
-      <div className="container mx-auto px-6 py-16 max-w-3xl">
+      <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
+          <h1 className="text-4xl font-bold tracking-tight text-[rgb(50,135,200)] mb-4">
             SDX Multi Provider Authentication
           </h1>
         </div>
         
-        <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base">
+        <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back to selection
         </Button>
 
-        <Card className="shadow-lg border-2 border-border/20">
+        <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
           <CardHeader className="pb-8">
-            <CardTitle className="text-2xl">No Valid Tokens</CardTitle>
-            <CardDescription className="text-lg mt-2">
+            <CardTitle className="text-2xl text-[rgb(64,143,204)]">No Valid Tokens</CardTitle>
+            <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
               You don't have any valid tokens. Please authenticate with a provider first.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
-            <Button onClick={onBack} className="w-full py-4 text-lg font-semibold" size="lg">
+            <Button onClick={onBack} className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]" size="lg">
               Go Back to Authentication
             </Button>
           </CardContent>
@@ -177,24 +177,24 @@ export function TokenPage({ environment, onEnvironmentChange, onBack }: TokenPag
   }
 
   return (
-    <div className="container mx-auto px-6 py-16 max-w-6xl">
+    <div className="container mx-auto px-6 py-16 max-w-6xl bg-[rgb(255,255,255)] min-h-screen">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
+        <h1 className="text-4xl font-bold tracking-tight text-[rgb(50,135,200)] mb-4">
           SDX Multi Provider Authentication
         </h1>
       </div>
       
-      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base">
+      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
         <ArrowLeft className="h-5 w-5 mr-2" />
         Back to selection
       </Button>
 
       <div className="grid lg:grid-cols-2 gap-10">
         {/* Token Selection */}
-        <Card className="shadow-lg border-2 border-border/20">
+        <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
           <CardHeader className="pb-8">
-            <CardTitle className="text-2xl">Available Tokens</CardTitle>
-            <CardDescription className="text-lg mt-2">
+            <CardTitle className="text-2xl text-[rgb(64,143,204)]">Available Tokens</CardTitle>
+            <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
               Select a token to view details and send to backend
             </CardDescription>
           </CardHeader>

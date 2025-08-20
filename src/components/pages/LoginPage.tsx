@@ -199,28 +199,28 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
   const timeRemaining = getTimeRemaining();
 
   return (
-    <div className="container mx-auto px-6 py-16 max-w-3xl">
+    <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
+        <h1 className="text-4xl font-bold tracking-tight text-[rgb(50,135,200)] mb-4">
           SDX Multi Provider Authentication
         </h1>
       </div>
       
-      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base">
+      <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
         <ArrowLeft className="h-5 w-5 mr-2" />
         Back to selection
       </Button>
 
-      <Card className="shadow-lg border-2 border-border/20">
+      <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
         <CardHeader className="pb-8">
-          <CardTitle className="flex items-center gap-4 text-2xl">
-            <div className="p-3 bg-primary rounded-xl text-primary-foreground">
+          <CardTitle className="flex items-center gap-4 text-2xl text-[rgb(64,143,204)]">
+            <div className="p-3 bg-[rgb(50,135,200)] rounded-xl text-[rgb(255,255,255)]">
               <Icon className="h-6 w-6" />
             </div>
             <span>Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}</span>
-            <Badge variant="secondary" className="ml-auto text-sm px-3 py-1">{environment}</Badge>
+            <Badge variant="secondary" className="ml-auto text-sm px-3 py-1 bg-[rgb(120,176,219)] text-[rgb(255,255,255)]">{environment}</Badge>
           </CardTitle>
-          <CardDescription className="text-lg mt-2">
+          <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
             Complete the authentication flow to obtain your token
           </CardDescription>
         </CardHeader>
@@ -232,7 +232,7 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
                   onClick={startCILogonFlow} 
                   disabled={isLoading} 
                   size="lg" 
-                  className="w-full py-4 text-lg font-semibold"
+                  className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                 >
                   Start CILogon Device Flow
                 </Button>
@@ -240,9 +240,9 @@ export function LoginPage({ provider, environment, onComplete, onBack }: LoginPa
 
               {deviceFlow.status === "polling" && (
                 <div className="space-y-8">
-                  <Alert className="border-2 border-primary/20 bg-primary/5">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <AlertDescription className="text-base ml-2">
+                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                    <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
+                    <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
                       Please visit the verification URL and enter the user code below.
                       Waiting for authentication...
                     </AlertDescription>

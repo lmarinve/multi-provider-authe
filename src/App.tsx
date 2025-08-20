@@ -72,7 +72,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
       <Toaster />
       
       {currentPage === "landing" && (
