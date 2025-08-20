@@ -50,9 +50,8 @@ export function LandingPage({
               </div>
               
               {/* Title with custom colors and 40% size reduction */}
-              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-1">
-                <span style={{ color: 'rgb(50, 135, 200)' }}>Atlantic</span>
-                <span style={{ color: 'rgb(64, 143, 204)' }}>Wave</span>
+              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-2">
+                <span style={{ color: 'rgb(50, 135, 200)' }}>AtlanticWave</span>
                 <span 
                   className="px-2 py-1 rounded-md font-bold"
                   style={{ 
@@ -67,7 +66,7 @@ export function LandingPage({
             
             {/* Subtitle with 60% size reduction and Deep Blue color */}
             <h2 
-              className="text-xs lg:text-sm font-medium uppercase tracking-wide"
+              className="text-xs font-medium uppercase tracking-wide"
               style={{ color: 'rgb(64, 143, 204)' }}
             >
               International Distributed Software-Defined Exchange
