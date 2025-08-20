@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SDXLogo } from "@/components/ui/SDXLogo";
 import { Provider } from "@/lib/config";
 
 interface LandingPageProps {
@@ -42,13 +41,16 @@ export function LandingPage({
       <div className="max-w-2xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <div className="flex flex-col items-center space-y-4">
-            <SDXLogo size={100} className="flex-shrink-0" />
-            <div className="space-y-2">
+          <div className="flex flex-col items-center space-y-6">
+            {/* Logo placeholder - replace with your logo */}
+            <div className="w-32 h-32 bg-gradient-to-br from-[rgb(50,135,200)] to-[rgb(64,143,204)] rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-lg">YOUR LOGO</span>
+            </div>
+            <div className="space-y-3">
               <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-foreground bg-gradient-to-r from-blue-600 via-blue-700 to-blue-900 bg-clip-text text-transparent leading-tight">
                 AtlanticWave SDX
               </h1>
-              <h2 className="text-[6px] lg:text-[7px] font-medium text-blue-600 uppercase tracking-wide">
+              <h2 className="text-sm lg:text-base font-medium text-blue-600 uppercase tracking-wide">
                 International Distributed Software-Defined Exchange
               </h2>
             </div>
