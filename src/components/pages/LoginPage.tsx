@@ -17,8 +17,7 @@ import {
   ExternalLink, 
   CheckCircle, 
   XCircle, 
-  Clock,
-  Shield
+  Clock
 } from "@phosphor-icons/react";
 
 interface LoginPageProps {
@@ -383,9 +382,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
             <>
               {deviceFlow.status === "idle" && (
                 <div className="space-y-6">
-                  <Alert>
-                    <Shield className="h-4 w-4" />
-                    <AlertDescription>
+                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
                       FABRIC API authentication requires a valid CILogon token. 
                       Please authenticate with CILogon first if you haven't already.
                     </AlertDescription>
@@ -394,7 +392,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     onClick={startFabricFlow} 
                     disabled={isLoading} 
                     size="lg" 
-                    className="w-full"
+                    className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
                     Create FABRIC API Token
                   </Button>
@@ -402,18 +400,18 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
               )}
 
               {isLoading && (
-                <Alert>
-                  <Clock className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                  <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
+                  <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
                     Creating FABRIC API token...
                   </AlertDescription>
                 </Alert>
               )}
 
               {deviceFlow.status === "error" && (
-                <Alert variant="destructive">
-                  <XCircle className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert variant="destructive" className="border-2 border-destructive/20">
+                  <XCircle className="h-5 w-5" />
+                  <AlertDescription className="text-base ml-2">
                     {deviceFlow.error}
                   </AlertDescription>
                 </Alert>
