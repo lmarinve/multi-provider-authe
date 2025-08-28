@@ -81,23 +81,6 @@ export class ORCIDProvider {
     return `${header}.${payload}.demo-signature`;
   }
 
-  // Static methods for backward compatibility and easier usage
-  static initiateLogin = async (): Promise<string> => {
-    const provider = new ORCIDProvider();
-    return provider.getAuthUrl();
-  }
-
-  static startDemoFlow = async (): Promise<TokenData> => {
-    console.log("ORCIDProvider.startDemoFlow called");
-    const provider = new ORCIDProvider();
-    return provider.startDemoFlow();
-  }
-
-  static handleCallback = async (code: string, state: string): Promise<TokenData> => {
-    const provider = new ORCIDProvider();
-    return provider.exchangeCodeForToken(code, state);
-  }
-
   exchangeCodeForToken = async (code: string, state: string): Promise<TokenData> => {
     const storedState = sessionStorage.getItem('orcid_state');
     const codeVerifier = sessionStorage.getItem('orcid_code_verifier');
@@ -165,6 +148,18 @@ export class ORCIDProvider {
       }
       throw error;
     }
+  }
+
+  // Static methods for backward compatibility and easier usage
+  static initiateLogin = async (): Promise<string> => {
+    const provider = new ORCIDProvider();
+    return provider.getAuthUrl();
+  }
+
+  static startDemoFlow = async (): Promise<TokenData> => {
+    console.log("ORCIDProvider.startDemoFlow called");
+    const provider = new ORCIDProvider();
+    return provider.startDemoFlow();
   }
 
   static handleCallback = async (code: string, state: string): Promise<TokenData> => {

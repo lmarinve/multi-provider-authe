@@ -147,8 +147,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         interval: response.interval || 5
       });
       
-      // Start polling for token
-      pollForToken(cilogonProvider, response.device_code, response.interval || 5);
+      // Start polling for token with real API calls
+      pollForTokenReal(cilogonProvider, response.device_code, response.interval || 5);
     } catch (error: any) {
       console.error("CILogon device flow error:", error);
       
@@ -156,7 +156,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       
       // Handle different types of errors
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        errorMessage = "Network error: Unable to connect to CILogon. This is expected in demo mode due to CORS restrictions.";
+        errorMessage = "Network error: Unable to connect to CILogon. Please check your internet connection and try again.";
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
@@ -245,6 +245,42 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const pollForTokenReal = async (provider: CILogonProvider, deviceCode: string, interval: number) => {
+    console.log("Starting real token polling for device code:", deviceCode.substring(0, 10) + "...");
+    
+    try {
+      // Use the provider's real polling method which handles all the OAuth2 device flow logic
+      const tokenData = await provider.exchangeForToken(deviceCode, interval);
+      
+      console.log("CILogon authentication successful!");
+      toast.success("Successfully authenticated with CILogon!");
+      setDeviceFlow({ 
+        status: "complete", 
+        token: tokenData.id_token
+      });
+      
+      // Navigate to token page
+      setTimeout(() => {
+        onComplete();
+      }, 1500);
+      
+    } catch (error: any) {
+      console.error("Real polling error:", error);
+      
+      let errorMessage = "Authentication failed";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
+      setDeviceFlow({ 
+        status: "error", 
+        error: errorMessage
+      });
     }
   };
 
@@ -400,13 +436,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Start CILogon Device Flow (Demo)
+                    Start CILogon Device Flow
                   </Button>
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-sm text-[rgb(64,143,204)]">
-                      <strong>Demo Mode:</strong> This simulates CILogon's device flow authentication. 
-                      In production, you would connect to the actual CILogon OAuth2 endpoints at cilogon.org.
-                      The demo automatically completes after a few polling cycles.
+                      <strong>Device Flow Authentication:</strong> You will be redirected to CILogon to complete authentication. 
+                      This uses the standard OAuth2 device flow for secure authentication with your institutional credentials.
                     </AlertDescription>
                   </Alert>
                 </>

@@ -4,68 +4,107 @@ import { TokenStorage } from "@/lib/token-storage";
 
 export class CILogonProvider {
   startDeviceFlow = async (): Promise<DeviceFlowResponse> => {
-    console.log("Starting CILogon device flow (demo mode)...");
+    console.log("Starting CILogon device flow...");
     
-    // For demo purposes, simulate the device flow API call
-    // In production, this would make a real API call to CILogon
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Simulate a device flow response
-    const userCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const deviceCode = crypto.randomUUID();
-    
-    return {
-      device_code: deviceCode,
-      user_code: userCode,
-      verification_uri: 'https://cilogon.org/device',
-      verification_uri_complete: `https://cilogon.org/device?user_code=${userCode}`,
-      expires_in: 600,
-      interval: 5
-    };
+    try {
+      const response = await fetch(config.cilogon.deviceCodeUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          client_id: config.cilogon.clientId,
+          scope: config.cilogon.scope,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`CILogon device flow failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json() as DeviceFlowResponse;
+      console.log("CILogon device flow started successfully");
+      
+      return data;
+    } catch (error) {
+      console.error("Failed to start CILogon device flow:", error);
+      throw new Error("Failed to start CILogon device flow. Please try again.");
+    }
   }
 
-  startDemoFlow = async (): Promise<DeviceFlowResponse> => {
-    return this.startDeviceFlow();
-  }
-
-  pollForToken = async (deviceCode: string): Promise<TokenResponse> => {
-    console.log("Polling for CILogon token (demo mode):", deviceCode.substring(0, 10) + "...");
+  pollForToken = async (deviceCode: string, interval: number = 5): Promise<TokenResponse> => {
+    console.log("Polling for CILogon token...");
     
-    // Simulate polling - in a real app this would poll the CILogon token endpoint
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const maxAttempts = 120; // 10 minutes with 5 second intervals
+    let attempts = 0;
     
-    // Simulate success after some time
-    return {
-      id_token: this.createDemoToken(),
-      access_token: 'demo_cilogon_access_' + crypto.randomUUID(),
-      refresh_token: 'demo_cilogon_refresh_' + crypto.randomUUID(),
-      expires_in: 3600,
-      token_type: 'Bearer'
-    };
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch(config.cilogon.tokenUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
+            device_code: deviceCode,
+            client_id: config.cilogon.clientId,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log("CILogon token received successfully");
+          return data as TokenResponse;
+        }
+
+        // Handle specific OAuth2 device flow errors
+        if (data.error === 'authorization_pending') {
+          console.log("Authorization pending, continuing to poll...");
+        } else if (data.error === 'slow_down') {
+          console.log("Rate limited, slowing down polling...");
+          interval += 5; // Increase interval when rate limited
+        } else if (data.error === 'access_denied') {
+          throw new Error("Authorization was denied by the user");
+        } else if (data.error === 'expired_token') {
+          throw new Error("The device code has expired. Please try again.");
+        } else {
+          throw new Error(data.error_description || data.error || "Unknown error during token exchange");
+        }
+
+        // Wait before next poll
+        await new Promise(resolve => setTimeout(resolve, interval * 1000));
+        attempts++;
+        
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("Authorization was denied")) {
+          throw error;
+        }
+        if (error instanceof Error && error.message.includes("expired")) {
+          throw error;
+        }
+        
+        console.error("Error polling for token:", error);
+        attempts++;
+        
+        if (attempts >= maxAttempts) {
+          throw new Error("Timeout waiting for authorization. Please try again.");
+        }
+        
+        // Wait before retrying on error
+        await new Promise(resolve => setTimeout(resolve, interval * 1000));
+      }
+    }
+    
+    throw new Error("Timeout waiting for authorization. Please try again.");
   }
 
-  private createDemoToken = (): string => {
-    // Create a simple demo token (not a real JWT)
-    const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }));
-    const payload = btoa(JSON.stringify({
-      sub: 'demo-user@university.edu',
-      iss: 'https://cilogon.org',
-      aud: config.cilogon.clientId,
-      exp: Math.floor(Date.now() / 1000) + 3600,
-      iat: Math.floor(Date.now() / 1000),
-      name: 'Demo University User',
-      email: 'demo-user@university.edu',
-      idp: 'Demo University',
-      idp_name: 'Demo University Identity Provider'
-    }));
-    return `${header}.${payload}.demo-signature`;
-  }
-
-  exchangeForToken = async (deviceCode: string): Promise<TokenData> => {
-    const tokenResponse = await this.pollForToken(deviceCode);
+  exchangeForToken = async (deviceCode: string, interval: number = 5): Promise<TokenData> => {
+    const tokenResponse = await this.pollForToken(deviceCode, interval);
     
     if (!tokenResponse.id_token) {
-      throw new Error("No ID token received");
+      throw new Error("No ID token received from CILogon");
     }
 
     const tokenData: TokenData = {
@@ -83,21 +122,16 @@ export class CILogonProvider {
   // Keep static methods for backward compatibility
   static startDeviceFlow = async (): Promise<DeviceFlowResponse> => {
     const provider = new CILogonProvider();
-    return provider.startDemoFlow();
+    return provider.startDeviceFlow();
   }
 
-  static startDemoFlow = async (): Promise<DeviceFlowResponse> => {
+  static pollForToken = async (deviceCode: string, interval: number = 5): Promise<TokenResponse> => {
     const provider = new CILogonProvider();
-    return provider.startDemoFlow();
+    return provider.pollForToken(deviceCode, interval);
   }
 
-  static pollForToken = async (deviceCode: string): Promise<TokenResponse> => {
+  static exchangeForToken = async (deviceCode: string, interval: number = 5): Promise<TokenData> => {
     const provider = new CILogonProvider();
-    return provider.pollForToken(deviceCode);
-  }
-
-  static exchangeForToken = async (deviceCode: string): Promise<TokenData> => {
-    const provider = new CILogonProvider();
-    return provider.exchangeForToken(deviceCode);
+    return provider.exchangeForToken(deviceCode, interval);
   }
 }
