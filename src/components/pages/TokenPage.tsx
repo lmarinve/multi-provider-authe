@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { TokenData, TokenClaims } from "@/lib/types";
 import { TokenStorage, decodeJWT } from "@/lib/token-storage";
 import { sendTokenToBackend } from "@/lib/backend";
+import sdxLogo from "@/assets/images/sdx-logo.svg";
 
 interface TokenPageProps {
   onBack: () => void;
@@ -126,7 +127,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
             {/* SDX Logo */}
             <div className="w-16 h-16 bg-white border border-[rgb(120,176,219)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
               <img 
-                src="/src/assets/images/sdx-logo.svg"
+                src={sdxLogo}
                 alt="SDX Logo" 
                 className="h-12 w-auto object-contain" 
               />
@@ -204,7 +205,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
             {/* SDX Logo */}
             <div className="w-16 h-16 bg-white border border-[rgb(120,176,219)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
               <img 
-                src="/src/assets/images/sdx-logo.svg"
+                src={sdxLogo}
                 alt="SDX Logo" 
                 className="h-12 w-auto object-contain" 
               />

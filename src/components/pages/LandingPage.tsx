@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Provider } from "@/lib/config"; 
+import { Provider } from "@/lib/config";
+import sdxLogo from "@/assets/images/sdx-logo.svg"; 
 
 interface LandingPageProps {
   selectedProvider?: Provider;
@@ -47,7 +48,7 @@ export function LandingPage({
               {/* SDX Logo */}
               <div className="w-16 h-16 bg-white border border-[rgb(120,176,219)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                 <img 
-                  src="/src/assets/images/sdx-logo.svg"
+                  src={sdxLogo}
                   alt="SDX Logo" 
                   className="h-12 w-auto object-contain"
                 />
