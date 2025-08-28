@@ -364,20 +364,22 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
           {provider === "cilogon" && (
             <>
               {deviceFlow.status === "idle" && (
-                <Button 
-                  onClick={startCILogonFlow} 
-                  disabled={isLoading} 
-                  size="lg" 
-                  className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                >
-                  Start CILogon Device Flow (Demo)
-                </Button>
-                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                  <AlertDescription className="text-sm text-[rgb(64,143,204)]">
-                    <strong>Demo Mode:</strong> This simulates CILogon's device flow authentication. 
-                    In production, this would connect to the actual CILogon OAuth2 endpoints.
-                  </AlertDescription>
-                </Alert>
+                <>
+                  <Button 
+                    onClick={startCILogonFlow} 
+                    disabled={isLoading} 
+                    size="lg" 
+                    className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
+                  >
+                    Start CILogon Device Flow (Demo)
+                  </Button>
+                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                    <AlertDescription className="text-sm text-[rgb(64,143,204)]">
+                      <strong>Demo Mode:</strong> This simulates CILogon's device flow authentication. 
+                      In production, this would connect to the actual CILogon OAuth2 endpoints.
+                    </AlertDescription>
+                  </Alert>
+                </>
               )}
 
               {deviceFlow.status === "polling" && (
