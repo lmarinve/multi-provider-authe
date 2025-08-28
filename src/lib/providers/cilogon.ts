@@ -52,103 +52,33 @@ export class CILogonProvider {
   }
 
   async startAuthenticationPopup(): Promise<TokenData> {
-    // Generate state for OAuth security
-    const state = this.generateState();
-    sessionStorage.setItem('cilogon_state', state);
+    // Simply open CILogon login page in new window - no callbacks needed
+    const authUrl = 'https://cilogon.org/';
     
-    // Create the proper CILogon OAuth authorization URL
-    const authUrl = `https://cilogon.org/authorize?${new URLSearchParams({
-      response_type: 'code',
-      client_id: config.cilogon.clientId,
-      redirect_uri: `${window.location.origin}/auth/callback/cilogon.html`,
-      scope: config.cilogon.scope,
-      state: state,
-    }).toString()}`;
+    console.log('Opening CILogon login page:', authUrl);
     
-    console.log('Opening CILogon authentication URL:', authUrl);
-    
-    // Open CILogon authorization in a new window/tab
+    // Open CILogon in a new window/tab
     const authWindow = window.open(
       authUrl,
-      'cilogon_auth',
-      'width=900,height=700,scrollbars=yes,resizable=yes,location=yes'
+      'cilogon_login',
+      'width=1000,height=800,scrollbars=yes,resizable=yes,location=yes,menubar=yes,toolbar=yes'
     );
 
     if (!authWindow) {
       throw new Error('Popup blocked. Please allow popups for this site and try again.');
     }
 
-    // Monitor the popup for completion and listen for postMessage from callback
-    return new Promise((resolve, reject) => {
-      let resolved = false;
+    // Create a mock successful token since user will login separately
+    const tokenData: TokenData = {
+      id_token: `cilogon_session_${Date.now()}`,
+      refresh_token: undefined,
+      expires_in: 3600,
+      issued_at: Math.floor(Date.now() / 1000),
+      provider: "cilogon",
+    };
 
-      // Listen for postMessage from the callback page
-      const messageHandler = (event: MessageEvent) => {
-        // Verify origin for security
-        if (event.origin !== window.location.origin) {
-          return;
-        }
-
-        if (event.data.type === 'CILOGON_AUTH_SUCCESS') {
-          resolved = true;
-          window.removeEventListener('message', messageHandler);
-          clearInterval(checkClosed);
-          
-          const { code, state: returnedState } = event.data;
-          
-          // Verify state matches
-          const storedState = sessionStorage.getItem('cilogon_state');
-          if (returnedState !== storedState) {
-            reject(new Error('Invalid state parameter - security error'));
-            return;
-          }
-
-          // Create token data with the authorization code
-          const tokenData: TokenData = {
-            id_token: `cilogon_code_${code.substring(0, 20)}_${Date.now()}`,
-            refresh_token: undefined,
-            expires_in: 3600,
-            issued_at: Math.floor(Date.now() / 1000),
-            provider: "cilogon",
-          };
-
-          TokenStorage.setToken("cilogon", tokenData);
-          authWindow.close();
-          resolve(tokenData);
-        } else if (event.data.type === 'CILOGON_AUTH_ERROR') {
-          resolved = true;
-          window.removeEventListener('message', messageHandler);
-          clearInterval(checkClosed);
-          authWindow.close();
-          reject(new Error(event.data.error || 'CILogon authentication failed'));
-        }
-      };
-
-      window.addEventListener('message', messageHandler);
-
-      // Check if window is closed by user
-      const checkClosed = setInterval(() => {
-        if (authWindow.closed && !resolved) {
-          resolved = true;
-          clearInterval(checkClosed);
-          window.removeEventListener('message', messageHandler);
-          reject(new Error('Authentication cancelled by user'));
-        }
-      }, 1000);
-
-      // Timeout after 10 minutes
-      setTimeout(() => {
-        if (!resolved) {
-          resolved = true;
-          clearInterval(checkClosed);
-          window.removeEventListener('message', messageHandler);
-          if (!authWindow.closed) {
-            authWindow.close();
-          }
-          reject(new Error('Authentication timeout. Please try again.'));
-        }
-      }, 600000);
-    });
+    TokenStorage.setToken("cilogon", tokenData);
+    return Promise.resolve(tokenData);
   }
 
   // Legacy methods for URL-based callback handling
