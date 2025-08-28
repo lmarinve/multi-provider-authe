@@ -16,11 +16,11 @@ export const config = {
   
   // ORCID
   orcid: {
-    clientId: "APP-S3BU1LVHOTHITEU2",
-    issuerUrl: "https://orcid.org",
-    authUrl: "https://orcid.org/oauth/authorize",
-    tokenUrl: "https://orcid.org/oauth/token",
-    scope: "openid email profile",
+    clientId: "APP-01234567890ABCDEF",
+    issuerUrl: "https://sandbox.orcid.org",
+    authUrl: "https://sandbox.orcid.org/oauth/authorize",
+    tokenUrl: "https://sandbox.orcid.org/oauth/token",
+    scope: "/authenticate",
     usePkce: true
   },
   

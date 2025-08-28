@@ -45,21 +45,45 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     const code = urlParams.get("code");
     const state = urlParams.get("state");
     const error = urlParams.get("error");
+    const errorDescription = urlParams.get("error_description");
 
     if (provider === "orcid" && code && state) {
       handleORCIDCallback(code, state);
     } else if (provider === "orcid" && error) {
-      toast.error(`ORCID login failed: ${error}`);
-      setDeviceFlow({ status: "error", error });
+      const fullErrorMessage = errorDescription 
+        ? `${error}: ${decodeURIComponent(errorDescription)}`
+        : error;
+        
+      toast.error(`ORCID login failed: ${fullErrorMessage}`);
+      setDeviceFlow({ 
+        status: "error", 
+        error: fullErrorMessage.includes('blocked') 
+          ? "Content blocked by ORCID. This may be due to incorrect client configuration or security settings. Please ensure the redirect URI is properly registered with ORCID."
+          : fullErrorMessage
+      });
+    }
+    
+    // Check if we were redirected back without any parameters (potential block)
+    if (provider === "orcid" && !code && !state && !error && window.location.search === "?provider=orcid") {
+      const referrer = document.referrer;
+      if (referrer.includes('orcid.org') || sessionStorage.getItem('orcid_auth_started')) {
+        // Clear the flag
+        sessionStorage.removeItem('orcid_auth_started');
+        setDeviceFlow({ 
+          status: "error", 
+          error: "Authentication was interrupted. This may be due to ORCID blocking the redirect or browser security settings. Please try again or check your browser's security settings."
+        });
+      }
     }
   }, [provider]);
 
   const handleORCIDCallback = async (code: string, state: string) => {
     setIsLoading(true);
     try {
-      console.log("Handling ORCID callback with code:", code, "state:", state);
+      console.log("Handling ORCID callback with code:", code.substring(0, 10) + "...", "state:", state);
       const orcidProvider = new ORCIDProvider();
       console.log("ORCID provider instance created for callback:", orcidProvider);
+      
       const tokenData = await orcidProvider.exchangeCodeForToken(code, state);
       console.log("Token exchange successful:", tokenData);
       
@@ -78,10 +102,27 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       }, 1500);
     } catch (error) {
       console.error("ORCID callback error:", error);
-      toast.error(`Failed to complete ORCID login: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      let errorMessage = 'Unknown error';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Provide more helpful error messages for common issues
+        if (errorMessage.includes('CORS')) {
+          errorMessage = "CORS error: The ORCID authentication service is blocking this request. This may be due to an incorrect client configuration or missing CORS settings.";
+        } else if (errorMessage.includes('Invalid state')) {
+          errorMessage = "Security error: The authentication state doesn't match. Please try logging in again.";
+        } else if (errorMessage.includes('Code verifier not found')) {
+          errorMessage = "Session error: Authentication session lost. Please try logging in again.";
+        } else if (errorMessage.includes('Token exchange failed')) {
+          errorMessage = "Authentication failed: Unable to exchange authorization code for token. The client may not be properly configured with ORCID.";
+        }
+      }
+      
+      toast.error(`Failed to complete ORCID login: ${errorMessage}`);
       setDeviceFlow({ 
         status: "error", 
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: errorMessage
       });
     } finally {
       setIsLoading(false);
@@ -147,12 +188,39 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       const authUrl = await orcidProvider.getAuthUrl();
       console.log("Auth URL generated:", authUrl);
       
-      // Redirect to ORCID for authentication
-      window.location.href = authUrl;
+      // Show a loading state before redirect
+      setDeviceFlow({ 
+        status: "idle"
+      });
+      
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        console.log("Redirecting to ORCID:", authUrl);
+        // Set a flag to track that we initiated ORCID auth
+        sessionStorage.setItem('orcid_auth_started', 'true');
+        window.location.href = authUrl;
+      }, 1000);
+      
     } catch (error) {
       console.error("ORCID flow error:", error);
-      toast.error(`Failed to start ORCID login: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setDeviceFlow({ status: "error", error: error instanceof Error ? error.message : "Unknown error" });
+      
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Provide more helpful error messages
+        if (errorMessage.includes('not a constructor')) {
+          errorMessage = "Configuration error: ORCID provider not properly loaded. Please refresh and try again.";
+        } else if (errorMessage.includes('not a function')) {
+          errorMessage = "Configuration error: ORCID authentication method not available. Please refresh and try again.";
+        }
+      }
+      
+      toast.error(`Failed to start ORCID login: ${errorMessage}`);
+      setDeviceFlow({ 
+        status: "error", 
+        error: errorMessage
+      });
       setIsLoading(false);
     }
   };
@@ -417,14 +485,29 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
           {provider === "orcid" && (
             <>
               {deviceFlow.status === "idle" && (
-                <Button 
-                  onClick={startORCIDFlow} 
-                  disabled={isLoading} 
-                  size="lg" 
-                  className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                >
-                  Login with ORCID
-                </Button>
+                <div className="space-y-6">
+                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
+                      <div className="space-y-2">
+                        <p><strong>Note:</strong> This demo uses ORCID Sandbox for testing.</p>
+                        <p>If you see a "content blocked" error, it may be due to:</p>
+                        <ul className="list-disc list-inside space-y-1 ml-4">
+                          <li>Client ID not properly configured with ORCID</li>
+                          <li>Redirect URI not registered with ORCID</li>
+                          <li>Browser blocking cross-origin requests</li>
+                        </ul>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                  <Button 
+                    onClick={startORCIDFlow} 
+                    disabled={isLoading} 
+                    size="lg" 
+                    className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
+                  >
+                    Login with ORCID
+                  </Button>
+                </div>
               )}
 
               {isLoading && (
@@ -446,12 +529,40 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
               )}
 
               {deviceFlow.status === "error" && (
-                <Alert variant="destructive">
-                  <XCircle className="h-5 w-5" />
-                  <AlertDescription>
-                    {deviceFlow.error}
-                  </AlertDescription>
-                </Alert>
+                <div className="space-y-4">
+                  <Alert variant="destructive">
+                    <XCircle className="h-5 w-5" />
+                    <AlertDescription>
+                      {deviceFlow.error}
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                    <AlertDescription className="text-sm text-[rgb(64,143,204)]">
+                      <div className="space-y-2">
+                        <p><strong>Troubleshooting Tips:</strong></p>
+                        <ul className="list-disc list-inside space-y-1 text-xs">
+                          <li>Ensure you have a valid ORCID account</li>
+                          <li>Try using a different browser or incognito mode</li>
+                          <li>Check if your browser is blocking pop-ups or redirects</li>
+                          <li>Clear your browser cache and cookies</li>
+                          <li>Disable browser extensions that might interfere</li>
+                        </ul>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <Button 
+                    onClick={() => {
+                      setDeviceFlow({ status: "idle" });
+                      setIsLoading(false);
+                    }}
+                    variant="outline"
+                    className="w-full border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
+                  >
+                    Try Again
+                  </Button>
+                </div>
               )}
             </>
           )}

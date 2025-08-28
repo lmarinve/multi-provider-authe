@@ -73,35 +73,48 @@ export class ORCIDProvider {
       code_verifier: codeVerifier,
     });
 
-    const response = await fetch(config.orcid.tokenUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Accept': 'application/json',
-      },
-      body: params,
-    });
+    try {
+      const response = await fetch(config.orcid.tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
+        },
+        body: params,
+      });
 
-    if (!response.ok) {
-      throw new Error(`Token exchange failed: ${response.statusText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('ORCID token exchange failed:', response.status, errorText);
+        throw new Error(`Token exchange failed: ${response.status} ${response.statusText}. ${errorText}`);
+      }
+
+      const tokenResponse: TokenResponse = await response.json();
+      console.log('ORCID token response:', tokenResponse);
+
+      // ORCID may not return an id_token, use access_token instead
+      const token = tokenResponse.id_token || tokenResponse.access_token;
+      if (!token) {
+        throw new Error('No token received from ORCID');
+      }
+
+      const tokenData: TokenData = {
+        id_token: token,
+        refresh_token: tokenResponse.refresh_token,
+        expires_in: tokenResponse.expires_in || 3600,
+        issued_at: Math.floor(Date.now() / 1000),
+        provider: 'orcid',
+      };
+
+      TokenStorage.setToken('orcid', tokenData);
+      return tokenData;
+    } catch (error) {
+      console.error('ORCID token exchange error:', error);
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error: Unable to connect to ORCID. This may be due to CORS restrictions or network issues.');
+      }
+      throw error;
     }
-
-    const tokenResponse: TokenResponse = await response.json();
-
-    if (!tokenResponse.id_token) {
-      throw new Error('No ID token received');
-    }
-
-    const tokenData: TokenData = {
-      id_token: tokenResponse.id_token,
-      refresh_token: tokenResponse.refresh_token,
-      expires_in: tokenResponse.expires_in || 3600,
-      issued_at: Math.floor(Date.now() / 1000),
-      provider: 'orcid',
-    };
-
-    TokenStorage.setToken('orcid', tokenData);
-    return tokenData;
   }
 
   static async handleCallback(code: string, state: string): Promise<TokenData> {
