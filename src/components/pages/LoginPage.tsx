@@ -289,9 +289,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   </Button>
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-sm text-[rgb(64,143,204)]">
-                      <strong>Manual Authentication:</strong> A new window will open to CILogon.org where you can 
-                      sign in with your institutional or identity provider credentials. Close the window when done 
-                      to continue with your authentication token.
+                      <strong>CILogon Authentication:</strong> Click the button below to open CILogon in a new window. 
+                      Sign in with your institutional credentials, and the window will close automatically when complete.
                     </AlertDescription>
                   </Alert>
                 </>
@@ -332,9 +331,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>Manual Authentication:</strong> A new window will open to ORCID.org where you can 
-                      sign in with your ORCID credentials. Close the window when done to continue with your 
-                      authentication token.
+                      <strong>ORCID Authentication:</strong> Click the button below to open ORCID in a new window. 
+                      Sign in with your ORCID credentials, and the window will close automatically when complete.
                     </AlertDescription>
                   </Alert>
                   <Button 

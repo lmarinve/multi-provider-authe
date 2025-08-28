@@ -47,54 +47,115 @@ export class ORCIDProvider {
   }
 
   async startAuthenticationPopup(): Promise<TokenData> {
-    // Simply open ORCID's main login page for user to authenticate manually
-    const authUrl = "https://orcid.org/signin";
-    
-    // Open a new window for user to authenticate
-    const authWindow = window.open(
-      authUrl,
-      'orcid_auth',
-      'width=900,height=700,scrollbars=yes,resizable=yes'
-    );
+    try {
+      // Generate PKCE parameters
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      const state = crypto.randomUUID();
 
-    if (!authWindow) {
-      throw new Error('Popup blocked. Please allow popups for this site and try again.');
+      // Store PKCE values
+      sessionStorage.setItem('orcid_code_verifier', codeVerifier);
+      sessionStorage.setItem('orcid_state', state);
+
+      // Create the proper ORCID OAuth authorization URL
+      const authUrl = `${config.orcid.authUrl}?${new URLSearchParams({
+        response_type: 'code',
+        client_id: config.orcid.clientId,
+        redirect_uri: `${window.location.origin}/auth/callback/orcid.html`,
+        scope: config.orcid.scope,
+        state: state,
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+      }).toString()}`;
+      
+      console.log('Opening ORCID authentication URL:', authUrl);
+      
+      // Open ORCID authorization in a new window/tab
+      const authWindow = window.open(
+        authUrl,
+        'orcid_auth',
+        'width=900,height=700,scrollbars=yes,resizable=yes,location=yes'
+      );
+
+      if (!authWindow) {
+        throw new Error('Popup blocked. Please allow popups for this site and try again.');
+      }
+
+      // Monitor the popup for completion and listen for postMessage from callback
+      return new Promise((resolve, reject) => {
+        let resolved = false;
+
+        // Listen for postMessage from the callback page
+        const messageHandler = (event: MessageEvent) => {
+          // Verify origin for security
+          if (event.origin !== window.location.origin) {
+            return;
+          }
+
+          if (event.data.type === 'ORCID_AUTH_SUCCESS') {
+            resolved = true;
+            window.removeEventListener('message', messageHandler);
+            clearInterval(checkClosed);
+            
+            const { code, state: returnedState } = event.data;
+            
+            // Verify state matches
+            const storedState = sessionStorage.getItem('orcid_state');
+            if (returnedState !== storedState) {
+              reject(new Error('Invalid state parameter - security error'));
+              return;
+            }
+
+            // Create token data with the authorization code
+            const tokenData: TokenData = {
+              id_token: `orcid_code_${code.substring(0, 20)}_${Date.now()}`,
+              refresh_token: undefined,
+              expires_in: 3600,
+              issued_at: Math.floor(Date.now() / 1000),
+              provider: "orcid",
+            };
+
+            TokenStorage.setToken("orcid", tokenData);
+            authWindow.close();
+            resolve(tokenData);
+          } else if (event.data.type === 'ORCID_AUTH_ERROR') {
+            resolved = true;
+            window.removeEventListener('message', messageHandler);
+            clearInterval(checkClosed);
+            authWindow.close();
+            reject(new Error(event.data.error || 'ORCID authentication failed'));
+          }
+        };
+
+        window.addEventListener('message', messageHandler);
+
+        // Check if window is closed by user
+        const checkClosed = setInterval(() => {
+          if (authWindow.closed && !resolved) {
+            resolved = true;
+            clearInterval(checkClosed);
+            window.removeEventListener('message', messageHandler);
+            reject(new Error('Authentication cancelled by user'));
+          }
+        }, 1000);
+
+        // Timeout after 10 minutes
+        setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            clearInterval(checkClosed);
+            window.removeEventListener('message', messageHandler);
+            if (!authWindow.closed) {
+              authWindow.close();
+            }
+            reject(new Error('Authentication timeout. Please try again.'));
+          }
+        }, 600000);
+      });
+    } catch (error) {
+      console.error('ORCID authentication error:', error);
+      throw error;
     }
-
-    // Since we can't receive callbacks in this environment,
-    // we'll create a token when the user closes the popup window
-    // This simulates successful authentication
-    
-    return new Promise((resolve, reject) => {
-      // Check if window is closed by user
-      const checkClosed = setInterval(() => {
-        if (authWindow.closed) {
-          clearInterval(checkClosed);
-          
-          // Create a token representing successful authentication
-          // In production, this would come from the actual OAuth callback
-          const tokenData: TokenData = {
-            id_token: `orcid_auth_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            refresh_token: undefined,
-            expires_in: 3600,
-            issued_at: Math.floor(Date.now() / 1000),
-            provider: "orcid",
-          };
-
-          TokenStorage.setToken("orcid", tokenData);
-          resolve(tokenData);
-        }
-      }, 1000);
-
-      // Timeout after 10 minutes
-      setTimeout(() => {
-        clearInterval(checkClosed);
-        if (!authWindow.closed) {
-          authWindow.close();
-        }
-        reject(new Error('Authentication timeout. Please try again.'));
-      }, 600000);
-    });
   }
 
   // Demo method for simulating ORCID authentication
