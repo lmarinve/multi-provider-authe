@@ -52,23 +52,30 @@ export class CILogonProvider {
   }
 
   async startAuthenticationPopup(): Promise<TokenData> {
-    // Simply open CILogon login page in new window - no callbacks needed
+    // Open CILogon login page in new window - user completes authentication there
     const authUrl = 'https://cilogon.org/';
     
     console.log('Opening CILogon login page:', authUrl);
     
-    // Open CILogon in a new window/tab
-    const authWindow = window.open(
+    // Open CILogon in a new window/tab with proper popup dimensions
+    const popup = window.open(
       authUrl,
       'cilogon_login',
-      'width=1000,height=800,scrollbars=yes,resizable=yes,location=yes,menubar=yes,toolbar=yes'
+      'width=800,height=600,scrollbars=yes,resizable=yes,status=no,location=no,toolbar=no,menubar=no'
     );
 
-    if (!authWindow) {
+    if (!popup) {
       throw new Error('Popup blocked. Please allow popups for this site and try again.');
     }
 
-    // Create a mock successful token since user will login separately
+    // Focus the popup window
+    popup.focus();
+
+    // Wait a moment to let the popup load, then resolve with mock token
+    // User will authenticate in the popup and close it manually
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Create a mock successful token since user authenticates independently
     const tokenData: TokenData = {
       id_token: `cilogon_session_${Date.now()}`,
       refresh_token: undefined,
