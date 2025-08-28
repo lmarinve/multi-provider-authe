@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Provider } from "@/lib/config";
-import sdxLogo from "../../assets/images/sdx-logo.svg"; 
+import sdxLogo from "@/assets/images/sdx-logo.svg"; 
 
 interface LandingPageProps {
   selectedProvider?: Provider;
