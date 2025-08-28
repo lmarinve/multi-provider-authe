@@ -9,19 +9,28 @@ export class CILogonProvider {
       scope: config.cilogon.scope,
     });
 
-    const response = await fetch(config.cilogon.deviceCodeUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params,
-    });
+    try {
+      const response = await fetch(config.cilogon.deviceCodeUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params,
+      });
 
-    if (!response.ok) {
-      throw new Error(`Device flow failed: ${response.statusText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Device flow failed: ${response.statusText}. ${errorText}`);
+      }
+
+      return await response.json();
+    } catch (error: any) {
+      // Handle network/CORS errors
+      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
+        throw new Error(`Network error connecting to CILogon: ${error.message}. This may be due to CORS restrictions or network connectivity issues.`);
+      }
+      throw error;
     }
-
-    return response.json();
   }
 
   async pollForToken(deviceCode: string): Promise<TokenResponse> {
@@ -42,7 +51,11 @@ export class CILogonProvider {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "Token request failed");
+      // Create an error object that matches the expected format
+      const error = new Error(data.error_description || data.error || "Token request failed");
+      (error as any).error = data.error;
+      (error as any).error_description = data.error_description;
+      throw error;
     }
 
     return data;

@@ -31,6 +31,14 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const [deviceFlow, setDeviceFlow] = useState<DeviceFlowState>({ status: "idle" });
   const [isLoading, setIsLoading] = useState(false);
 
+  // Debug: Verify provider classes are loaded
+  useEffect(() => {
+    console.log("LoginPage loaded for provider:", provider);
+    console.log("ORCIDProvider:", ORCIDProvider);
+    console.log("CILogonProvider:", CILogonProvider);
+    console.log("FabricProvider:", FabricProvider);
+  }, [provider]);
+
   useEffect(() => {
     // Check URL for ORCID callback
     const urlParams = new URLSearchParams(window.location.search);
@@ -49,8 +57,11 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const handleORCIDCallback = async (code: string, state: string) => {
     setIsLoading(true);
     try {
+      console.log("Handling ORCID callback with code:", code, "state:", state);
       const orcidProvider = new ORCIDProvider();
+      console.log("ORCID provider instance created for callback:", orcidProvider);
       const tokenData = await orcidProvider.exchangeCodeForToken(code, state);
+      console.log("Token exchange successful:", tokenData);
       
       // Store the token
       TokenStorage.setToken('orcid', tokenData);
@@ -67,7 +78,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       }, 1500);
     } catch (error) {
       console.error("ORCID callback error:", error);
-      toast.error("Failed to complete ORCID login");
+      toast.error(`Failed to complete ORCID login: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setDeviceFlow({ 
         status: "error", 
         error: error instanceof Error ? error.message : "Unknown error"
@@ -95,10 +106,20 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       
       // Start polling for token
       pollForToken(cilogonProvider, response.device_code, response.interval || 5);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Device flow error:", error);
-      toast.error("Failed to start device flow");
-      setDeviceFlow({ status: "error", error: error instanceof Error ? error.message : "Unknown error" });
+      
+      // Handle CORS errors which are expected for CILogon device flow
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        toast.error("Network error: Unable to connect to CILogon. This may be due to CORS restrictions.");
+        setDeviceFlow({ 
+          status: "error", 
+          error: "Network connectivity issue with CILogon service. Please try again or contact support if the problem persists." 
+        });
+      } else {
+        toast.error("Failed to start device flow");
+        setDeviceFlow({ status: "error", error: error instanceof Error ? error.message : "Unknown error" });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -107,14 +128,30 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const startORCIDFlow = async () => {
     setIsLoading(true);
     try {
+      console.log("Creating ORCID provider instance...");
+      
+      // Verify the class exists
+      if (typeof ORCIDProvider !== 'function') {
+        throw new Error(`ORCIDProvider is not a constructor: ${typeof ORCIDProvider}`);
+      }
+      
       const orcidProvider = new ORCIDProvider();
+      console.log("ORCID provider created:", orcidProvider);
+      
+      // Verify the method exists
+      if (typeof orcidProvider.getAuthUrl !== 'function') {
+        throw new Error(`getAuthUrl is not a function: ${typeof orcidProvider.getAuthUrl}`);
+      }
+      
+      console.log("Getting auth URL...");
       const authUrl = await orcidProvider.getAuthUrl();
+      console.log("Auth URL generated:", authUrl);
       
       // Redirect to ORCID for authentication
       window.location.href = authUrl;
     } catch (error) {
       console.error("ORCID flow error:", error);
-      toast.error("Failed to start ORCID login");
+      toast.error(`Failed to start ORCID login: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setDeviceFlow({ status: "error", error: error instanceof Error ? error.message : "Unknown error" });
       setIsLoading(false);
     }
@@ -181,11 +218,13 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
           onComplete();
         }, 1500);
       } catch (error: any) {
-        if (error.error === "authorization_pending" || error.error === "slow_down") {
+        const errorCode = error.error || (error.message && error.message.includes("authorization_pending") ? "authorization_pending" : null);
+        
+        if (errorCode === "authorization_pending" || errorCode === "slow_down") {
           // Continue polling
-          const nextInterval = error.error === "slow_down" ? interval + 5 : interval;
+          const nextInterval = errorCode === "slow_down" ? interval + 5 : interval;
           setTimeout(poll, nextInterval * 1000);
-        } else if (error.error === "expired_token") {
+        } else if (errorCode === "expired_token") {
           setDeviceFlow({ status: "error", error: "Device code expired. Please try again." });
         } else {
           console.error("Polling error:", error);
