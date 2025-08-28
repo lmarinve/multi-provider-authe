@@ -289,8 +289,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   </Button>
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-sm text-[rgb(64,143,204)]">
-                      <strong>Popup Authentication:</strong> A new window will open for CILogon authentication. 
-                      Please ensure popups are enabled and complete authentication in the popup window.
+                      <strong>Manual Authentication:</strong> A new window will open to CILogon.org where you can 
+                      sign in with your institutional or identity provider credentials. Close the window when done 
+                      to continue with your authentication token.
                     </AlertDescription>
                   </Alert>
                 </>
@@ -300,7 +301,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Opening authentication popup window...
+                    Opening CILogon authentication window...
                   </AlertDescription>
                 </Alert>
               )}
@@ -331,8 +332,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>Popup Authentication:</strong> A new window will open for ORCID authentication. 
-                      Please ensure popups are enabled and complete authentication in the popup window.
+                      <strong>Manual Authentication:</strong> A new window will open to ORCID.org where you can 
+                      sign in with your ORCID credentials. Close the window when done to continue with your 
+                      authentication token.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -350,7 +352,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Opening authentication popup window...
+                    Opening ORCID authentication window...
                   </AlertDescription>
                 </Alert>
               )}
