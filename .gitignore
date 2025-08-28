@@ -31,3 +31,11 @@ packages
 .devcontainer/
 
 .spark-workbench-id
+
+# Spark temp
+pids/
+*.pid
+
+# OS
+.DS_Store
+Thumbs.db
