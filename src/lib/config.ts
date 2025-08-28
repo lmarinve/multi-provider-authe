@@ -10,7 +10,7 @@ export const config = {
   cilogon: {
     clientId: "APP-S3BU1LVHOTHITEU2",
     scope: "openid email profile",
-    deviceCodeUrl: "https://cilogon.org/oauth2/device/code",
+    authUrl: "https://cilogon.org/authorize",
     tokenUrl: "https://cilogon.org/oauth2/token"
   },
   

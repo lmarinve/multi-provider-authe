@@ -1,21 +1,16 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Provider } from "@/lib/config";
-import { TokenData, DeviceFlowState } from "@/lib/types";
+import { DeviceFlowState } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
 import { CILogonProvider } from "@/lib/providers/cilogon";
 import { ORCIDProvider } from "@/lib/providers/orcid";
 import { FabricProvider } from "@/lib/providers/fabric";
 import sdxLogo from "@/assets/images/sdx-logo.svg";
 import { 
-  Copy, 
-  ExternalLink, 
   CheckCircle, 
   XCircle, 
   Clock
@@ -37,41 +32,86 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   }, [provider]);
 
   useEffect(() => {
-    // Check URL for ORCID callback
+    // Check URL for OAuth callback
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
     const state = urlParams.get("state");
     const error = urlParams.get("error");
     const errorDescription = urlParams.get("error_description");
 
-    if (provider === "orcid") {
+    if (provider === "orcid" || provider === "cilogon") {
       if (code && state) {
         // Handle successful callback
-        handleORCIDCallback(code, state);
+        if (provider === "orcid") {
+          handleORCIDCallback(code, state);
+        } else if (provider === "cilogon") {
+          handleCILogonCallback(code, state);
+        }
       } else if (error) {
         // Handle error callback
         const fullErrorMessage = errorDescription 
           ? `${error}: ${decodeURIComponent(errorDescription)}`
           : error;
           
-        toast.error(`ORCID authentication failed: ${fullErrorMessage}`);
+        toast.error(`${provider.toUpperCase()} authentication failed: ${fullErrorMessage}`);
         setDeviceFlow({ 
           status: "error", 
-          error: "ORCID authentication was rejected or failed. Please try again or check your ORCID account status."
+          error: `${provider.toUpperCase()} authentication was rejected or failed. Please try again or check your account status.`
         });
-      } else if (window.location.search === "?provider=orcid") {
+      } else if (window.location.search === `?provider=${provider}`) {
         // Check if we were redirected back without parameters (potential interruption)
         const referrer = document.referrer;
-        if (referrer.includes('orcid.org') || sessionStorage.getItem('orcid_auth_started')) {
-          sessionStorage.removeItem('orcid_auth_started');
+        const providerDomain = provider === "orcid" ? "orcid.org" : "cilogon.org";
+        if (referrer.includes(providerDomain) || sessionStorage.getItem(`${provider}_auth_started`)) {
+          sessionStorage.removeItem(`${provider}_auth_started`);
           setDeviceFlow({ 
             status: "error", 
-            error: "Authentication was interrupted. This may be due to ORCID blocking the redirect or browser security settings."
+            error: "Authentication was interrupted. This may be due to browser security settings or the provider blocking the redirect."
           });
         }
       }
     }
   }, [provider]);
+
+  const handleCILogonCallback = async (code: string, state: string) => {
+    console.log("Processing CILogon callback...");
+    setIsLoading(true);
+    
+    try {
+      const cilogonProvider = new CILogonProvider();
+      const tokenData = await cilogonProvider.handleCallback();
+      
+      console.log("CILogon token exchange successful");
+      
+      toast.success("Successfully authenticated with CILogon!");
+      setDeviceFlow({ 
+        status: "complete", 
+        token: tokenData.id_token
+      });
+      
+      // Navigate to token page
+      setTimeout(() => {
+        onComplete();
+      }, 1500);
+      
+    } catch (error) {
+      console.error("CILogon callback processing error:", error);
+      
+      let errorMessage = 'CILogon authentication failed';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(`CILogon authentication failed: ${errorMessage}`);
+      setDeviceFlow({ 
+        status: "error", 
+        error: errorMessage
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleORCIDCallback = async (code: string, state: string) => {
     console.log("Processing ORCID callback...");
@@ -132,32 +172,17 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     setIsLoading(true);
     
     try {
+      // Mark that we're starting authentication
+      sessionStorage.setItem('cilogon_auth_started', 'true');
+      
       const cilogonProvider = new CILogonProvider();
-      const response = await cilogonProvider.startDeviceFlow();
+      cilogonProvider.startAuthentication();
       
-      console.log("CILogon device flow started:", response);
-      
-      setDeviceFlow({
-        status: "polling",
-        deviceCode: response.device_code,
-        userCode: response.user_code,
-        verificationUri: response.verification_uri,
-        verificationUriComplete: response.verification_uri_complete,
-        expiresAt: Date.now() + (response.expires_in * 1000),
-        interval: response.interval || 5
-      });
-      
-      // Start polling for token with real API calls
-      pollForTokenReal(cilogonProvider, response.device_code, response.interval || 5);
     } catch (error: any) {
-      console.error("CILogon device flow error:", error);
+      console.error("CILogon authentication error:", error);
       
       let errorMessage = "Failed to start CILogon authentication";
-      
-      // Handle different types of errors
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        errorMessage = "Network error: Unable to connect to CILogon. Please check your internet connection and try again.";
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         errorMessage = error.message;
       }
       
@@ -166,7 +191,6 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         status: "error", 
         error: errorMessage
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -176,35 +200,28 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     setIsLoading(true);
     
     try {
-      const tokenData = await ORCIDProvider.startDemoFlow();
+      // Mark that we're starting authentication
+      sessionStorage.setItem('orcid_auth_started', 'true');
       
-      console.log("ORCID authentication successful:", tokenData);
+      const orcidProvider = new ORCIDProvider();
+      const authUrl = await orcidProvider.getAuthUrl();
       
-      toast.success("Successfully authenticated with ORCID!");
-      setDeviceFlow({ 
-        status: "complete", 
-        token: tokenData.id_token
-      });
-      
-      // Navigate to token page
-      setTimeout(() => {
-        onComplete();
-      }, 1500);
+      // Redirect to ORCID for authentication
+      window.location.href = authUrl;
       
     } catch (error) {
       console.error("ORCID authentication error:", error);
       
-      let errorMessage = 'ORCID authentication failed';
+      let errorMessage = 'Failed to start ORCID authentication';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
       
-      toast.error(`Failed to authenticate with ORCID: ${errorMessage}`);
+      toast.error(errorMessage);
       setDeviceFlow({ 
         status: "error", 
         error: errorMessage
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -248,136 +265,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     }
   };
 
-  const pollForTokenReal = async (provider: CILogonProvider, deviceCode: string, interval: number) => {
-    console.log("Starting real token polling for device code:", deviceCode.substring(0, 10) + "...");
-    
-    try {
-      // Use the provider's real polling method which handles all the OAuth2 device flow logic
-      const tokenData = await provider.exchangeForToken(deviceCode, interval);
-      
-      console.log("CILogon authentication successful!");
-      toast.success("Successfully authenticated with CILogon!");
-      setDeviceFlow({ 
-        status: "complete", 
-        token: tokenData.id_token
-      });
-      
-      // Navigate to token page
-      setTimeout(() => {
-        onComplete();
-      }, 1500);
-      
-    } catch (error: any) {
-      console.error("Real polling error:", error);
-      
-      let errorMessage = "Authentication failed";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      toast.error(errorMessage);
-      setDeviceFlow({ 
-        status: "error", 
-        error: errorMessage
-      });
-    }
-  };
 
-  const pollForToken = async (provider: CILogonProvider, deviceCode: string, interval: number) => {
-    let pollCount = 0;
-    const maxPolls = 20; // Maximum number of polling attempts
-    
-    console.log("Starting token polling for device code:", deviceCode.substring(0, 10) + "...");
-    
-    const poll = async () => {
-      pollCount++;
-      console.log(`Polling attempt ${pollCount}/${maxPolls}`);
-      
-      try {
-        // Simulate authorization pending for first few polls (demo behavior)
-        if (pollCount < 3) {
-          const error = new Error("User authorization pending");
-          (error as any).error = "authorization_pending";
-          throw error;
-        }
-        
-        // Simulate success after some attempts
-        const tokenResponse = await provider.pollForToken(deviceCode);
-        
-        if (!tokenResponse.id_token) {
-          throw new Error("No ID token received from provider");
-        }
 
-        const tokenData: TokenData = {
-          id_token: tokenResponse.id_token,
-          refresh_token: tokenResponse.refresh_token,
-          expires_in: tokenResponse.expires_in || 3600,
-          issued_at: Math.floor(Date.now() / 1000),
-          provider: "cilogon",
-        };
 
-        TokenStorage.setToken("cilogon", tokenData);
-        
-        console.log("CILogon authentication successful!");
-        toast.success("Successfully authenticated with CILogon!");
-        setDeviceFlow({ 
-          status: "complete", 
-          token: tokenData.id_token
-        });
-        
-        // Navigate to token page
-        setTimeout(() => {
-          onComplete();
-        }, 1500);
-        
-      } catch (error: any) {
-        const errorCode = error.error || (error.message && error.message.includes("authorization_pending") ? "authorization_pending" : null);
-        
-        if (errorCode === "authorization_pending") {
-          console.log("Authorization still pending, continuing to poll...");
-          // Continue polling after interval
-          setTimeout(poll, interval * 1000);
-        } else if (errorCode === "slow_down") {
-          console.log("Rate limited, increasing interval...");
-          // Continue polling with increased interval
-          setTimeout(poll, (interval + 5) * 1000);
-        } else if (errorCode === "expired_token" || pollCount >= maxPolls) {
-          console.log("Polling expired or max attempts reached");
-          setDeviceFlow({ 
-            status: "error", 
-            error: "Device code expired or authentication timed out. Please try again." 
-          });
-        } else {
-          console.error("Polling error:", error);
-          setDeviceFlow({ 
-            status: "error", 
-            error: error.message || "Authentication failed unexpectedly" 
-          });
-        }
-      }
-    };
-    
-    // Start polling after the initial interval
-    setTimeout(poll, interval * 1000);
-  };
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success("Copied to clipboard!");
-    } catch {
-      toast.error("Failed to copy to clipboard");
-    }
-  };
-
-  const getTimeRemaining = () => {
-    if (!deviceFlow.expiresAt) return null;
-    const remaining = Math.max(0, deviceFlow.expiresAt - Date.now());
-    return Math.ceil(remaining / 1000);
-  };
-
-  const timeRemaining = getTimeRemaining();
 
   return (
     <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
@@ -436,95 +326,24 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Start CILogon Device Flow
+                    Login with CILogon
                   </Button>
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-sm text-[rgb(64,143,204)]">
-                      <strong>Device Flow Authentication:</strong> You will be redirected to CILogon to complete authentication. 
-                      This uses the standard OAuth2 device flow for secure authentication with your institutional credentials.
+                      <strong>Browser Authentication:</strong> You will be redirected to CILogon to authenticate with your institutional credentials. 
+                      This uses the standard OAuth2 authorization code flow for secure authentication.
                     </AlertDescription>
                   </Alert>
                 </>
               )}
 
-              {deviceFlow.status === "polling" && (
-                <div className="space-y-8">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
-                    <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                      Please visit the URL below and enter the user code to complete authentication.
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <div className="space-y-6">
-                    <div className="bg-[rgb(236,244,250)] p-6 rounded-lg border-2 border-[rgb(120,176,219)]">
-                      <Label className="text-sm font-semibold text-[rgb(64,143,204)] mb-3 block">
-                        Verification URL
-                      </Label>
-                      <div className="flex items-center justify-between bg-white p-3 rounded border">
-                        <code className="text-sm text-[rgb(50,135,200)]">{deviceFlow.verificationUri}</code>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => copyToClipboard(deviceFlow.verificationUri!)}
-                            className="text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.open(deviceFlow.verificationUri, '_blank')}
-                            className="text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-[rgb(236,244,250)] p-6 rounded-lg border-2 border-[rgb(120,176,219)]">
-                      <Label className="text-sm font-semibold text-[rgb(64,143,204)] mb-3 block">
-                        User Code
-                      </Label>
-                      <div className="flex items-center justify-between bg-white p-4 rounded border">
-                        <code className="text-xl font-mono font-bold text-[rgb(50,135,200)]">
-                          {deviceFlow.userCode}
-                        </code>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(deviceFlow.userCode!)}
-                          className="text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    {timeRemaining && (
-                      <div className="text-center">
-                        <Badge variant="outline" className="text-sm text-[rgb(64,143,204)] border-[rgb(120,176,219)]">
-                          Code expires in {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {deviceFlow.verificationUriComplete && (
-                    <div className="text-center pt-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => window.open(deviceFlow.verificationUriComplete, '_blank')}
-                        className="border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                      >
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Open Complete Authentication URL
-                      </Button>
-                    </div>
-                  )}
-                </div>
+              {isLoading && (
+                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                  <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
+                  <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
+                    Redirecting to CILogon for authentication...
+                  </AlertDescription>
+                </Alert>
               )}
 
               {deviceFlow.status === "complete" && (
@@ -553,16 +372,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <div className="space-y-2">
-                        <p><strong>Demo Mode:</strong> This simulates ORCID authentication for demonstration.</p>
-                        <p>In production, you would need:</p>
-                        <ul className="list-disc list-inside space-y-1 ml-4 text-sm">
-                          <li>A valid ORCID client ID registered at orcid.org</li>
-                          <li>Proper redirect URI configuration in your ORCID application</li>
-                          <li>CORS headers configured for your domain</li>
-                          <li>Valid SSL/TLS certificates</li>
-                        </ul>
-                      </div>
+                      <strong>Browser Authentication:</strong> You will be redirected to ORCID to authenticate with your ORCID credentials. 
+                      This uses the standard OAuth2 authorization code flow with PKCE for secure authentication.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -571,7 +382,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Login with ORCID (Demo)
+                    Login with ORCID
                   </Button>
                 </div>
               )}
@@ -580,7 +391,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Simulating ORCID authentication...
+                    Redirecting to ORCID for authentication...
                   </AlertDescription>
                 </Alert>
               )}
