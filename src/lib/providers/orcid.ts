@@ -22,7 +22,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 }
 
 export class ORCIDProvider {
-  async getAuthUrl(): Promise<string> {
+  getAuthUrl = async (): Promise<string> => {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
     const state = crypto.randomUUID();
@@ -44,12 +44,12 @@ export class ORCIDProvider {
     return `${config.orcid.authUrl}?${params}`;
   }
 
-  static async initiateLogin(): Promise<string> {
+  static initiateLogin = async (): Promise<string> => {
     const provider = new ORCIDProvider();
     return provider.getAuthUrl();
   }
 
-  async exchangeCodeForToken(code: string, state: string): Promise<TokenData> {
+  exchangeCodeForToken = async (code: string, state: string): Promise<TokenData> => {
     const storedState = sessionStorage.getItem('orcid_state');
     const codeVerifier = sessionStorage.getItem('orcid_code_verifier');
 
@@ -80,6 +80,7 @@ export class ORCIDProvider {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json',
         },
+        mode: 'cors',
         body: params,
       });
 
@@ -117,7 +118,7 @@ export class ORCIDProvider {
     }
   }
 
-  static async handleCallback(code: string, state: string): Promise<TokenData> {
+  static handleCallback = async (code: string, state: string): Promise<TokenData> => {
     const provider = new ORCIDProvider();
     return provider.exchangeCodeForToken(code, state);
   }

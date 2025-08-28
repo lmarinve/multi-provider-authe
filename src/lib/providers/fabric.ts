@@ -3,7 +3,7 @@ import { TokenData } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
 
 export class FabricProvider {
-  async authenticate(): Promise<TokenData> {
+  authenticate = async (): Promise<TokenData> => {
     const cilogonToken = TokenStorage.getToken('cilogon');
     
     if (!cilogonToken || !TokenStorage.isTokenValid(cilogonToken)) {
@@ -14,8 +14,10 @@ export class FabricProvider {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': `Bearer ${cilogonToken.id_token}`,
       },
+      mode: 'cors',
       body: JSON.stringify({
         project_id: config.fabric.projectId,
         project_name: config.fabric.projectName,
@@ -42,7 +44,7 @@ export class FabricProvider {
     return tokenData;
   }
 
-  async refreshToken(): Promise<TokenData> {
+  refreshToken = async (): Promise<TokenData> => {
     const fabricToken = TokenStorage.getToken('fabric');
     
     if (!fabricToken?.refresh_token) {
@@ -53,8 +55,10 @@ export class FabricProvider {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': `Bearer ${fabricToken.refresh_token}`,
       },
+      mode: 'cors',
       body: JSON.stringify({
         project_id: config.fabric.projectId,
       }),
@@ -80,12 +84,12 @@ export class FabricProvider {
   }
 
   // Keep static methods for backward compatibility
-  static async createToken(): Promise<TokenData> {
+  static createToken = async (): Promise<TokenData> => {
     const provider = new FabricProvider();
     return provider.authenticate();
   }
 
-  static async refreshToken(): Promise<TokenData> {
+  static refreshToken = async (): Promise<TokenData> => {
     const provider = new FabricProvider();
     return provider.refreshToken();
   }

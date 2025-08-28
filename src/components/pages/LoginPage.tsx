@@ -34,9 +34,10 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   // Debug: Verify provider classes are loaded
   useEffect(() => {
     console.log("LoginPage loaded for provider:", provider);
-    console.log("ORCIDProvider:", ORCIDProvider);
-    console.log("CILogonProvider:", CILogonProvider);
-    console.log("FabricProvider:", FabricProvider);
+    console.log("Provider classes loaded:");
+    console.log("- ORCIDProvider:", typeof ORCIDProvider);
+    console.log("- CILogonProvider:", typeof CILogonProvider);
+    console.log("- FabricProvider:", typeof FabricProvider);
   }, [provider]);
 
   useEffect(() => {
