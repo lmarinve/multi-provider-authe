@@ -189,8 +189,6 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
 
   return (
     <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
-    {/* Header */}
-        <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
      {/* Header */}
      <div className="text-center space-y-4 mb-12">
        <div className="flex flex-col items-center space-y-6">
