@@ -194,9 +194,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         <div className="flex flex-col items-center space-y-6">
           {/* Logo and Title */}
           <div className="flex items-center justify-center gap-4">
-            <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-              <img src={sdxLogo} alt="SDX Logo" className="h-12 w-auto object-contain" />
-            </div>
+            <img src={sdxLogo} alt="SDX Logo" className="w-12 h-12 object-contain" />
             <h1 className="text-4xl font-bold tracking-tight leading-tight">
               <span style={{ color: 'rgb(50, 135, 200)' }}>AtlanticWave</span>
               <span style={{ color: 'rgb(64, 143, 204)' }}>-</span>
