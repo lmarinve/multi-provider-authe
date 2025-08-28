@@ -189,35 +189,38 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
 
   return (
     <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
-      {/* Header */}
-      <div className="text-center space-y-4 mb-12">
-        <div className="flex flex-col items-center space-y-6">
-          {/* Logo and Title */}
-          <div className="flex items-center justify-center gap-4">
-            <img src={sdxLogo} alt="SDX Logo" className="w-12 h-12 object-contain" />
-            <h1 className="text-4xl font-bold tracking-tight leading-tight">
-              <span style={{ color: 'rgb(50, 135, 200)' }}>AtlanticWave</span>
-              <span style={{ color: 'rgb(64, 143, 204)' }}>-</span>
-              <span 
-                className="px-3 py-1 rounded-md font-bold"
-                style={{ 
-                  color: 'rgb(255, 255, 255)', 
-                  backgroundColor: 'rgb(120, 176, 219)' 
-                }}
-              >
-                SDX
-              </span>
-            </h1>
-          </div>
-          
-          <h2 
-            className="text-xs font-light uppercase tracking-wide opacity-70"
-            style={{ color: 'rgb(64, 143, 204)' }}
-          >
-            International Distributed Software-Defined Exchange
-          </h2>
-        </div>
-      </div>
+    {/* Header */}
+        <div className="container mx-auto px-6 py-16 max-w-3xl bg-[rgb(255,255,255)] min-h-screen">
+     {/* Header */}
+     <div className="text-center space-y-4 mb-12">
+       <div className="flex flex-col items-center space-y-6">
+         {/* Logo and Title */}
+         <div className="flex items-center justify-center gap-4">
+           <img src={sdxLogo} alt="SDX Logo" className="w-12 h-12 object-contain" />
+           <h1 className="text-4xl font-bold tracking-tight leading-tight">
+             <span style={{ color: 'rgb(50, 135, 200)' }}>AtlanticWave</span>
+             <span style={{ color: 'rgb(64, 143, 204)' }}>-</span>
+             <span
+               className="px-3 py-1 rounded-md font-bold"
+               style={{
+                 color: 'rgb(255, 255, 255)',
+                 backgroundColor: 'rgb(120, 176, 219)'
+               }}
+             >
+               SDX
+             </span>
+           </h1>
+         </div>
+        
+         <h2
+           className="text-xs font-light uppercase tracking-wide opacity-70"
+           style={{ color: 'rgb(64, 143, 204)' }}
+         >
+           International Distributed Software-Defined Exchange
+         </h2>
+       </div>
+     </div>
+
       
       <Button variant="ghost" onClick={onBack} className="mb-8 -ml-2 text-base text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]">
         ← Back to selection
