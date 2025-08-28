@@ -91,8 +91,7 @@ export class FabricProvider {
     return tokenData;
   }
 
-  // Keep static methods for backward compatibility
-  static createToken = async (): Promise<TokenData> => {
+  static createToken = async (cilogonToken?: TokenData): Promise<TokenData> => {
     const provider = new FabricProvider();
     return provider.authenticate();
   }

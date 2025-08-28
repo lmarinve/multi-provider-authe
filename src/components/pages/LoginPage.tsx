@@ -32,33 +32,24 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   }, [provider]);
 
   const startCILogonFlow = async () => {
-    console.log("Opening CILogon authentication window...");
+    console.log("Starting CILogon authentication...");
     setIsLoading(true);
     
     try {
-      // Simply open CILogon login page for user authentication
-      const authUrl = 'https://cilogon.org/';
+      const token = await CILogonProvider.startAuthenticationPopup();
+      console.log("CILogon authentication successful:", token);
       
-      console.log("Opening CILogon with URL:", authUrl);
+      toast.success("CILogon authentication successful!");
+      setDeviceFlow({ status: "success", token });
       
-      // Open in new tab/window
-      const authWindow = window.open(authUrl, '_blank');
-      
-      if (!authWindow) {
-        throw new Error('Pop-up blocked. Please enable pop-ups for this site.');
-      }
-      
-      toast.success("Authentication window opened. Please complete the login process and return to this page.");
-      
-      // Set to pending state, requiring user confirmation
-      setDeviceFlow({ 
-        status: "pending", 
-        message: "Please complete authentication in the new window and click 'I've Completed Login' below."
-      });
+      // Complete the login process
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
       
     } catch (error: any) {
-      console.error("Error starting CILogon flow:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to open authentication window";
+      console.error("CILogon authentication failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
       toast.error(errorMessage);
       setDeviceFlow({ 
         status: "error", 
@@ -72,32 +63,33 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
 
 
   const startORCIDFlow = async () => {
-    console.log("Opening ORCID authentication window...");
+    console.log("Starting ORCID authentication...");
     setIsLoading(true);
     
     try {
-      // Simply open ORCID login page for user authentication
-      const authUrl = 'https://orcid.org/signin';
+      const token = await ORCIDProvider.startAuthenticationPopup();
+      console.log("ORCID authentication successful:", token);
       
-      console.log("Opening ORCID with URL:", authUrl);
+      toast.success("ORCID authentication successful!");
+      setDeviceFlow({ status: "success", token });
       
-      // Open in new tab/window
-      const authWindow = window.open(authUrl, '_blank');
-      
-      if (!authWindow) {
-        throw new Error('Pop-up blocked. Please enable pop-ups for this site.');
-      }
-      
-      toast.success("Authentication window opened. Please complete the login process and return to this page.");
-      
-      // Set to pending state, requiring user confirmation
-      setDeviceFlow({ 
-        status: "pending", 
-        message: "Please complete authentication in the new window and click 'I've Completed Login' below."
-      });
+      // Complete the login process
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
       
     } catch (error: any) {
-      console.error("Error starting ORCID flow:", error);
+      console.error("ORCID authentication failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
+      toast.error(errorMessage);
+      setDeviceFlow({ 
+        status: "error", 
+        error: errorMessage
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
       const errorMessage = error instanceof Error ? error.message : "Failed to open authentication window";
       toast.error(errorMessage);
       setDeviceFlow({ 
@@ -112,29 +104,30 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
 
 
   const startFabricFlow = async () => {
-    console.log("Opening FABRIC API authentication window...");
+    console.log("Starting FABRIC API authentication...");
     setIsLoading(true);
     
     try {
-      // Simply open FABRIC login page for user authentication
-      const authUrl = "https://cm.fabric-testbed.net/login";
-      const authWindow = window.open(authUrl, "_blank");
-      
-      if (!authWindow) {
-        throw new Error("Popup blocked. Please allow popups for this site and try again.");
+      // Check if CILogon token exists first (FABRIC requires CILogon)
+      const cilogonToken = TokenStorage.getToken("cilogon");
+      if (!cilogonToken) {
+        throw new Error("FABRIC API authentication requires a valid CILogon token. Please authenticate with CILogon first.");
       }
       
-      toast.success("Authentication window opened. Please complete login there and return here when finished.");
+      const token = await FabricProvider.createToken(cilogonToken);
+      console.log("FABRIC authentication successful:", token);
       
-      // Wait for user to indicate they've completed authentication
-      setDeviceFlow({ 
-        status: "pending", 
-        message: "Please complete authentication in the new window and click 'I've Completed Login' below."
-      });
+      toast.success("FABRIC API authentication successful!");
+      setDeviceFlow({ status: "success", token });
+      
+      // Complete the login process
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
       
     } catch (error: any) {
-      console.error("Error opening FABRIC window:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to open authentication window";
+      console.error("FABRIC authentication failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
       toast.error(errorMessage);
       setDeviceFlow({ 
         status: "error", 
@@ -145,80 +138,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     }
   };
 
-  const confirmCILogonComplete = () => {
-    // Create a mock token for demonstration since we can't get the real callback
-    const mockToken = {
-      id_token: "mock_cilogon_jwt_token_" + Date.now(),
-      refresh_token: null,
-      expires_in: 3600,
-      issued_at: Math.floor(Date.now() / 1000),
-      provider: "cilogon" as const
-    };
-    
-    // Store the mock token
-    TokenStorage.setToken("cilogon", mockToken);
-    
-    setDeviceFlow({ 
-      status: "complete", 
-      token: "cilogon_authenticated"
-    });
-    
-    toast.success("CILogon authentication completed!");
-    
-    setTimeout(() => {
-      onComplete();
-    }, 1500);
-  };
 
-  const confirmORCIDComplete = () => {
-    // Create a mock token for demonstration since we can't get the real callback
-    const mockToken = {
-      id_token: "mock_orcid_jwt_token_" + Date.now(),
-      refresh_token: null,
-      expires_in: 3600,
-      issued_at: Math.floor(Date.now() / 1000),
-      provider: "orcid" as const
-    };
-    
-    // Store the mock token
-    TokenStorage.setToken("orcid", mockToken);
-    
-    setDeviceFlow({ 
-      status: "complete", 
-      token: "orcid_authenticated"
-    });
-    
-    toast.success("ORCID authentication completed!");
-    
-    setTimeout(() => {
-      onComplete();
-    }, 1500);
-  };
-
-  const confirmFabricComplete = () => {
-    // Create a mock token for demonstration since we can't get the real callback
-    const mockToken = {
-      id_token: "mock_fabric_jwt_token_" + Date.now(),
-      refresh_token: "mock_fabric_refresh_token_" + Date.now(),
-      expires_in: 3600,
-      issued_at: Math.floor(Date.now() / 1000),
-      provider: "fabric" as const
-    };
-    
-    // Store the mock token
-    TokenStorage.setToken("fabric", mockToken);
-    
-    setDeviceFlow({ 
-      status: "complete", 
-      token: "fabric_authenticated"
-    });
-    
-    toast.success("FABRIC API authentication completed!");
-    
-    setTimeout(() => {
-      onComplete();
-    }, 1500);
-  };
 
 
 
@@ -277,8 +197,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>CILogon Authentication:</strong> Click the button to open CILogon in a new window. 
-                      Complete your login there and return here to continue.
+                      <strong>CILogon Authentication:</strong> Click the button below to authenticate with your institution via CILogon.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -287,46 +206,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Login with CILogon
+                    {isLoading ? "Opening Authentication..." : "Login with CILogon"}
                   </Button>
                 </div>
               )}
 
-              {isLoading && (
-                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                  <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
-                  <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Opening authentication window...
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {deviceFlow.status === "pending" && (
-                <div className="space-y-6">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      {deviceFlow.message}
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={confirmCILogonComplete} 
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    I've Completed Login
-                  </Button>
-                  <Button 
-                    onClick={() => setDeviceFlow({ status: "idle" })} 
-                    variant="outline"
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-
-              {deviceFlow.status === "complete" && (
+              {deviceFlow.status === "success" && (
                 <Alert className="border-2 border-green-200 bg-green-50">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <AlertDescription className="text-base ml-2 text-green-800">
@@ -365,8 +250,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>ORCID Authentication:</strong> Click the button to open ORCID in a new window. 
-                      Complete your login there and return here to continue.
+                      <strong>ORCID Authentication:</strong> Click the button below to authenticate with your ORCID account.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -375,46 +259,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Login with ORCID
+                    {isLoading ? "Opening Authentication..." : "Login with ORCID"}
                   </Button>
                 </div>
               )}
 
-              {isLoading && (
-                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                  <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
-                  <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Opening authentication window...
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {deviceFlow.status === "pending" && (
-                <div className="space-y-6">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      {deviceFlow.message}
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={confirmORCIDComplete} 
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    I've Completed Login
-                  </Button>
-                  <Button 
-                    onClick={() => setDeviceFlow({ status: "idle" })} 
-                    variant="outline"
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-
-              {deviceFlow.status === "complete" && (
+              {deviceFlow.status === "success" && (
                 <Alert className="border-2 border-green-200 bg-green-50">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <AlertDescription className="text-base ml-2 text-green-800">
@@ -468,8 +318,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>FABRIC API Authentication:</strong> Click the button to open FABRIC in a new window. 
-                      Complete your login there and return here to continue.
+                      <strong>FABRIC API Authentication:</strong> FABRIC API authentication requires a valid CILogon token. 
+                      Please authenticate with CILogon first if you haven't already.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -478,46 +328,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Login with FABRIC API
+                    {isLoading ? "Creating Token..." : "Login with FABRIC API"}
                   </Button>
                 </div>
               )}
 
-              {isLoading && (
-                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                  <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
-                  <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Opening authentication window...
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {deviceFlow.status === "pending" && (
-                <div className="space-y-6">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      {deviceFlow.message}
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={confirmFabricComplete} 
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    I've Completed Login
-                  </Button>
-                  <Button 
-                    onClick={() => setDeviceFlow({ status: "idle" })} 
-                    variant="outline"
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-
-              {deviceFlow.status === "complete" && (
+              {deviceFlow.status === "success" && (
                 <Alert className="border-2 border-green-200 bg-green-50">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <AlertDescription className="text-base ml-2 text-green-800">
@@ -527,12 +343,25 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
               )}
 
               {deviceFlow.status === "error" && (
-                <Alert variant="destructive" className="border-2 border-destructive/20">
-                  <XCircle className="h-5 w-5" />
-                  <AlertDescription className="text-base ml-2">
-                    {deviceFlow.error}
-                  </AlertDescription>
-                </Alert>
+                <div className="space-y-4">
+                  <Alert variant="destructive" className="border-2 border-destructive/20">
+                    <XCircle className="h-5 w-5" />
+                    <AlertDescription className="text-base ml-2">
+                      {deviceFlow.error}
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <Button 
+                    onClick={() => {
+                      setDeviceFlow({ status: "idle" });
+                      setIsLoading(false);
+                    }}
+                    variant="outline"
+                    className="w-full border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
+                  >
+                    Try Again
+                  </Button>
+                </div>
               )}
             </>
           )}

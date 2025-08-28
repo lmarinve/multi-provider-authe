@@ -1,128 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ORCID Authentication</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f8fafc;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-        }
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #e2e8f0;
-            border-radius: 50%;
-            border-top-color: #3b82f6;
-            animation: spin 1s ease-in-out infinite;
-            margin-bottom: 1rem;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .message {
-            color: #475569;
-            margin-bottom: 1rem;
-        }
-        .error {
-            color: #dc2626;
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-            padding: 1rem;
-            border-radius: 6px;
-            margin-top: 1rem;
-        }
-    </style>
+    <meta charset="utf-8">
 </head>
 <body>
-    <div class="container">
-        <div id="loading" class="spinner"></div>
-        <div id="message" class="message">Processing ORCID authentication...</div>
-        <div id="error" class="error" style="display: none;"></div>
+    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+        <h2>Processing ORCID Authentication...</h2>
+        <p>This window will close automatically once authentication is complete.</p>
     </div>
 
     <script>
-        (function() {
-            try {
-                // Get URL parameters
-                const urlParams = new URLSearchParams(window.location.search);
-                const code = urlParams.get('code');
-                const state = urlParams.get('state');
-                const error = urlParams.get('error');
-                const errorDescription = urlParams.get('error_description');
+        // Extract authorization code and state from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
 
-                console.log('ORCID callback received:', { code: !!code, state: !!state, error });
+        if (error) {
+            // Send error to parent window
+            window.opener?.postMessage({
+                type: 'ORCID_AUTH_ERROR',
+                error: errorDescription || error
+            }, window.location.origin);
+        } else if (code && state) {
+            // Send success to parent window
+            window.opener?.postMessage({
+                type: 'ORCID_AUTH_SUCCESS',
+                code: code,
+                state: state
+            }, window.location.origin);
+        } else {
+            // Send error for missing parameters
+            window.opener?.postMessage({
+                type: 'ORCID_AUTH_ERROR',
+                error: 'No authorization code received'
+            }, window.location.origin);
+        }
 
-                // Check if we have a parent window
-                if (!window.opener) {
-                    throw new Error('No parent window found. This page should be opened as a popup.');
-                }
-
-                if (error) {
-                    const errorMsg = errorDescription || error || 'Authentication failed';
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('message').style.display = 'none';
-                    document.getElementById('error').style.display = 'block';
-                    document.getElementById('error').textContent = errorMsg;
-                    
-                    // Send error to parent
-                    window.opener.postMessage({
-                        type: 'ORCID_AUTH_ERROR',
-                        error: errorMsg
-                    }, window.location.origin);
-                    return;
-                }
-
-                if (!code || !state) {
-                    throw new Error('Missing authorization code or state parameter');
-                }
-
-                // Success - send data to parent window
-                document.getElementById('message').textContent = 'Authentication successful! Closing window...';
-                
-                window.opener.postMessage({
-                    type: 'ORCID_AUTH_SUCCESS',
-                    code: code,
-                    state: state
-                }, window.location.origin);
-
-                // Close this window after a brief delay
-                setTimeout(() => {
-                    window.close();
-                }, 1500);
-
-            } catch (error) {
-                console.error('ORCID callback error:', error);
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('message').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = error.message || 'An error occurred during authentication';
-
-                // Send error to parent if possible
-                if (window.opener) {
-                    window.opener.postMessage({
-                        type: 'ORCID_AUTH_ERROR',
-                        error: error.message || 'Authentication callback failed'
-                    }, window.location.origin);
-                }
-            }
-        })();
+        // Close this window after a short delay
+        setTimeout(() => {
+            window.close();
+        }, 1000);
     </script>
 </body>
 </html>
