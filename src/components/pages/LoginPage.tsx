@@ -49,13 +49,29 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const handleORCIDCallback = async (code: string, state: string) => {
     setIsLoading(true);
     try {
-      await ORCIDProvider.handleCallback(code, state);
-      toast.success("ORCID authentication successful!");
-      onComplete();
+      const orcidProvider = new ORCIDProvider();
+      const tokenData = await orcidProvider.exchangeCodeForToken(code, state);
+      
+      // Store the token
+      await TokenStorage.storeToken(tokenData);
+      
+      toast.success("Successfully logged in with ORCID!");
+      setDeviceFlow({ 
+        status: "complete", 
+        token: tokenData.access_token
+      });
+      
+      // Navigate to token page
+      setTimeout(() => {
+        onComplete();
+      }, 1500);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Authentication failed";
-      toast.error(message);
-      setDeviceFlow({ status: "error", error: message });
+      console.error("ORCID callback error:", error);
+      toast.error("Failed to complete ORCID login");
+      setDeviceFlow({ 
+        status: "error", 
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +80,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const startCILogonFlow = async () => {
     setIsLoading(true);
     try {
-      const response = await CILogonProvider.startDeviceFlow();
+      const cilogonProvider = new CILogonProvider();
+      const response = await cilogonProvider.startDeviceFlow();
       
       setDeviceFlow({
         status: "polling",
@@ -73,75 +90,32 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         verificationUri: response.verification_uri,
         verificationUriComplete: response.verification_uri_complete,
         expiresAt: Date.now() + (response.expires_in * 1000),
-        interval: response.interval,
+        interval: response.interval || 5
       });
-
-      // Start polling
-      pollForCILogonToken(response.device_code, response.interval);
+      
+      // Start polling for token
+      pollForToken(cilogonProvider, response.device_code, response.interval || 5);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to start device flow";
-      toast.error(message);
-      setDeviceFlow({ status: "error", error: message });
+      console.error("Device flow error:", error);
+      toast.error("Failed to start device flow");
+      setDeviceFlow({ status: "error", error: error instanceof Error ? error.message : "Unknown error" });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const pollForCILogonToken = async (deviceCode: string, interval: number) => {
-    const pollInterval = setInterval(async () => {
-      try {
-        await CILogonProvider.exchangeForToken(deviceCode);
-        clearInterval(pollInterval);
-        setDeviceFlow({ status: "success" });
-        toast.success("CILogon authentication successful!");
-        setTimeout(onComplete, 1000);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "Unknown error";
-        
-        if (message.includes("authorization_pending")) {
-          // Continue polling
-          return;
-        }
-        
-        if (message.includes("slow_down")) {
-          // Increase interval
-          clearInterval(pollInterval);
-          setTimeout(() => pollForCILogonToken(deviceCode, interval + 5), (interval + 5) * 1000);
-          return;
-        }
-        
-        if (message.includes("access_denied") || message.includes("expired_token")) {
-          clearInterval(pollInterval);
-          setDeviceFlow({ status: "error", error: message });
-          toast.error(`Authentication failed: ${message}`);
-          return;
-        }
-        
-        // Other errors
-        clearInterval(pollInterval);
-        setDeviceFlow({ status: "error", error: message });
-        toast.error(`Authentication failed: ${message}`);
-      }
-    }, interval * 1000);
-
-    // Clear interval if component unmounts or expires
-    setTimeout(() => {
-      clearInterval(pollInterval);
-      if (deviceFlow.status === "polling") {
-        setDeviceFlow({ status: "error", error: "Device code expired" });
-      }
-    }, deviceFlow.expiresAt ? deviceFlow.expiresAt - Date.now() : 600000);
-  };
-
   const startORCIDFlow = async () => {
     setIsLoading(true);
     try {
-      const authUrl = await ORCIDProvider.initiateLogin();
+      const orcidProvider = new ORCIDProvider();
+      const authUrl = await orcidProvider.getAuthUrl();
+      
+      // Redirect to ORCID for authentication
       window.location.href = authUrl;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to start ORCID flow";
-      toast.error(message);
-      setDeviceFlow({ status: "error", error: message });
+      console.error("ORCID flow error:", error);
+      toast.error("Failed to start ORCID login");
+      setDeviceFlow({ status: "error", error: error instanceof Error ? error.message : "Unknown error" });
       setIsLoading(false);
     }
   };
@@ -149,25 +123,68 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const startFabricFlow = async () => {
     setIsLoading(true);
     try {
-      const cilogonToken = TokenStorage.getToken("cilogon");
+      const fabricProvider = new FabricProvider();
+      const tokenData = await fabricProvider.authenticate();
       
-      if (!cilogonToken || !TokenStorage.isTokenValid(cilogonToken)) {
-        toast.error("Please authenticate with CILogon first");
-        setDeviceFlow({ status: "error", error: "CILogon token required" });
-        setIsLoading(false);
-        return;
-      }
-
-      await FabricProvider.createToken();
-      toast.success("FABRIC API authentication successful!");
-      onComplete();
+      // Store the token
+      await TokenStorage.storeToken(tokenData);
+      
+      toast.success("Successfully logged in with FABRIC API!");
+      setDeviceFlow({ 
+        status: "complete", 
+        token: tokenData.access_token
+      });
+      
+      // Navigate to token page
+      setTimeout(() => {
+        onComplete();
+      }, 1500);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "FABRIC API authentication failed";
-      toast.error(message);
-      setDeviceFlow({ status: "error", error: message });
+      console.error("FABRIC flow error:", error);
+      toast.error("Failed to authenticate with FABRIC API");
+      setDeviceFlow({ 
+        status: "error", 
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const pollForToken = async (provider: CILogonProvider, deviceCode: string, interval: number) => {
+    const poll = async () => {
+      try {
+        const tokenData = await provider.pollForToken(deviceCode);
+        
+        // Store the token
+        await TokenStorage.storeToken(tokenData);
+        
+        toast.success("Successfully logged in!");
+        setDeviceFlow({ 
+          status: "complete", 
+          token: tokenData.access_token
+        });
+        
+        // Navigate to token page
+        setTimeout(() => {
+          onComplete();
+        }, 1500);
+      } catch (error: any) {
+        if (error.error === "authorization_pending" || error.error === "slow_down") {
+          // Continue polling
+          const nextInterval = error.error === "slow_down" ? interval + 5 : interval;
+          setTimeout(poll, nextInterval * 1000);
+        } else if (error.error === "expired_token") {
+          setDeviceFlow({ status: "error", error: "Device code expired. Please try again." });
+        } else {
+          console.error("Polling error:", error);
+          setDeviceFlow({ status: "error", error: error.message || "Authentication failed" });
+        }
+      }
+    };
+    
+    // Start polling after the initial interval
+    setTimeout(poll, interval * 1000);
   };
 
   const copyToClipboard = async (text: string) => {
@@ -252,72 +269,86 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                     <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                      Please visit the verification URL and enter the user code below.
-                      Waiting for authentication...
+                      Please visit the URL below and enter the user code to complete authentication.
                     </AlertDescription>
                   </Alert>
-
-                  <div className="grid gap-8">
-                    <div className="space-y-4">
-                      <Label className="text-base font-semibold text-foreground">Verification URL</Label>
-                      <div className="flex items-center gap-4">
-                        <code className="flex-1 p-4 bg-muted rounded-xl text-base font-mono border-2 border-border/20">
-                          {deviceFlow.verificationUri}
-                        </code>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="px-4 py-2 border-2 border-border/20 hover:border-primary/30"
-                          onClick={() => copyToClipboard(deviceFlow.verificationUri!)}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="px-4 py-2 border-2 border-border/20 hover:border-primary/30"
-                          onClick={() => window.open(deviceFlow.verificationUri, "_blank")}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
+                  
+                  <div className="space-y-6">
+                    <div className="bg-[rgb(236,244,250)] p-6 rounded-lg border-2 border-[rgb(120,176,219)]">
+                      <Label className="text-sm font-semibold text-[rgb(64,143,204)] mb-3 block">
+                        Verification URL
+                      </Label>
+                      <div className="flex items-center justify-between bg-white p-3 rounded border">
+                        <code className="text-sm text-[rgb(50,135,200)]">{deviceFlow.verificationUri}</code>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(deviceFlow.verificationUri!)}
+                            className="text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(deviceFlow.verificationUri, '_blank')}
+                            className="text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="space-y-4">
-                      <Label className="text-base font-semibold text-foreground">User Code</Label>
-                      <div className="flex items-center gap-4">
-                        <code className="flex-1 p-6 bg-accent/10 rounded-xl text-2xl font-mono tracking-widest text-center font-bold border-2 border-accent/20 text-accent">
+                    
+                    <div className="bg-[rgb(236,244,250)] p-6 rounded-lg border-2 border-[rgb(120,176,219)]">
+                      <Label className="text-sm font-semibold text-[rgb(64,143,204)] mb-3 block">
+                        User Code
+                      </Label>
+                      <div className="flex items-center justify-between bg-white p-4 rounded border">
+                        <code className="text-xl font-mono font-bold text-[rgb(50,135,200)]">
                           {deviceFlow.userCode}
                         </code>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
-                          className="px-4 py-2 border-2 border-border/20 hover:border-accent/30"
                           onClick={() => copyToClipboard(deviceFlow.userCode!)}
+                          className="text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
-
+                    
                     {timeRemaining && (
-                      <div className="space-y-4">
-                        <div className="flex justify-between text-base">
-                          <span className="font-semibold">Time remaining</span>
-                          <span className="font-mono text-primary">{Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}</span>
-                        </div>
-                        <Progress value={(timeRemaining / 600) * 100} className="h-3" />
+                      <div className="text-center">
+                        <Badge variant="outline" className="text-sm text-[rgb(64,143,204)] border-[rgb(120,176,219)]">
+                          Code expires in {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                        </Badge>
                       </div>
                     )}
                   </div>
+                  
+                  {deviceFlow.verificationUriComplete && (
+                    <div className="text-center pt-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => window.open(deviceFlow.verificationUriComplete, '_blank')}
+                        className="border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Open Complete Authentication URL
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {deviceFlow.status === "success" && (
-                <Alert className="border-2 border-accent/20 bg-accent/5">
-                  <CheckCircle className="h-5 w-5 text-accent" />
-                  <AlertDescription className="text-base ml-2">
-                    Authentication successful! Redirecting...
+              {deviceFlow.status === "complete" && (
+                <Alert className="border-2 border-green-200 bg-green-50">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <AlertDescription className="text-base ml-2 text-green-800">
+                    Authentication successful! Redirecting to your token...
                   </AlertDescription>
                 </Alert>
               )}
@@ -347,16 +378,25 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
               )}
 
               {isLoading && (
-                <Alert className="border-2 border-primary/20 bg-primary/5">
-                  <Clock className="h-5 w-5 text-primary" />
-                  <AlertDescription className="text-base ml-2">
-                    Processing ORCID authentication...
+                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                  <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
+                  <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
+                    Redirecting to ORCID...
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {deviceFlow.status === "complete" && (
+                <Alert className="border-2 border-green-200 bg-green-50">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <AlertDescription className="text-base ml-2 text-green-800">
+                    Authentication successful! Redirecting to your token...
                   </AlertDescription>
                 </Alert>
               )}
 
               {deviceFlow.status === "error" && (
-                <Alert variant="destructive" className="border-2 border-destructive/20">
+                <Alert variant="destructive">
                   <XCircle className="h-5 w-5" />
                   <AlertDescription>
                     {deviceFlow.error}
