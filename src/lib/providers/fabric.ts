@@ -4,6 +4,8 @@ import { TokenStorage } from "@/lib/token-storage";
 
 export class FabricProvider {
   authenticate = async (): Promise<TokenData> => {
+    console.log("Starting FABRIC API authentication (demo mode)...");
+    
     // For demo purposes, simulate FABRIC API authentication
     // In production, this would require a valid CILogon token and make real API calls
     
@@ -12,11 +14,11 @@ export class FabricProvider {
     
     if (!cilogonToken || !TokenStorage.isTokenValid(cilogonToken)) {
       // For demo, create a simulated CILogon token if one doesn't exist
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate requiring CILogon authentication
-      throw new Error('Demo: Please authenticate with CILogon first to use FABRIC API');
+      console.log("No valid CILogon token found for FABRIC authentication");
+      throw new Error('FABRIC API authentication requires a valid CILogon token. Please authenticate with CILogon first.');
     }
+
+    console.log("CILogon token found, proceeding with FABRIC authentication...");
 
     // Simulate FABRIC API call delay
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -30,6 +32,7 @@ export class FabricProvider {
     };
 
     TokenStorage.setToken('fabric', tokenData);
+    console.log("FABRIC token created successfully");
     return tokenData;
   }
 

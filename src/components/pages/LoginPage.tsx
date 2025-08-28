@@ -31,13 +31,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const [deviceFlow, setDeviceFlow] = useState<DeviceFlowState>({ status: "idle" });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Debug: Verify provider classes are loaded
+  // Debug: Log provider information
   useEffect(() => {
-    console.log("LoginPage loaded for provider:", provider);
-    console.log("Provider classes loaded:");
-    console.log("- ORCIDProvider:", typeof ORCIDProvider);
-    console.log("- CILogonProvider:", typeof CILogonProvider);
-    console.log("- FabricProvider:", typeof FabricProvider);
+    console.log("LoginPage initialized for provider:", provider);
   }, [provider]);
 
   useEffect(() => {
@@ -48,50 +44,49 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     const error = urlParams.get("error");
     const errorDescription = urlParams.get("error_description");
 
-    if (provider === "orcid" && code && state) {
-      handleORCIDCallback(code, state);
-    } else if (provider === "orcid" && error) {
-      const fullErrorMessage = errorDescription 
-        ? `${error}: ${decodeURIComponent(errorDescription)}`
-        : error;
-        
-      toast.error(`ORCID login failed: ${fullErrorMessage}`);
-      setDeviceFlow({ 
-        status: "error", 
-        error: fullErrorMessage.includes('blocked') 
-          ? "Content blocked by ORCID. This may be due to incorrect client configuration or security settings. Please ensure the redirect URI is properly registered with ORCID."
-          : fullErrorMessage
-      });
-    }
-    
-    // Check if we were redirected back without any parameters (potential block)
-    if (provider === "orcid" && !code && !state && !error && window.location.search === "?provider=orcid") {
-      const referrer = document.referrer;
-      if (referrer.includes('orcid.org') || sessionStorage.getItem('orcid_auth_started')) {
-        // Clear the flag
-        sessionStorage.removeItem('orcid_auth_started');
+    if (provider === "orcid") {
+      if (code && state) {
+        // Handle successful callback
+        handleORCIDCallback(code, state);
+      } else if (error) {
+        // Handle error callback
+        const fullErrorMessage = errorDescription 
+          ? `${error}: ${decodeURIComponent(errorDescription)}`
+          : error;
+          
+        toast.error(`ORCID authentication failed: ${fullErrorMessage}`);
         setDeviceFlow({ 
           status: "error", 
-          error: "Authentication was interrupted. This may be due to ORCID blocking the redirect or browser security settings. Please try again or check your browser's security settings."
+          error: "ORCID authentication was rejected or failed. Please try again or check your ORCID account status."
         });
+      } else if (window.location.search === "?provider=orcid") {
+        // Check if we were redirected back without parameters (potential interruption)
+        const referrer = document.referrer;
+        if (referrer.includes('orcid.org') || sessionStorage.getItem('orcid_auth_started')) {
+          sessionStorage.removeItem('orcid_auth_started');
+          setDeviceFlow({ 
+            status: "error", 
+            error: "Authentication was interrupted. This may be due to ORCID blocking the redirect or browser security settings."
+          });
+        }
       }
     }
   }, [provider]);
 
   const handleORCIDCallback = async (code: string, state: string) => {
+    console.log("Processing ORCID callback...");
     setIsLoading(true);
+    
     try {
-      console.log("Handling ORCID callback with code:", code.substring(0, 10) + "...", "state:", state);
       const orcidProvider = new ORCIDProvider();
-      console.log("ORCID provider instance created for callback:", orcidProvider);
-      
       const tokenData = await orcidProvider.exchangeCodeForToken(code, state);
-      console.log("Token exchange successful:", tokenData);
+      
+      console.log("ORCID token exchange successful");
       
       // Store the token
       TokenStorage.setToken('orcid', tokenData);
       
-      toast.success("Successfully logged in with ORCID!");
+      toast.success("Successfully authenticated with ORCID!");
       setDeviceFlow({ 
         status: "complete", 
         token: tokenData.id_token
@@ -101,26 +96,28 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       setTimeout(() => {
         onComplete();
       }, 1500);
+      
     } catch (error) {
-      console.error("ORCID callback error:", error);
-      let errorMessage = 'Unknown error';
+      console.error("ORCID callback processing error:", error);
+      
+      let errorMessage = 'ORCID authentication failed';
       
       if (error instanceof Error) {
         errorMessage = error.message;
         
         // Provide more helpful error messages for common issues
         if (errorMessage.includes('CORS')) {
-          errorMessage = "CORS error: The ORCID authentication service is blocking this request. This may be due to an incorrect client configuration or missing CORS settings.";
+          errorMessage = "CORS error: The ORCID service is blocking this request. This may be due to client configuration or CORS policy issues.";
         } else if (errorMessage.includes('Invalid state')) {
-          errorMessage = "Security error: The authentication state doesn't match. Please try logging in again.";
+          errorMessage = "Security error: Authentication state verification failed. Please try again.";
         } else if (errorMessage.includes('Code verifier not found')) {
-          errorMessage = "Session error: Authentication session lost. Please try logging in again.";
+          errorMessage = "Session error: Authentication session expired. Please try again.";
         } else if (errorMessage.includes('Token exchange failed')) {
-          errorMessage = "Authentication failed: Unable to exchange authorization code for token. The client may not be properly configured with ORCID.";
+          errorMessage = "Authentication failed: Unable to complete the ORCID authentication process.";
         }
       }
       
-      toast.error(`Failed to complete ORCID login: ${errorMessage}`);
+      toast.error(`ORCID authentication failed: ${errorMessage}`);
       setDeviceFlow({ 
         status: "error", 
         error: errorMessage
@@ -131,10 +128,14 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   };
 
   const startCILogonFlow = async () => {
+    console.log("Starting CILogon authentication flow...");
     setIsLoading(true);
+    
     try {
       const cilogonProvider = new CILogonProvider();
       const response = await cilogonProvider.startDeviceFlow();
+      
+      console.log("CILogon device flow started:", response);
       
       setDeviceFlow({
         status: "polling",
@@ -149,33 +150,37 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       // Start polling for token
       pollForToken(cilogonProvider, response.device_code, response.interval || 5);
     } catch (error: any) {
-      console.error("Device flow error:", error);
+      console.error("CILogon device flow error:", error);
       
-      // Handle CORS errors which are expected for CILogon device flow
+      let errorMessage = "Failed to start CILogon authentication";
+      
+      // Handle different types of errors
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        toast.error("Network error: Unable to connect to CILogon. This may be due to CORS restrictions.");
-        setDeviceFlow({ 
-          status: "error", 
-          error: "Network connectivity issue with CILogon service. Please try again or contact support if the problem persists." 
-        });
-      } else {
-        toast.error("Failed to start device flow");
-        setDeviceFlow({ status: "error", error: error instanceof Error ? error.message : "Unknown error" });
+        errorMessage = "Network error: Unable to connect to CILogon. This is expected in demo mode due to CORS restrictions.";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
+      
+      toast.error(errorMessage);
+      setDeviceFlow({ 
+        status: "error", 
+        error: errorMessage
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const startORCIDFlow = async () => {
+    console.log("Starting ORCID authentication flow...");
     setIsLoading(true);
+    
     try {
-      console.log("Starting ORCID demo flow...");
-      
-      // Use the demo flow instead of real ORCID authentication
       const tokenData = await ORCIDProvider.startDemoFlow();
       
-      toast.success("Successfully logged in with ORCID!");
+      console.log("ORCID authentication successful:", tokenData);
+      
+      toast.success("Successfully authenticated with ORCID!");
       setDeviceFlow({ 
         status: "complete", 
         token: tokenData.id_token
@@ -187,14 +192,14 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       }, 1500);
       
     } catch (error) {
-      console.error("ORCID demo flow error:", error);
+      console.error("ORCID authentication error:", error);
       
-      let errorMessage = 'Demo authentication failed';
+      let errorMessage = 'ORCID authentication failed';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
       
-      toast.error(`Failed to start ORCID login: ${errorMessage}`);
+      toast.error(`Failed to authenticate with ORCID: ${errorMessage}`);
       setDeviceFlow({ 
         status: "error", 
         error: errorMessage
@@ -205,14 +210,16 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   };
 
   const startFabricFlow = async () => {
+    console.log("Starting FABRIC API authentication flow...");
     setIsLoading(true);
+    
     try {
       const fabricProvider = new FabricProvider();
       const tokenData = await fabricProvider.authenticate();
       
-      // Token is already stored by the provider
+      console.log("FABRIC authentication successful:", tokenData);
       
-      toast.success("Successfully logged in with FABRIC API!");
+      toast.success("Successfully authenticated with FABRIC API!");
       setDeviceFlow({ 
         status: "complete", 
         token: tokenData.id_token
@@ -222,12 +229,19 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       setTimeout(() => {
         onComplete();
       }, 1500);
+      
     } catch (error) {
-      console.error("FABRIC flow error:", error);
-      toast.error("Failed to authenticate with FABRIC API");
+      console.error("FABRIC authentication error:", error);
+      
+      let errorMessage = "FABRIC API authentication failed";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
       setDeviceFlow({ 
         status: "error", 
-        error: error instanceof Error ? error.message : "Unknown error"
+        error: errorMessage
       });
     } finally {
       setIsLoading(false);
@@ -236,25 +250,27 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
 
   const pollForToken = async (provider: CILogonProvider, deviceCode: string, interval: number) => {
     let pollCount = 0;
-    const maxPolls = 10; // Demo will succeed after a few polls
+    const maxPolls = 20; // Maximum number of polling attempts
+    
+    console.log("Starting token polling for device code:", deviceCode.substring(0, 10) + "...");
     
     const poll = async () => {
       pollCount++;
+      console.log(`Polling attempt ${pollCount}/${maxPolls}`);
       
       try {
-        // Simulate authorization pending for first few polls
+        // Simulate authorization pending for first few polls (demo behavior)
         if (pollCount < 3) {
           const error = new Error("User authorization pending");
           (error as any).error = "authorization_pending";
           throw error;
         }
         
-        // Simulate success
+        // Simulate success after some attempts
         const tokenResponse = await provider.pollForToken(deviceCode);
         
-        // Convert to TokenData and store
         if (!tokenResponse.id_token) {
-          throw new Error("No ID token received");
+          throw new Error("No ID token received from provider");
         }
 
         const tokenData: TokenData = {
@@ -267,7 +283,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
 
         TokenStorage.setToken("cilogon", tokenData);
         
-        toast.success("Successfully logged in!");
+        console.log("CILogon authentication successful!");
+        toast.success("Successfully authenticated with CILogon!");
         setDeviceFlow({ 
           status: "complete", 
           token: tokenData.id_token
@@ -277,18 +294,30 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         setTimeout(() => {
           onComplete();
         }, 1500);
+        
       } catch (error: any) {
         const errorCode = error.error || (error.message && error.message.includes("authorization_pending") ? "authorization_pending" : null);
         
-        if (errorCode === "authorization_pending" || errorCode === "slow_down") {
-          // Continue polling
-          const nextInterval = errorCode === "slow_down" ? interval + 5 : interval;
-          setTimeout(poll, nextInterval * 1000);
+        if (errorCode === "authorization_pending") {
+          console.log("Authorization still pending, continuing to poll...");
+          // Continue polling after interval
+          setTimeout(poll, interval * 1000);
+        } else if (errorCode === "slow_down") {
+          console.log("Rate limited, increasing interval...");
+          // Continue polling with increased interval
+          setTimeout(poll, (interval + 5) * 1000);
         } else if (errorCode === "expired_token" || pollCount >= maxPolls) {
-          setDeviceFlow({ status: "error", error: "Device code expired. Please try again." });
+          console.log("Polling expired or max attempts reached");
+          setDeviceFlow({ 
+            status: "error", 
+            error: "Device code expired or authentication timed out. Please try again." 
+          });
         } else {
           console.error("Polling error:", error);
-          setDeviceFlow({ status: "error", error: error.message || "Authentication failed" });
+          setDeviceFlow({ 
+            status: "error", 
+            error: error.message || "Authentication failed unexpectedly" 
+          });
         }
       }
     };
@@ -376,7 +405,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-sm text-[rgb(64,143,204)]">
                       <strong>Demo Mode:</strong> This simulates CILogon's device flow authentication. 
-                      In production, this would connect to the actual CILogon OAuth2 endpoints.
+                      In production, you would connect to the actual CILogon OAuth2 endpoints at cilogon.org.
+                      The demo automatically completes after a few polling cycles.
                     </AlertDescription>
                   </Alert>
                 </>
@@ -489,12 +519,13 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
                       <div className="space-y-2">
-                        <p><strong>Demo Mode:</strong> This is a simulated ORCID authentication for demonstration purposes.</p>
-                        <p>In a production environment, you would need:</p>
-                        <ul className="list-disc list-inside space-y-1 ml-4">
-                          <li>A valid ORCID client ID registered with ORCID</li>
-                          <li>Proper redirect URI configuration</li>
+                        <p><strong>Demo Mode:</strong> This simulates ORCID authentication for demonstration.</p>
+                        <p>In production, you would need:</p>
+                        <ul className="list-disc list-inside space-y-1 ml-4 text-sm">
+                          <li>A valid ORCID client ID registered at orcid.org</li>
+                          <li>Proper redirect URI configuration in your ORCID application</li>
                           <li>CORS headers configured for your domain</li>
+                          <li>Valid SSL/TLS certificates</li>
                         </ul>
                       </div>
                     </AlertDescription>
@@ -574,7 +605,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
                       <strong>Demo Mode:</strong> This simulates FABRIC API token creation. 
-                      In production, this would require a valid CILogon token and connect to the actual FABRIC Control Framework API.
+                      In production, this requires a valid CILogon token and connects to the actual FABRIC Control Framework API at fabric-testbed.net.
                     </AlertDescription>
                   </Alert>
                   <Button 

@@ -22,6 +22,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 }
 
 export class ORCIDProvider {
+  // Generate auth URL for ORCID OAuth flow
   getAuthUrl = async (): Promise<string> => {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -46,6 +47,8 @@ export class ORCIDProvider {
 
   // Demo method for simulating ORCID authentication
   startDemoFlow = async (): Promise<TokenData> => {
+    console.log("Starting ORCID demo flow...");
+    
     // Simulate a delay for authentication
     await new Promise(resolve => setTimeout(resolve, 2000));
     
@@ -71,20 +74,28 @@ export class ORCIDProvider {
       aud: config.orcid.clientId,
       exp: Math.floor(Date.now() / 1000) + 3600,
       iat: Math.floor(Date.now() / 1000),
-      name: 'Demo User',
-      email: 'demo@example.com'
+      name: 'Demo ORCID User',
+      email: 'demo@orcid.org',
+      orcid: '0000-0000-0000-0000'
     }));
     return `${header}.${payload}.demo-signature`;
   }
 
+  // Static methods for backward compatibility and easier usage
   static initiateLogin = async (): Promise<string> => {
     const provider = new ORCIDProvider();
     return provider.getAuthUrl();
   }
 
   static startDemoFlow = async (): Promise<TokenData> => {
+    console.log("ORCIDProvider.startDemoFlow called");
     const provider = new ORCIDProvider();
     return provider.startDemoFlow();
+  }
+
+  static handleCallback = async (code: string, state: string): Promise<TokenData> => {
+    const provider = new ORCIDProvider();
+    return provider.exchangeCodeForToken(code, state);
   }
 
   exchangeCodeForToken = async (code: string, state: string): Promise<TokenData> => {
