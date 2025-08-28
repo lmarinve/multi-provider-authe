@@ -11,8 +11,8 @@ export class CILogonProvider {
   }
 
   private getAuthUrl(state: string): string {
-    // For CILogon, we need to use the full callback URL path
-    const redirectUri = `${window.location.origin}/auth/callback/cilogon.html`;
+    // Use a simple redirect that CILogon can accept
+    const redirectUri = `${window.location.origin}`;
     
     const params = new URLSearchParams({
       response_type: 'code',
@@ -52,15 +52,19 @@ export class CILogonProvider {
   }
 
   async startAuthenticationPopup(): Promise<TokenData> {
-    // Open CILogon login page in new window - user completes authentication there
-    const authUrl = 'https://cilogon.org/';
+    // Generate state for security
+    const state = this.generateState();
+    sessionStorage.setItem('cilogon_state', state);
     
-    console.log('Opening CILogon login page:', authUrl);
+    // Get the proper authorization URL
+    const authUrl = this.getAuthUrl(state);
     
-    // Open CILogon in a new window/tab with proper popup dimensions
+    console.log('Opening CILogon authentication:', authUrl);
+    
+    // Open CILogon authorization page in a new window/tab
     const popup = window.open(
       authUrl,
-      'cilogon_login',
+      'cilogon_auth',
       'width=800,height=600,scrollbars=yes,resizable=yes,status=no,location=no,toolbar=no,menubar=no'
     );
 
@@ -72,10 +76,10 @@ export class CILogonProvider {
     popup.focus();
 
     // Wait a moment to let the popup load, then resolve with mock token
-    // User will authenticate in the popup and close it manually
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // In production, this would handle the actual OAuth callback
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Create a mock successful token since user authenticates independently
+    // Create a mock successful token for demonstration
     const tokenData: TokenData = {
       id_token: `cilogon_session_${Date.now()}`,
       refresh_token: undefined,

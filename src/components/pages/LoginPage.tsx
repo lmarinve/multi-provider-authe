@@ -36,118 +36,68 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     setIsLoading(true);
     
     try {
-      // Open the CILogon authentication URL provided by the user
-      const authUrl = "https://cilogon.org/authorize?response_type=code&client_id=APP-S3BU1LVHOTHITEU2&redirect_uri=https://example.com/callback&scope=openid+email+profile";
-      const authWindow = window.open(authUrl, "_blank", "width=800,height=700,scrollbars=yes,resizable=yes");
+      // Use the current window's origin as redirect URI - this should match what's registered with CILogon
+      const redirectUri = window.location.origin;
+      const state = Math.random().toString(36).substring(2, 15);
       
-      if (!authWindow) {
-        throw new Error("Popup blocked. Please allow popups for this site and try again.");
-      }
+      // Store state for validation when the redirect comes back
+      sessionStorage.setItem('cilogon_oauth_state', state);
       
-      toast.success("Authentication window opened. Please complete login there and return here when finished.");
+      const authUrl = `https://cilogon.org/authorize?response_type=code&client_id=APP-S3BU1LVHOTHITEU2&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid+email+profile&state=${state}`;
       
-      // Wait for user to indicate they've completed authentication
-      setDeviceFlow({ 
-        status: "pending", 
-        message: "Please complete authentication in the new window and click 'I've Completed Login' below."
-      });
+      console.log("Opening CILogon with URL:", authUrl);
+      console.log("Redirect URI:", redirectUri);
+      
+      // Open in the same window to handle the OAuth redirect properly
+      window.location.href = authUrl;
       
     } catch (error: any) {
-      console.error("Error opening CILogon window:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to open authentication window";
+      console.error("Error starting CILogon flow:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to start authentication";
       toast.error(errorMessage);
       setDeviceFlow({ 
         status: "error", 
         error: errorMessage
       });
-    } finally {
       setIsLoading(false);
     }
   };
 
-  const confirmCILogonComplete = () => {
-    // Create a mock token for demonstration since we can't get the real callback
-    const mockToken = {
-      id_token: "mock_cilogon_jwt_token_" + Date.now(),
-      refresh_token: null,
-      expires_in: 3600,
-      issued_at: Math.floor(Date.now() / 1000),
-      provider: "cilogon" as const
-    };
-    
-    // Store the mock token
-    TokenStorage.storeToken("cilogon", mockToken);
-    
-    setDeviceFlow({ 
-      status: "complete", 
-      token: "cilogon_authenticated"
-    });
-    
-    toast.success("CILogon authentication completed!");
-    
-    setTimeout(() => {
-      onComplete();
-    }, 1500);
-  };
+
 
   const startORCIDFlow = async () => {
     console.log("Opening ORCID authentication window...");
     setIsLoading(true);
     
     try {
-      // Open ORCID authentication URL in a new window
-      const authUrl = "https://orcid.org/oauth/authorize?response_type=code&client_id=APP-S3BU1LVHOTHITEU2&redirect_uri=https://example.com/callback&scope=openid";
-      const authWindow = window.open(authUrl, "_blank", "width=800,height=700,scrollbars=yes,resizable=yes");
+      // Use the current window's origin as redirect URI
+      const redirectUri = window.location.origin;
+      const state = Math.random().toString(36).substring(2, 15);
       
-      if (!authWindow) {
-        throw new Error("Popup blocked. Please allow popups for this site and try again.");
-      }
+      // Store state for validation when the redirect comes back
+      sessionStorage.setItem('orcid_oauth_state', state);
       
-      toast.success("Authentication window opened. Please complete login there and return here when finished.");
+      const authUrl = `https://orcid.org/oauth/authorize?response_type=code&client_id=APP-S3BU1LVHOTHITEU2&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid&state=${state}`;
       
-      // Wait for user to indicate they've completed authentication
-      setDeviceFlow({ 
-        status: "pending", 
-        message: "Please complete authentication in the new window and click 'I've Completed Login' below."
-      });
+      console.log("Opening ORCID with URL:", authUrl);
+      console.log("Redirect URI:", redirectUri);
+      
+      // Open in the same window to handle the OAuth redirect properly  
+      window.location.href = authUrl;
       
     } catch (error: any) {
-      console.error("Error opening ORCID window:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to open authentication window";
+      console.error("Error starting ORCID flow:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to start authentication";
       toast.error(errorMessage);
       setDeviceFlow({ 
         status: "error", 
         error: errorMessage
       });
-    } finally {
       setIsLoading(false);
     }
   };
 
-  const confirmORCIDComplete = () => {
-    // Create a mock token for demonstration since we can't get the real callback
-    const mockToken = {
-      id_token: "mock_orcid_jwt_token_" + Date.now(),
-      refresh_token: null,
-      expires_in: 3600,
-      issued_at: Math.floor(Date.now() / 1000),
-      provider: "orcid" as const
-    };
-    
-    // Store the mock token
-    TokenStorage.storeToken("orcid", mockToken);
-    
-    setDeviceFlow({ 
-      status: "complete", 
-      token: "orcid_authenticated"
-    });
-    
-    toast.success("ORCID authentication completed!");
-    
-    setTimeout(() => {
-      onComplete();
-    }, 1500);
-  };
+
 
   const startFabricFlow = async () => {
     console.log("Opening FABRIC API authentication window...");
@@ -194,7 +144,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     };
     
     // Store the mock token
-    TokenStorage.storeToken("fabric", mockToken);
+    TokenStorage.setToken("fabric", mockToken);
     
     setDeviceFlow({ 
       status: "complete", 
@@ -273,8 +223,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   </Button>
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-sm text-[rgb(64,143,204)]">
-                      <strong>CILogon Authentication:</strong> Click the button to open CILogon in a new window. 
-                      Complete your login there and return here to continue.
+                      <strong>CILogon Authentication:</strong> Click the button to authenticate with CILogon.
+                      You'll be redirected to CILogon's secure login page and then back to complete the process.
                     </AlertDescription>
                   </Alert>
                 </>
@@ -284,34 +234,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Opening authentication window...
+                    Redirecting to CILogon authentication...
                   </AlertDescription>
                 </Alert>
-              )}
-
-              {deviceFlow.status === "pending" && (
-                <div className="space-y-6">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      {deviceFlow.message}
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={confirmCILogonComplete} 
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    I've Completed Login
-                  </Button>
-                  <Button 
-                    onClick={() => setDeviceFlow({ status: "idle" })} 
-                    variant="outline"
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                  >
-                    Cancel
-                  </Button>
-                </div>
               )}
 
               {deviceFlow.status === "complete" && (
@@ -340,8 +265,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>ORCID Authentication:</strong> Click the button to open ORCID in a new window. 
-                      Complete your login there and return here to continue.
+                      <strong>ORCID Authentication:</strong> Click the button to authenticate with ORCID.
+                      You'll be redirected to ORCID's secure login page and then back to complete the process.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -359,34 +284,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Opening authentication window...
+                    Redirecting to ORCID authentication...
                   </AlertDescription>
                 </Alert>
-              )}
-
-              {deviceFlow.status === "pending" && (
-                <div className="space-y-6">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      {deviceFlow.message}
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={confirmORCIDComplete} 
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    I've Completed Login
-                  </Button>
-                  <Button 
-                    onClick={() => setDeviceFlow({ status: "idle" })} 
-                    variant="outline"
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                  >
-                    Cancel
-                  </Button>
-                </div>
               )}
 
               {deviceFlow.status === "complete" && (
