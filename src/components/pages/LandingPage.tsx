@@ -46,9 +46,8 @@ export function LandingPage({
             {/* Title and Logo in same line */}
             <div className="flex items-center justify-center gap-6">
               {/* SDX Logo */}
-              <div className="w-1 h-1 flex items-center justify-center flex-shrink-0">
-                <img src={sdxLogo} alt="SDX Logo" className="w-full h-full object-contain" />
-              </div>
+              <div className="w-12 h-12 bg-white border border-[rgb(120,176,219)] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                <img src={sdxLogo} alt="SDX Logo" className="h-8 w-auto object-contain" />
               </div>
               {/* Title with custom colors and slightly increased size */}
               <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
