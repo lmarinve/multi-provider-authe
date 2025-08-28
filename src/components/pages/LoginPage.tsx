@@ -53,12 +53,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       const tokenData = await orcidProvider.exchangeCodeForToken(code, state);
       
       // Store the token
-      await TokenStorage.storeToken(tokenData);
+      TokenStorage.setToken('orcid', tokenData);
       
       toast.success("Successfully logged in with ORCID!");
       setDeviceFlow({ 
         status: "complete", 
-        token: tokenData.access_token
+        token: tokenData.id_token
       });
       
       // Navigate to token page
@@ -126,13 +126,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       const fabricProvider = new FabricProvider();
       const tokenData = await fabricProvider.authenticate();
       
-      // Store the token
-      await TokenStorage.storeToken(tokenData);
+      // Token is already stored by the provider
       
       toast.success("Successfully logged in with FABRIC API!");
       setDeviceFlow({ 
         status: "complete", 
-        token: tokenData.access_token
+        token: tokenData.id_token
       });
       
       // Navigate to token page
@@ -154,15 +153,27 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const pollForToken = async (provider: CILogonProvider, deviceCode: string, interval: number) => {
     const poll = async () => {
       try {
-        const tokenData = await provider.pollForToken(deviceCode);
+        const tokenResponse = await provider.pollForToken(deviceCode);
         
-        // Store the token
-        await TokenStorage.storeToken(tokenData);
+        // Convert to TokenData and store
+        if (!tokenResponse.id_token) {
+          throw new Error("No ID token received");
+        }
+
+        const tokenData: TokenData = {
+          id_token: tokenResponse.id_token,
+          refresh_token: tokenResponse.refresh_token,
+          expires_in: tokenResponse.expires_in || 3600,
+          issued_at: Math.floor(Date.now() / 1000),
+          provider: "cilogon",
+        };
+
+        TokenStorage.setToken("cilogon", tokenData);
         
         toast.success("Successfully logged in!");
         setDeviceFlow({ 
           status: "complete", 
-          token: tokenData.access_token
+          token: tokenData.id_token
         });
         
         // Navigate to token page

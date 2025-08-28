@@ -22,7 +22,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 }
 
 export class ORCIDProvider {
-  static async initiateLogin(): Promise<string> {
+  async getAuthUrl(): Promise<string> {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
     const state = crypto.randomUUID();
@@ -44,7 +44,12 @@ export class ORCIDProvider {
     return `${config.orcid.authUrl}?${params}`;
   }
 
-  static async handleCallback(code: string, state: string): Promise<TokenData> {
+  static async initiateLogin(): Promise<string> {
+    const provider = new ORCIDProvider();
+    return provider.getAuthUrl();
+  }
+
+  async exchangeCodeForToken(code: string, state: string): Promise<TokenData> {
     const storedState = sessionStorage.getItem('orcid_state');
     const codeVerifier = sessionStorage.getItem('orcid_code_verifier');
 
@@ -97,5 +102,10 @@ export class ORCIDProvider {
 
     TokenStorage.setToken('orcid', tokenData);
     return tokenData;
+  }
+
+  static async handleCallback(code: string, state: string): Promise<TokenData> {
+    const provider = new ORCIDProvider();
+    return provider.exchangeCodeForToken(code, state);
   }
 }

@@ -53,7 +53,7 @@ export type AuthState = {
 };
 
 export type DeviceFlowState = {
-  status: "idle" | "requesting" | "polling" | "success" | "error";
+  status: "idle" | "requesting" | "polling" | "complete" | "error";
   deviceCode?: string;
   userCode?: string;
   verificationUri?: string;
@@ -61,4 +61,5 @@ export type DeviceFlowState = {
   expiresAt?: number;
   interval?: number;
   error?: string;
+  token?: string;
 };

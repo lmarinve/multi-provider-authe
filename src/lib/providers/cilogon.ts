@@ -3,7 +3,7 @@ import { TokenData, DeviceFlowResponse, TokenResponse } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
 
 export class CILogonProvider {
-  static async startDeviceFlow(): Promise<DeviceFlowResponse> {
+  async startDeviceFlow(): Promise<DeviceFlowResponse> {
     const params = new URLSearchParams({
       client_id: config.cilogon.clientId,
       scope: config.cilogon.scope,
@@ -24,7 +24,7 @@ export class CILogonProvider {
     return response.json();
   }
 
-  static async pollForToken(deviceCode: string): Promise<TokenResponse> {
+  async pollForToken(deviceCode: string): Promise<TokenResponse> {
     const params = new URLSearchParams({
       grant_type: "urn:ietf:params:oauth:grant-type:device_code",
       device_code: deviceCode,
@@ -48,7 +48,7 @@ export class CILogonProvider {
     return data;
   }
 
-  static async exchangeForToken(deviceCode: string): Promise<TokenData> {
+  async exchangeForToken(deviceCode: string): Promise<TokenData> {
     const tokenResponse = await this.pollForToken(deviceCode);
     
     if (!tokenResponse.id_token) {
@@ -65,5 +65,21 @@ export class CILogonProvider {
 
     TokenStorage.setToken("cilogon", tokenData);
     return tokenData;
+  }
+
+  // Keep static methods for backward compatibility
+  static async startDeviceFlow(): Promise<DeviceFlowResponse> {
+    const provider = new CILogonProvider();
+    return provider.startDeviceFlow();
+  }
+
+  static async pollForToken(deviceCode: string): Promise<TokenResponse> {
+    const provider = new CILogonProvider();
+    return provider.pollForToken(deviceCode);
+  }
+
+  static async exchangeForToken(deviceCode: string): Promise<TokenData> {
+    const provider = new CILogonProvider();
+    return provider.exchangeForToken(deviceCode);
   }
 }

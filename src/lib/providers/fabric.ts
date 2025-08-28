@@ -3,7 +3,7 @@ import { TokenData } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
 
 export class FabricProvider {
-  static async createToken(): Promise<TokenData> {
+  async authenticate(): Promise<TokenData> {
     const cilogonToken = TokenStorage.getToken('cilogon');
     
     if (!cilogonToken || !TokenStorage.isTokenValid(cilogonToken)) {
@@ -42,7 +42,7 @@ export class FabricProvider {
     return tokenData;
   }
 
-  static async refreshToken(): Promise<TokenData> {
+  async refreshToken(): Promise<TokenData> {
     const fabricToken = TokenStorage.getToken('fabric');
     
     if (!fabricToken?.refresh_token) {
@@ -77,5 +77,16 @@ export class FabricProvider {
 
     TokenStorage.setToken('fabric', tokenData);
     return tokenData;
+  }
+
+  // Keep static methods for backward compatibility
+  static async createToken(): Promise<TokenData> {
+    const provider = new FabricProvider();
+    return provider.authenticate();
+  }
+
+  static async refreshToken(): Promise<TokenData> {
+    const provider = new FabricProvider();
+    return provider.refreshToken();
   }
 }
