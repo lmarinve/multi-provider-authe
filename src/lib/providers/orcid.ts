@@ -1,6 +1,7 @@
 import { config } from "@/lib/config";
 import { TokenData, TokenResponse } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
+import { authenticateWithPopup } from "@/lib/auth-popup";
 
 function generateCodeVerifier(): string {
   const array = new Uint8Array(32);
@@ -35,7 +36,7 @@ export class ORCIDProvider {
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: config.orcid.clientId,
-      redirect_uri: `${window.location.origin}/login?provider=orcid`,
+      redirect_uri: `${window.location.origin}/auth/callback/orcid.html`,
       scope: config.orcid.scope,
       state,
       code_challenge: codeChallenge,
@@ -43,6 +44,33 @@ export class ORCIDProvider {
     });
 
     return `${config.orcid.authUrl}?${params}`;
+  }
+
+  async startAuthenticationPopup(): Promise<TokenData> {
+    const authUrl = await this.getAuthUrl();
+    
+    try {
+      const result = await authenticateWithPopup({ 
+        url: authUrl,
+        width: 800,
+        height: 600 
+      });
+      
+      if (result.error) {
+        throw new Error(`ORCID authentication error: ${result.error}${result.error_description ? ' - ' + result.error_description : ''}`);
+      }
+      
+      if (!result.code || !result.state) {
+        throw new Error('No authorization code received from ORCID');
+      }
+      
+      return await this.exchangeCodeForToken(result.code, result.state);
+    } catch (error) {
+      // Clean up session storage on error
+      sessionStorage.removeItem('orcid_state');
+      sessionStorage.removeItem('orcid_code_verifier');
+      throw error;
+    }
   }
 
   // Demo method for simulating ORCID authentication
@@ -101,7 +129,7 @@ export class ORCIDProvider {
       grant_type: 'authorization_code',
       client_id: config.orcid.clientId,
       code,
-      redirect_uri: `${window.location.origin}/login?provider=orcid`,
+      redirect_uri: `${window.location.origin}/auth/callback/orcid`,
       code_verifier: codeVerifier,
     });
 
@@ -165,5 +193,10 @@ export class ORCIDProvider {
   static handleCallback = async (code: string, state: string): Promise<TokenData> => {
     const provider = new ORCIDProvider();
     return provider.exchangeCodeForToken(code, state);
+  }
+
+  static async startAuthenticationPopup(): Promise<TokenData> {
+    const provider = new ORCIDProvider();
+    return provider.startAuthenticationPopup();
   }
 }

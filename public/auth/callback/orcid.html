@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ORCID Authentication</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #a6ce39 0%, #8bc34a 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .spinner {
+            margin: 20px auto;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">ORCID Authentication</div>
+        <div class="spinner"></div>
+        <h2>Processing ORCID authentication...</h2>
+        <p>This window will close automatically.</p>
+    </div>
+
+    <script>
+        (function() {
+            try {
+                // Get URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const result = {};
+                
+                // Extract OAuth parameters
+                if (urlParams.has('code')) result.code = urlParams.get('code');
+                if (urlParams.has('state')) result.state = urlParams.get('state');
+                if (urlParams.has('error')) result.error = urlParams.get('error');
+                if (urlParams.has('error_description')) result.error_description = urlParams.get('error_description');
+                
+                console.log('ORCID callback received:', result);
+                
+                // Send result back to parent window
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                        type: 'OAUTH_RESULT',
+                        provider: 'orcid',
+                        result: result
+                    }, window.location.origin);
+                    
+                    // Close popup after a brief delay
+                    setTimeout(() => {
+                        window.close();
+                    }, 1000);
+                } else {
+                    console.error('No opener window found');
+                    // Fallback: redirect to main app
+                    const params = new URLSearchParams(result);
+                    window.location.href = `${window.location.origin}/login?provider=orcid&${params.toString()}`;
+                }
+            } catch (error) {
+                console.error('ORCID callback error:', error);
+                
+                // Try to send error back to parent
+                if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                        type: 'OAUTH_RESULT',
+                        provider: 'orcid',
+                        result: { error: 'callback_error', error_description: error.message }
+                    }, window.location.origin);
+                    
+                    setTimeout(() => {
+                        window.close();
+                    }, 2000);
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

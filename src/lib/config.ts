@@ -14,9 +14,9 @@ export const config = {
     tokenUrl: "https://cilogon.org/oauth2/token"
   },
   
-  // ORCID - Using member API
+  // ORCID - Using sandbox environment for testing
   orcid: {
-    clientId: "0000-0000-0000-0000", // Demo client ID
+    clientId: "APP-S3BU1LVHOTHITEU2", // Updated with proper ORCID client ID
     issuerUrl: "https://orcid.org",
     authUrl: "https://orcid.org/oauth/authorize", 
     tokenUrl: "https://orcid.org/oauth/token",

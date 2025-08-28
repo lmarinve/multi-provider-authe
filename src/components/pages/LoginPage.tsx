@@ -26,62 +26,21 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const [deviceFlow, setDeviceFlow] = useState<DeviceFlowState>({ status: "idle" });
   const [isLoading, setIsLoading] = useState(false);
 
-  // Debug: Log provider information
   useEffect(() => {
+    // Debug: Log provider information
     console.log("LoginPage initialized for provider:", provider);
   }, [provider]);
 
-  useEffect(() => {
-    // Check URL for OAuth callback
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get("code");
-    const state = urlParams.get("state");
-    const error = urlParams.get("error");
-    const errorDescription = urlParams.get("error_description");
-
-    if (provider === "orcid" || provider === "cilogon") {
-      if (code && state) {
-        // Handle successful callback
-        if (provider === "orcid") {
-          handleORCIDCallback(code, state);
-        } else if (provider === "cilogon") {
-          handleCILogonCallback(code, state);
-        }
-      } else if (error) {
-        // Handle error callback
-        const fullErrorMessage = errorDescription 
-          ? `${error}: ${decodeURIComponent(errorDescription)}`
-          : error;
-          
-        toast.error(`${provider.toUpperCase()} authentication failed: ${fullErrorMessage}`);
-        setDeviceFlow({ 
-          status: "error", 
-          error: `${provider.toUpperCase()} authentication was rejected or failed. Please try again or check your account status.`
-        });
-      } else if (window.location.search === `?provider=${provider}`) {
-        // Check if we were redirected back without parameters (potential interruption)
-        const referrer = document.referrer;
-        const providerDomain = provider === "orcid" ? "orcid.org" : "cilogon.org";
-        if (referrer.includes(providerDomain) || sessionStorage.getItem(`${provider}_auth_started`)) {
-          sessionStorage.removeItem(`${provider}_auth_started`);
-          setDeviceFlow({ 
-            status: "error", 
-            error: "Authentication was interrupted. This may be due to browser security settings or the provider blocking the redirect."
-          });
-        }
-      }
-    }
-  }, [provider]);
-
-  const handleCILogonCallback = async (code: string, state: string) => {
-    console.log("Processing CILogon callback...");
+  const startCILogonFlow = async () => {
+    console.log("Starting CILogon popup authentication flow...");
     setIsLoading(true);
+    setDeviceFlow({ status: "idle" });
     
     try {
       const cilogonProvider = new CILogonProvider();
-      const tokenData = await cilogonProvider.handleCallback();
+      const tokenData = await cilogonProvider.startAuthenticationPopup();
       
-      console.log("CILogon token exchange successful");
+      console.log("CILogon popup authentication successful:", tokenData);
       
       toast.success("Successfully authenticated with CILogon!");
       setDeviceFlow({ 
@@ -94,16 +53,24 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         onComplete();
       }, 1500);
       
-    } catch (error) {
-      console.error("CILogon callback processing error:", error);
+    } catch (error: any) {
+      console.error("CILogon popup authentication error:", error);
       
-      let errorMessage = 'CILogon authentication failed';
-      
+      let errorMessage = "Failed to authenticate with CILogon";
       if (error instanceof Error) {
         errorMessage = error.message;
+        
+        // Provide more helpful error messages
+        if (errorMessage.includes('Popup blocked')) {
+          errorMessage = "Popup blocked. Please allow popups for this site and try again.";
+        } else if (errorMessage.includes('cancelled by user')) {
+          errorMessage = "Authentication was cancelled. Please try again.";
+        } else if (errorMessage.includes('timeout')) {
+          errorMessage = "Authentication timed out. Please try again.";
+        }
       }
       
-      toast.error(`CILogon authentication failed: ${errorMessage}`);
+      toast.error(errorMessage);
       setDeviceFlow({ 
         status: "error", 
         error: errorMessage
@@ -113,18 +80,16 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     }
   };
 
-  const handleORCIDCallback = async (code: string, state: string) => {
-    console.log("Processing ORCID callback...");
+  const startORCIDFlow = async () => {
+    console.log("Starting ORCID popup authentication flow...");
     setIsLoading(true);
+    setDeviceFlow({ status: "idle" });
     
     try {
       const orcidProvider = new ORCIDProvider();
-      const tokenData = await orcidProvider.exchangeCodeForToken(code, state);
+      const tokenData = await orcidProvider.startAuthenticationPopup();
       
-      console.log("ORCID token exchange successful");
-      
-      // Store the token
-      TokenStorage.setToken('orcid', tokenData);
+      console.log("ORCID popup authentication successful:", tokenData);
       
       toast.success("Successfully authenticated with ORCID!");
       setDeviceFlow({ 
@@ -138,16 +103,21 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       }, 1500);
       
     } catch (error) {
-      console.error("ORCID callback processing error:", error);
+      console.error("ORCID popup authentication error:", error);
       
-      let errorMessage = 'ORCID authentication failed';
-      
+      let errorMessage = 'Failed to authenticate with ORCID';
       if (error instanceof Error) {
         errorMessage = error.message;
         
         // Provide more helpful error messages for common issues
-        if (errorMessage.includes('CORS')) {
-          errorMessage = "CORS error: The ORCID service is blocking this request. This may be due to client configuration or CORS policy issues.";
+        if (errorMessage.includes('Popup blocked')) {
+          errorMessage = "Popup blocked. Please allow popups for this site and try again.";
+        } else if (errorMessage.includes('cancelled by user')) {
+          errorMessage = "Authentication was cancelled. Please try again.";
+        } else if (errorMessage.includes('timeout')) {
+          errorMessage = "Authentication timed out. Please try again.";
+        } else if (errorMessage.includes('CORS')) {
+          errorMessage = "CORS error: The ORCID service is blocking this request. This may be due to client configuration issues.";
         } else if (errorMessage.includes('Invalid state')) {
           errorMessage = "Security error: Authentication state verification failed. Please try again.";
         } else if (errorMessage.includes('Code verifier not found')) {
@@ -157,71 +127,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         }
       }
       
-      toast.error(`ORCID authentication failed: ${errorMessage}`);
+      toast.error(errorMessage);
       setDeviceFlow({ 
         status: "error", 
         error: errorMessage
       });
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const startCILogonFlow = async () => {
-    console.log("Starting CILogon authentication flow...");
-    setIsLoading(true);
-    
-    try {
-      // Mark that we're starting authentication
-      sessionStorage.setItem('cilogon_auth_started', 'true');
-      
-      const cilogonProvider = new CILogonProvider();
-      cilogonProvider.startAuthentication();
-      
-    } catch (error: any) {
-      console.error("CILogon authentication error:", error);
-      
-      let errorMessage = "Failed to start CILogon authentication";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      toast.error(errorMessage);
-      setDeviceFlow({ 
-        status: "error", 
-        error: errorMessage
-      });
-      setIsLoading(false);
-    }
-  };
-
-  const startORCIDFlow = async () => {
-    console.log("Starting ORCID authentication flow...");
-    setIsLoading(true);
-    
-    try {
-      // Mark that we're starting authentication
-      sessionStorage.setItem('orcid_auth_started', 'true');
-      
-      const orcidProvider = new ORCIDProvider();
-      const authUrl = await orcidProvider.getAuthUrl();
-      
-      // Redirect to ORCID for authentication
-      window.location.href = authUrl;
-      
-    } catch (error) {
-      console.error("ORCID authentication error:", error);
-      
-      let errorMessage = 'Failed to start ORCID authentication';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      toast.error(errorMessage);
-      setDeviceFlow({ 
-        status: "error", 
-        error: errorMessage
-      });
       setIsLoading(false);
     }
   };
@@ -330,8 +241,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   </Button>
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-sm text-[rgb(64,143,204)]">
-                      <strong>Browser Authentication:</strong> You will be redirected to CILogon to authenticate with your institutional credentials. 
-                      This uses the standard OAuth2 authorization code flow for secure authentication.
+                      <strong>Popup Authentication:</strong> A new window will open for CILogon authentication. 
+                      Please ensure popups are enabled and complete authentication in the popup window.
                     </AlertDescription>
                   </Alert>
                 </>
@@ -341,7 +252,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Redirecting to CILogon for authentication...
+                    Opening authentication popup window...
                   </AlertDescription>
                 </Alert>
               )}
@@ -372,8 +283,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>Browser Authentication:</strong> You will be redirected to ORCID to authenticate with your ORCID credentials. 
-                      This uses the standard OAuth2 authorization code flow with PKCE for secure authentication.
+                      <strong>Popup Authentication:</strong> A new window will open for ORCID authentication. 
+                      Please ensure popups are enabled and complete authentication in the popup window.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -391,7 +302,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Redirecting to ORCID for authentication...
+                    Opening authentication popup window...
                   </AlertDescription>
                 </Alert>
               )}

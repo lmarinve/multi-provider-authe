@@ -1,6 +1,7 @@
 import { config } from "@/lib/config";
 import { TokenData, TokenResponse } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
+import { authenticateWithPopup } from "@/lib/auth-popup";
 
 export class CILogonProvider {
   private generateState(): string {
@@ -9,12 +10,8 @@ export class CILogonProvider {
     return btoa(String.fromCharCode(...array)).replace(/[+/=]/g, '').substring(0, 43);
   }
 
-  getAuthUrl(): string {
-    const state = this.generateState();
-    const redirectUri = `${window.location.origin}/login?provider=cilogon`;
-    
-    // Store state for validation
-    sessionStorage.setItem('cilogon_state', state);
+  private getAuthUrl(state: string): string {
+    const redirectUri = `${window.location.origin}/auth/callback/cilogon.html`;
     
     const params = new URLSearchParams({
       response_type: 'code',
@@ -27,20 +24,7 @@ export class CILogonProvider {
     return `${config.cilogon.authUrl}?${params.toString()}`;
   }
 
-  async handleCallback(): Promise<TokenData> {
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const state = urlParams.get('state');
-    const error = urlParams.get('error');
-
-    if (error) {
-      throw new Error(`CILogon authentication error: ${error}`);
-    }
-
-    if (!code) {
-      throw new Error('No authorization code received from CILogon');
-    }
-
+  async exchangeCodeForToken(code: string, state: string): Promise<TokenData> {
     const storedState = sessionStorage.getItem('cilogon_state');
     if (!state || state !== storedState) {
       throw new Error('Invalid state parameter');
@@ -49,7 +33,7 @@ export class CILogonProvider {
     sessionStorage.removeItem('cilogon_state');
 
     // Exchange code for tokens
-    const redirectUri = `${window.location.origin}/login?provider=cilogon`;
+    const redirectUri = `${window.location.origin}/auth/callback/cilogon.html`;
     
     const response = await fetch(config.cilogon.tokenUrl, {
       method: 'POST',
@@ -65,7 +49,8 @@ export class CILogonProvider {
     });
 
     if (!response.ok) {
-      throw new Error(`Token exchange failed: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Token exchange failed: ${response.status} ${response.statusText}. ${errorText}`);
     }
 
     const tokenResponse = await response.json() as TokenResponse;
@@ -86,15 +71,64 @@ export class CILogonProvider {
     return tokenData;
   }
 
+  async startAuthenticationPopup(): Promise<TokenData> {
+    const state = this.generateState();
+    sessionStorage.setItem('cilogon_state', state);
+    
+    const authUrl = this.getAuthUrl(state);
+    
+    try {
+      const result = await authenticateWithPopup({ 
+        url: authUrl,
+        width: 800,
+        height: 600 
+      });
+      
+      if (result.error) {
+        throw new Error(`CILogon authentication error: ${result.error}${result.error_description ? ' - ' + result.error_description : ''}`);
+      }
+      
+      if (!result.code || !result.state) {
+        throw new Error('No authorization code received from CILogon');
+      }
+      
+      return await this.exchangeCodeForToken(result.code, result.state);
+    } catch (error) {
+      sessionStorage.removeItem('cilogon_state');
+      throw error;
+    }
+  }
+
+  // Legacy methods for URL-based callback handling
+  async handleCallback(): Promise<TokenData> {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const error = urlParams.get('error');
+
+    if (error) {
+      throw new Error(`CILogon authentication error: ${error}`);
+    }
+
+    if (!code || !state) {
+      throw new Error('No authorization code received from CILogon');
+    }
+
+    return await this.exchangeCodeForToken(code, state);
+  }
+
   startAuthentication(): void {
-    const authUrl = this.getAuthUrl();
+    const state = this.generateState();
+    sessionStorage.setItem('cilogon_state', state);
+    const authUrl = this.getAuthUrl(state);
     window.location.href = authUrl;
   }
 
   // Keep static methods for backward compatibility
   static getAuthUrl(): string {
     const provider = new CILogonProvider();
-    return provider.getAuthUrl();
+    const state = provider.generateState();
+    return provider.getAuthUrl(state);
   }
 
   static handleCallback(): Promise<TokenData> {
@@ -105,5 +139,10 @@ export class CILogonProvider {
   static startAuthentication(): void {
     const provider = new CILogonProvider();
     provider.startAuthentication();
+  }
+
+  static async startAuthenticationPopup(): Promise<TokenData> {
+    const provider = new CILogonProvider();
+    return provider.startAuthenticationPopup();
   }
 }
