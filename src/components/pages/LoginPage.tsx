@@ -36,18 +36,13 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     setIsLoading(true);
     
     try {
-      // Open CILogon authentication in a new window
-      const authUrl = 'https://cilogon.org/authorize?' + new URLSearchParams({
-        response_type: 'code',
-        client_id: 'APP-S3BU1LVHOTHITEU2',
-        redirect_uri: 'https://example.com/callback',
-        scope: 'openid email profile'
-      }).toString();
+      // Simply open CILogon login page for user authentication
+      const authUrl = 'https://cilogon.org/';
       
       console.log("Opening CILogon with URL:", authUrl);
       
-      // Open in new window
-      const authWindow = window.open(authUrl, 'cilogon_auth', 'width=600,height=700,scrollbars=yes,resizable=yes');
+      // Open in new tab/window
+      const authWindow = window.open(authUrl, '_blank');
       
       if (!authWindow) {
         throw new Error('Pop-up blocked. Please enable pop-ups for this site.');
@@ -81,18 +76,13 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     setIsLoading(true);
     
     try {
-      // Open ORCID authentication in a new window
-      const authUrl = 'https://orcid.org/oauth/authorize?' + new URLSearchParams({
-        response_type: 'code',
-        client_id: 'APP-S3BU1LVHOTHITEU2',
-        redirect_uri: 'https://example.com/callback',
-        scope: 'openid'
-      }).toString();
+      // Simply open ORCID login page for user authentication
+      const authUrl = 'https://orcid.org/signin';
       
       console.log("Opening ORCID with URL:", authUrl);
       
-      // Open in new window
-      const authWindow = window.open(authUrl, 'orcid_auth', 'width=600,height=700,scrollbars=yes,resizable=yes');
+      // Open in new tab/window
+      const authWindow = window.open(authUrl, '_blank');
       
       if (!authWindow) {
         throw new Error('Pop-up blocked. Please enable pop-ups for this site.');
@@ -126,9 +116,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     setIsLoading(true);
     
     try {
-      // Open FABRIC authentication URL in a new window
+      // Simply open FABRIC login page for user authentication
       const authUrl = "https://cm.fabric-testbed.net/login";
-      const authWindow = window.open(authUrl, "_blank", "width=800,height=700,scrollbars=yes,resizable=yes");
+      const authWindow = window.open(authUrl, "_blank");
       
       if (!authWindow) {
         throw new Error("Popup blocked. Please allow popups for this site and try again.");
