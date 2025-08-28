@@ -36,6 +36,28 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     setIsLoading(true);
     setDeviceFlow({ status: "idle" });
     
+    // Check if there's already a valid token
+    const existingToken = TokenStorage.getToken("cilogon");
+    if (existingToken && existingToken.expires_in) {
+      const now = Math.floor(Date.now() / 1000);
+      const expiresAt = existingToken.issued_at + existingToken.expires_in;
+      
+      if (expiresAt > now + 300) { // Still valid for at least 5 minutes
+        console.log("Using existing valid CILogon token");
+        toast.success("Using existing CILogon authentication!");
+        setDeviceFlow({ 
+          status: "complete", 
+          token: existingToken.id_token
+        });
+        
+        setTimeout(() => {
+          onComplete();
+        }, 1500);
+        setIsLoading(false);
+        return;
+      }
+    }
+    
     try {
       const cilogonProvider = new CILogonProvider();
       const tokenData = await cilogonProvider.startAuthenticationPopup();
@@ -67,6 +89,10 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
           errorMessage = "Authentication was cancelled. Please try again.";
         } else if (errorMessage.includes('timeout')) {
           errorMessage = "Authentication timed out. Please try again.";
+        } else if (errorMessage.includes('refused to connect') || errorMessage.includes('BLOCKED_BY_RESPONSE')) {
+          errorMessage = "CILogon connection blocked. Please check if CILogon.org is accessible from your network.";
+        } else if (errorMessage.includes('complete authentication in the new tab')) {
+          errorMessage = errorMessage; // Keep the full message for tab-based flow
         }
       }
       
@@ -84,6 +110,28 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     console.log("Starting ORCID popup authentication flow...");
     setIsLoading(true);
     setDeviceFlow({ status: "idle" });
+    
+    // Check if there's already a valid token
+    const existingToken = TokenStorage.getToken("orcid");
+    if (existingToken && existingToken.expires_in) {
+      const now = Math.floor(Date.now() / 1000);
+      const expiresAt = existingToken.issued_at + existingToken.expires_in;
+      
+      if (expiresAt > now + 300) { // Still valid for at least 5 minutes
+        console.log("Using existing valid ORCID token");
+        toast.success("Using existing ORCID authentication!");
+        setDeviceFlow({ 
+          status: "complete", 
+          token: existingToken.id_token
+        });
+        
+        setTimeout(() => {
+          onComplete();
+        }, 1500);
+        setIsLoading(false);
+        return;
+      }
+    }
     
     try {
       const orcidProvider = new ORCIDProvider();

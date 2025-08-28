@@ -11,6 +11,7 @@ export class CILogonProvider {
   }
 
   private getAuthUrl(state: string): string {
+    // For CILogon, we need to use the full callback URL path
     const redirectUri = `${window.location.origin}/auth/callback/cilogon.html`;
     
     const params = new URLSearchParams({
@@ -95,6 +96,26 @@ export class CILogonProvider {
       return await this.exchangeCodeForToken(result.code, result.state);
     } catch (error) {
       sessionStorage.removeItem('cilogon_state');
+      
+      // If popup fails, provide a fallback option
+      if (error instanceof Error && (
+        error.message.includes('Popup blocked') || 
+        error.message.includes('refused to connect') ||
+        error.message.includes('BLOCKED_BY_RESPONSE')
+      )) {
+        // Offer full window redirect as fallback
+        const userConsent = confirm(
+          'CILogon popup was blocked or failed. Would you like to open CILogon authentication in a new tab instead?'
+        );
+        
+        if (userConsent) {
+          // Store a flag to handle return
+          sessionStorage.setItem('cilogon_fullwindow_flow', 'true');
+          window.open(authUrl, '_blank');
+          throw new Error('Please complete authentication in the new tab, then return here and try again.');
+        }
+      }
+      
       throw error;
     }
   }

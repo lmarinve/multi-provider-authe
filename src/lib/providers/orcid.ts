@@ -129,7 +129,7 @@ export class ORCIDProvider {
       grant_type: 'authorization_code',
       client_id: config.orcid.clientId,
       code,
-      redirect_uri: `${window.location.origin}/auth/callback/orcid`,
+      redirect_uri: `${window.location.origin}/auth/callback/orcid.html`,
       code_verifier: codeVerifier,
     });
 
