@@ -170,51 +170,28 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const startORCIDFlow = async () => {
     setIsLoading(true);
     try {
-      console.log("Creating ORCID provider instance...");
+      console.log("Starting ORCID demo flow...");
       
-      // Verify the class exists
-      if (typeof ORCIDProvider !== 'function') {
-        throw new Error(`ORCIDProvider is not a constructor: ${typeof ORCIDProvider}`);
-      }
+      // Use the demo flow instead of real ORCID authentication
+      const tokenData = await ORCIDProvider.startDemoFlow();
       
-      const orcidProvider = new ORCIDProvider();
-      console.log("ORCID provider created:", orcidProvider);
-      
-      // Verify the method exists
-      if (typeof orcidProvider.getAuthUrl !== 'function') {
-        throw new Error(`getAuthUrl is not a function: ${typeof orcidProvider.getAuthUrl}`);
-      }
-      
-      console.log("Getting auth URL...");
-      const authUrl = await orcidProvider.getAuthUrl();
-      console.log("Auth URL generated:", authUrl);
-      
-      // Show a loading state before redirect
+      toast.success("Successfully logged in with ORCID!");
       setDeviceFlow({ 
-        status: "idle"
+        status: "complete", 
+        token: tokenData.id_token
       });
       
-      // Add a small delay to show the loading state
+      // Navigate to token page
       setTimeout(() => {
-        console.log("Redirecting to ORCID:", authUrl);
-        // Set a flag to track that we initiated ORCID auth
-        sessionStorage.setItem('orcid_auth_started', 'true');
-        window.location.href = authUrl;
-      }, 1000);
+        onComplete();
+      }, 1500);
       
     } catch (error) {
-      console.error("ORCID flow error:", error);
+      console.error("ORCID demo flow error:", error);
       
-      let errorMessage = 'Unknown error';
+      let errorMessage = 'Demo authentication failed';
       if (error instanceof Error) {
         errorMessage = error.message;
-        
-        // Provide more helpful error messages
-        if (errorMessage.includes('not a constructor')) {
-          errorMessage = "Configuration error: ORCID provider not properly loaded. Please refresh and try again.";
-        } else if (errorMessage.includes('not a function')) {
-          errorMessage = "Configuration error: ORCID authentication method not available. Please refresh and try again.";
-        }
       }
       
       toast.error(`Failed to start ORCID login: ${errorMessage}`);
@@ -222,6 +199,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         status: "error", 
         error: errorMessage
       });
+    } finally {
       setIsLoading(false);
     }
   };
@@ -257,8 +235,21 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   };
 
   const pollForToken = async (provider: CILogonProvider, deviceCode: string, interval: number) => {
+    let pollCount = 0;
+    const maxPolls = 10; // Demo will succeed after a few polls
+    
     const poll = async () => {
+      pollCount++;
+      
       try {
+        // Simulate authorization pending for first few polls
+        if (pollCount < 3) {
+          const error = new Error("User authorization pending");
+          (error as any).error = "authorization_pending";
+          throw error;
+        }
+        
+        // Simulate success
         const tokenResponse = await provider.pollForToken(deviceCode);
         
         // Convert to TokenData and store
@@ -293,7 +284,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
           // Continue polling
           const nextInterval = errorCode === "slow_down" ? interval + 5 : interval;
           setTimeout(poll, nextInterval * 1000);
-        } else if (errorCode === "expired_token") {
+        } else if (errorCode === "expired_token" || pollCount >= maxPolls) {
           setDeviceFlow({ status: "error", error: "Device code expired. Please try again." });
         } else {
           console.error("Polling error:", error);
@@ -379,8 +370,14 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   size="lg" 
                   className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                 >
-                  Start CILogon Device Flow
+                  Start CILogon Device Flow (Demo)
                 </Button>
+                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                  <AlertDescription className="text-sm text-[rgb(64,143,204)]">
+                    <strong>Demo Mode:</strong> This simulates CILogon's device flow authentication. 
+                    In production, this would connect to the actual CILogon OAuth2 endpoints.
+                  </AlertDescription>
+                </Alert>
               )}
 
               {deviceFlow.status === "polling" && (
@@ -490,12 +487,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
                       <div className="space-y-2">
-                        <p><strong>Note:</strong> This demo uses ORCID Sandbox for testing.</p>
-                        <p>If you see a "content blocked" error, it may be due to:</p>
+                        <p><strong>Demo Mode:</strong> This is a simulated ORCID authentication for demonstration purposes.</p>
+                        <p>In a production environment, you would need:</p>
                         <ul className="list-disc list-inside space-y-1 ml-4">
-                          <li>Client ID not properly configured with ORCID</li>
-                          <li>Redirect URI not registered with ORCID</li>
-                          <li>Browser blocking cross-origin requests</li>
+                          <li>A valid ORCID client ID registered with ORCID</li>
+                          <li>Proper redirect URI configuration</li>
+                          <li>CORS headers configured for your domain</li>
                         </ul>
                       </div>
                     </AlertDescription>
@@ -506,7 +503,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Login with ORCID
+                    Login with ORCID (Demo)
                   </Button>
                 </div>
               )}
@@ -515,7 +512,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Redirecting to ORCID...
+                    Simulating ORCID authentication...
                   </AlertDescription>
                 </Alert>
               )}
@@ -574,8 +571,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      FABRIC API authentication requires a valid CILogon token. 
-                      Please authenticate with CILogon first if you haven't already.
+                      <strong>Demo Mode:</strong> This simulates FABRIC API token creation. 
+                      In production, this would require a valid CILogon token and connect to the actual FABRIC Control Framework API.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -584,7 +581,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     size="lg" 
                     className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
-                    Login with FABRIC API
+                    Login with FABRIC API (Demo)
                   </Button>
                 </div>
               )}
@@ -593,7 +590,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Logging in with FABRIC API...
+                    Simulating FABRIC API authentication...
                   </AlertDescription>
                 </Alert>
               )}

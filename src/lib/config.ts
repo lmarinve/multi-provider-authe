@@ -14,12 +14,12 @@ export const config = {
     tokenUrl: "https://cilogon.org/oauth2/token"
   },
   
-  // ORCID
+  // ORCID - Using member API
   orcid: {
-    clientId: "APP-01234567890ABCDEF",
-    issuerUrl: "https://sandbox.orcid.org",
-    authUrl: "https://sandbox.orcid.org/oauth/authorize",
-    tokenUrl: "https://sandbox.orcid.org/oauth/token",
+    clientId: "0000-0000-0000-0000", // Demo client ID
+    issuerUrl: "https://orcid.org",
+    authUrl: "https://orcid.org/oauth/authorize", 
+    tokenUrl: "https://orcid.org/oauth/token",
     scope: "/authenticate",
     usePkce: true
   },

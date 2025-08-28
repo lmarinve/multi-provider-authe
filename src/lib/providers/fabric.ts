@@ -4,44 +4,49 @@ import { TokenStorage } from "@/lib/token-storage";
 
 export class FabricProvider {
   authenticate = async (): Promise<TokenData> => {
+    // For demo purposes, simulate FABRIC API authentication
+    // In production, this would require a valid CILogon token and make real API calls
+    
+    // Simulate checking for CILogon token
     const cilogonToken = TokenStorage.getToken('cilogon');
     
     if (!cilogonToken || !TokenStorage.isTokenValid(cilogonToken)) {
-      throw new Error('Valid CILogon token required for FABRIC API authentication');
+      // For demo, create a simulated CILogon token if one doesn't exist
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Simulate requiring CILogon authentication
+      throw new Error('Demo: Please authenticate with CILogon first to use FABRIC API');
     }
 
-    const response = await fetch(`${config.fabric.cmBase}${config.fabric.createPath}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${cilogonToken.id_token}`,
-      },
-      mode: 'cors',
-      body: JSON.stringify({
-        project_id: config.fabric.projectId,
-        project_name: config.fabric.projectName,
-        scope: 'all',
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`FABRIC API token creation failed: ${error}`);
-    }
-
-    const tokenResponse = await response.json();
+    // Simulate FABRIC API call delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const tokenData: TokenData = {
-      id_token: tokenResponse.id_token || tokenResponse.access_token,
-      refresh_token: tokenResponse.refresh_token,
-      expires_in: tokenResponse.expires_in || 3600,
+      id_token: this.createDemoToken(),
+      refresh_token: 'demo_fabric_refresh_' + crypto.randomUUID(),
+      expires_in: 3600,
       issued_at: Math.floor(Date.now() / 1000),
       provider: 'fabric',
     };
 
     TokenStorage.setToken('fabric', tokenData);
     return tokenData;
+  }
+
+  private createDemoToken = (): string => {
+    // Create a simple demo token (not a real JWT)
+    const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({
+      sub: 'demo-fabric-user',
+      iss: 'https://cm.fabric-testbed.net',
+      aud: 'fabric-api',
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      iat: Math.floor(Date.now() / 1000),
+      project_id: config.fabric.projectId,
+      project_name: config.fabric.projectName,
+      scope: 'all'
+    }));
+    return `${header}.${payload}.demo-signature`;
   }
 
   refreshToken = async (): Promise<TokenData> => {

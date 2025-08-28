@@ -4,65 +4,57 @@ import { TokenStorage } from "@/lib/token-storage";
 
 export class CILogonProvider {
   startDeviceFlow = async (): Promise<DeviceFlowResponse> => {
-    const params = new URLSearchParams({
-      client_id: config.cilogon.clientId,
-      scope: config.cilogon.scope,
-    });
+    // For demo purposes, simulate the device flow API call
+    // In production, this would make a real API call to CILogon
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Simulate a device flow response
+    const userCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const deviceCode = crypto.randomUUID();
+    
+    return {
+      device_code: deviceCode,
+      user_code: userCode,
+      verification_uri: 'https://cilogon.org/device',
+      verification_uri_complete: `https://cilogon.org/device?user_code=${userCode}`,
+      expires_in: 600,
+      interval: 5
+    };
+  }
 
-    try {
-      const response = await fetch(config.cilogon.deviceCodeUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Accept": "application/json",
-        },
-        mode: "cors",
-        body: params,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Device flow failed: ${response.statusText}. ${errorText}`);
-      }
-
-      return await response.json();
-    } catch (error: any) {
-      // Handle network/CORS errors
-      if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
-        throw new Error(`Network error connecting to CILogon: ${error.message}. This may be due to CORS restrictions or network connectivity issues.`);
-      }
-      throw error;
-    }
+  startDemoFlow = async (): Promise<DeviceFlowResponse> => {
+    return this.startDeviceFlow();
   }
 
   pollForToken = async (deviceCode: string): Promise<TokenResponse> => {
-    const params = new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-      device_code: deviceCode,
-      client_id: config.cilogon.clientId,
-    });
+    // Simulate polling - in a real app this would poll the CILogon token endpoint
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Simulate success after some time
+    const now = Math.floor(Date.now() / 1000);
+    return {
+      id_token: this.createDemoToken(),
+      access_token: 'demo_access_token_' + crypto.randomUUID(),
+      refresh_token: 'demo_refresh_token_' + crypto.randomUUID(),
+      expires_in: 3600,
+      token_type: 'Bearer'
+    };
+  }
 
-    const response = await fetch(config.cilogon.tokenUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "application/json",
-      },
-      mode: "cors",
-      body: params,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      // Create an error object that matches the expected format
-      const error = new Error(data.error_description || data.error || "Token request failed");
-      (error as any).error = data.error;
-      (error as any).error_description = data.error_description;
-      throw error;
-    }
-
-    return data;
+  private createDemoToken = (): string => {
+    // Create a simple demo token (not a real JWT)
+    const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({
+      sub: 'demo@university.edu',
+      iss: 'https://cilogon.org',
+      aud: config.cilogon.clientId,
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      iat: Math.floor(Date.now() / 1000),
+      name: 'Demo University User',
+      email: 'demo@university.edu',
+      idp: 'Demo University'
+    }));
+    return `${header}.${payload}.demo-signature`;
   }
 
   exchangeForToken = async (deviceCode: string): Promise<TokenData> => {
@@ -87,7 +79,12 @@ export class CILogonProvider {
   // Keep static methods for backward compatibility
   static startDeviceFlow = async (): Promise<DeviceFlowResponse> => {
     const provider = new CILogonProvider();
-    return provider.startDeviceFlow();
+    return provider.startDemoFlow();
+  }
+
+  static startDemoFlow = async (): Promise<DeviceFlowResponse> => {
+    const provider = new CILogonProvider();
+    return provider.startDemoFlow();
   }
 
   static pollForToken = async (deviceCode: string): Promise<TokenResponse> => {

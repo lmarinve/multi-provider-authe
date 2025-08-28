@@ -44,9 +44,47 @@ export class ORCIDProvider {
     return `${config.orcid.authUrl}?${params}`;
   }
 
+  // Demo method for simulating ORCID authentication
+  startDemoFlow = async (): Promise<TokenData> => {
+    // Simulate a delay for authentication
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Create a demo token
+    const tokenData: TokenData = {
+      id_token: this.createDemoToken(),
+      refresh_token: undefined,
+      expires_in: 3600,
+      issued_at: Math.floor(Date.now() / 1000),
+      provider: 'orcid',
+    };
+
+    TokenStorage.setToken('orcid', tokenData);
+    return tokenData;
+  }
+
+  private createDemoToken = (): string => {
+    // Create a simple demo token (not a real JWT)
+    const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({
+      sub: '0000-0000-0000-0000',
+      iss: 'https://orcid.org',
+      aud: config.orcid.clientId,
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      iat: Math.floor(Date.now() / 1000),
+      name: 'Demo User',
+      email: 'demo@example.com'
+    }));
+    return `${header}.${payload}.demo-signature`;
+  }
+
   static initiateLogin = async (): Promise<string> => {
     const provider = new ORCIDProvider();
     return provider.getAuthUrl();
+  }
+
+  static startDemoFlow = async (): Promise<TokenData> => {
+    const provider = new ORCIDProvider();
+    return provider.startDemoFlow();
   }
 
   exchangeCodeForToken = async (code: string, state: string): Promise<TokenData> => {
