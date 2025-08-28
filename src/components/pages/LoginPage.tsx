@@ -90,16 +90,6 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       setIsLoading(false);
     }
   };
-      const errorMessage = error instanceof Error ? error.message : "Failed to open authentication window";
-      toast.error(errorMessage);
-      setDeviceFlow({ 
-        status: "error", 
-        error: errorMessage
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
 
 
