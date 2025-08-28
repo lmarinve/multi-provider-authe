@@ -192,32 +192,14 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       {/* Header */}
       <div className="text-center space-y-4 mb-12">
         <div className="flex flex-col items-center space-y-6">
-          {/* Title and Logo in same line */}
-          <div className="flex items-center justify-center gap-6">
-            {/* SDX Logo */}
-            <div className="w-20 h-20 flex items-center justify-center flex-shrink-0">
-              <img src={sdxLogo} alt="SDX Logo" className="max-w-full max-h-full object-contain"/>
+          {/* Logo and Title */}
+          <div className="flex items-center justify-center gap-4">
+            <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+              <img src={sdxLogo} alt="SDX Logo" className="h-12 w-auto object-contain" />
             </div>
-            {/* Title with custom colors */}
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight leading-tight flex items-center gap-3">
-              <span 
-                className="px-2 py-1 rounded-md"
-                style={{ 
-                  color: 'rgb(50, 135, 200)', 
-                  backgroundColor: 'rgb(255, 255, 255)' 
-                }}
-              >
-                AtlanticWave
-              </span>
-              <span 
-                className="px-2 py-1 rounded-md"
-                style={{ 
-                  color: 'rgb(255, 255, 255)', 
-                  backgroundColor: 'rgb(255, 255, 255)' 
-                }}
-              >
-                -
-              </span>
+            <h1 className="text-4xl font-bold tracking-tight leading-tight">
+              <span style={{ color: 'rgb(50, 135, 200)' }}>AtlanticWave</span>
+              <span style={{ color: 'rgb(64, 143, 204)' }}>-</span>
               <span 
                 className="px-3 py-1 rounded-md font-bold"
                 style={{ 
@@ -230,9 +212,8 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
             </h1>
           </div>
           
-          {/* Subtitle with maximum size reduction and Deep Blue color */}
           <h2 
-            className="text-[0.5rem] font-light uppercase tracking-wide opacity-70"
+            className="text-xs font-light uppercase tracking-wide opacity-70"
             style={{ color: 'rgb(64, 143, 204)' }}
           >
             International Distributed Software-Defined Exchange
