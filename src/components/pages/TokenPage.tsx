@@ -395,8 +395,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
 
                 <Button
                   onClick={() => {
-                    toast.info("Connecting to MEICAN...");
-                    // TODO: Implement MEICAN connection
+                    window.open("http://190.103.184.199", "_blank");
                   }}
                   className="w-full py-4 text-lg font-semibold bg-[rgb(120,176,219)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   size="lg"
