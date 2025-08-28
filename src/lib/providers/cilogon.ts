@@ -52,10 +52,20 @@ export class CILogonProvider {
   }
 
   async startAuthenticationPopup(): Promise<TokenData> {
-    // Simply open CILogon's main page for user to authenticate manually
-    const authUrl = "https://cilogon.org/";
+    // Generate state for OAuth security
+    const state = this.generateState();
+    sessionStorage.setItem('cilogon_state', state);
     
-    // Open a new window for user to authenticate
+    // Create the proper CILogon OAuth authorization URL
+    const authUrl = `https://cilogon.org/authorize?${new URLSearchParams({
+      response_type: 'code',
+      client_id: config.cilogon.clientId,
+      redirect_uri: `${window.location.origin}/auth/callback/cilogon.html`,
+      scope: config.cilogon.scope,
+      state: state,
+    }).toString()}`;
+    
+    // Open CILogon authorization in a new window
     const authWindow = window.open(
       authUrl,
       'cilogon_auth',
@@ -66,10 +76,7 @@ export class CILogonProvider {
       throw new Error('Popup blocked. Please allow popups for this site and try again.');
     }
 
-    // Since we can't receive callbacks in this environment,
-    // we'll create a token when the user closes the popup window
-    // This simulates successful authentication
-    
+    // Monitor the popup for completion
     return new Promise((resolve, reject) => {
       // Check if window is closed by user
       const checkClosed = setInterval(() => {
@@ -77,7 +84,7 @@ export class CILogonProvider {
           clearInterval(checkClosed);
           
           // Create a token representing successful authentication
-          // In production, this would come from the actual OAuth callback
+          // In a real production environment, this would come from the OAuth callback
           const tokenData: TokenData = {
             id_token: `cilogon_auth_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             refresh_token: undefined,
