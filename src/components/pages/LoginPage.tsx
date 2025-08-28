@@ -195,7 +195,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
           {/* Title and Logo in same line */}
           <div className="flex items-center justify-center gap-6">
             {/* SDX Logo */}
-            <div className="w-16 h-16 flex items-center justify-center flex-shrink-0 p-1 border-2 border-[rgb(236,244,250)] rounded-lg">
+            <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
               <img src={sdxLogo} alt="SDX Logo" className="w-full h-full object-contain" />
             </div>
             {/* Title with custom colors */}
