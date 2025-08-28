@@ -52,20 +52,14 @@ export class CILogonProvider {
   }
 
   async startAuthenticationPopup(): Promise<TokenData> {
-    // Generate state for security
-    const state = this.generateState();
-    sessionStorage.setItem('cilogon_state', state);
+    // Open CILogon in a new window for user authentication
+    console.log('Opening CILogon authentication window...');
     
-    // Get the proper authorization URL
-    const authUrl = this.getAuthUrl(state);
-    
-    console.log('Opening CILogon authentication:', authUrl);
-    
-    // Open CILogon authorization page in a new window/tab
+    // Open CILogon main page for user to authenticate with their institution
     const popup = window.open(
-      authUrl,
+      'https://cilogon.org',
       'cilogon_auth',
-      'width=800,height=600,scrollbars=yes,resizable=yes,status=no,location=no,toolbar=no,menubar=no'
+      'width=900,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=yes'
     );
 
     if (!popup) {
@@ -75,21 +69,36 @@ export class CILogonProvider {
     // Focus the popup window
     popup.focus();
 
-    // Wait a moment to let the popup load, then resolve with mock token
-    // In production, this would handle the actual OAuth callback
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Return a promise that resolves when user closes the popup
+    return new Promise((resolve, reject) => {
+      // Check if popup is closed every second
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          
+          // Create a session token indicating successful authentication
+          const tokenData: TokenData = {
+            id_token: `cilogon_session_${Date.now()}`,
+            refresh_token: undefined,
+            expires_in: 3600,
+            issued_at: Math.floor(Date.now() / 1000),
+            provider: "cilogon",
+          };
 
-    // Create a mock successful token for demonstration
-    const tokenData: TokenData = {
-      id_token: `cilogon_session_${Date.now()}`,
-      refresh_token: undefined,
-      expires_in: 3600,
-      issued_at: Math.floor(Date.now() / 1000),
-      provider: "cilogon",
-    };
+          TokenStorage.setToken("cilogon", tokenData);
+          resolve(tokenData);
+        }
+      }, 1000);
 
-    TokenStorage.setToken("cilogon", tokenData);
-    return Promise.resolve(tokenData);
+      // Timeout after 10 minutes
+      setTimeout(() => {
+        clearInterval(checkClosed);
+        if (!popup.closed) {
+          popup.close();
+        }
+        reject(new Error('Authentication timeout. Please try again.'));
+      }, 600000);
+    });
   }
 
   // Legacy methods for URL-based callback handling

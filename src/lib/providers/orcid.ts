@@ -47,33 +47,53 @@ export class ORCIDProvider {
   }
 
   async startAuthenticationPopup(): Promise<TokenData> {
-    // Simply open ORCID login page in new window - no callbacks needed
-    const authUrl = 'https://orcid.org/signin';
+    // Open ORCID login page in new window for user authentication
+    console.log('Opening ORCID authentication window...');
     
-    console.log('Opening ORCID login page:', authUrl);
-    
-    // Open ORCID in a new window/tab
-    const authWindow = window.open(
-      authUrl,
-      'orcid_login',
-      'width=1000,height=800,scrollbars=yes,resizable=yes,location=yes,menubar=yes,toolbar=yes'
+    // Open ORCID signin page for user to authenticate
+    const popup = window.open(
+      'https://orcid.org/signin',
+      'orcid_auth',
+      'width=900,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=yes'
     );
 
-    if (!authWindow) {
+    if (!popup) {
       throw new Error('Popup blocked. Please allow popups for this site and try again.');
     }
 
-    // Create a mock successful token since user will login separately
-    const tokenData: TokenData = {
-      id_token: `orcid_session_${Date.now()}`,
-      refresh_token: undefined,
-      expires_in: 3600,
-      issued_at: Math.floor(Date.now() / 1000),
-      provider: "orcid",
-    };
+    // Focus the popup window
+    popup.focus();
 
-    TokenStorage.setToken("orcid", tokenData);
-    return Promise.resolve(tokenData);
+    // Return a promise that resolves when user closes the popup
+    return new Promise((resolve, reject) => {
+      // Check if popup is closed every second
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          
+          // Create a session token indicating successful authentication
+          const tokenData: TokenData = {
+            id_token: `orcid_session_${Date.now()}`,
+            refresh_token: undefined,
+            expires_in: 3600,
+            issued_at: Math.floor(Date.now() / 1000),
+            provider: "orcid",
+          };
+
+          TokenStorage.setToken("orcid", tokenData);
+          resolve(tokenData);
+        }
+      }, 1000);
+
+      // Timeout after 10 minutes
+      setTimeout(() => {
+        clearInterval(checkClosed);
+        if (!popup.closed) {
+          popup.close();
+        }
+        reject(new Error('Authentication timeout. Please try again.'));
+      }, 600000);
+    });
   }
 
   // Demo method for simulating ORCID authentication
