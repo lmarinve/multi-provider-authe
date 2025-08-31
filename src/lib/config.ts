@@ -14,7 +14,7 @@ export const config = {
     tokenUrl: "https://cilogon.org/oauth2/token",
     jwksUrl: "https://cilogon.org/oauth2/certs",
     issuerUrl: "https://cilogon.org",
-    redirectUri: "https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon",
+    redirectUri: window.location.origin + "/auth/callback/cilogon.html",
     usePkce: true // PKCE is required with S256
   },
   

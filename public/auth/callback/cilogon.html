@@ -2,61 +2,133 @@
 <html>
 <head>
     <title>CILogon Authentication</title>
-    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: #dc3545;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .success {
+            background: #28a745;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+    <div class="container">
+        <div class="spinner"></div>
         <h2>Processing CILogon Authentication...</h2>
-        <p>This window will close automatically once authentication is complete.</p>
+        <p>Please wait while we complete your authentication.</p>
+        <div id="status"></div>
     </div>
 
     <script>
-        // Extract authorization code and state from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        const state = urlParams.get('state');
-        const error = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
-
-        // Determine the parent origin based on where this page was opened from
-        let parentOrigin = '*'; // Fallback to allow any origin
-        try {
-            // Try to get the opener's origin if possible
-            if (window.opener && window.opener.location) {
-                parentOrigin = window.opener.location.origin;
+        (function() {
+            const statusEl = document.getElementById('status');
+            
+            function showStatus(message, type = 'info') {
+                statusEl.innerHTML = `<div class="${type}">${message}</div>`;
             }
-        } catch (e) {
-            // Cross-origin security might prevent access, use wildcard
-            console.log('Could not determine parent origin, using wildcard');
-        }
 
-        console.log('Sending message to parent with origin:', parentOrigin);
+            function handleAuthCallback() {
+                try {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const code = urlParams.get('code');
+                    const state = urlParams.get('state');
+                    const error = urlParams.get('error');
+                    const errorDescription = urlParams.get('error_description');
 
-        if (error) {
-            // Send error to parent window
-            window.opener?.postMessage({
-                type: 'CILOGON_AUTH_ERROR',
-                error: errorDescription || error
-            }, parentOrigin);
-        } else if (code && state) {
-            // Send success to parent window
-            window.opener?.postMessage({
-                type: 'CILOGON_AUTH_SUCCESS',
-                code: code,
-                state: state
-            }, parentOrigin);
-        } else {
-            // Send error for missing parameters
-            window.opener?.postMessage({
-                type: 'CILOGON_AUTH_ERROR',
-                error: 'No authorization code received'
-            }, parentOrigin);
-        }
+                    if (error) {
+                        const errorMsg = errorDescription || error || 'Unknown authentication error';
+                        showStatus(`Authentication failed: ${errorMsg}`, 'error');
+                        
+                        if (window.opener) {
+                            window.opener.postMessage({
+                                type: 'CILOGON_AUTH_ERROR',
+                                error: errorMsg
+                            }, '*');
+                        }
+                        return;
+                    }
 
-        // Close this window after a short delay
-        setTimeout(() => {
-            window.close();
-        }, 1000);
+                    if (!code || !state) {
+                        showStatus('Invalid response from CILogon - missing code or state', 'error');
+                        
+                        if (window.opener) {
+                            window.opener.postMessage({
+                                type: 'CILOGON_AUTH_ERROR',
+                                error: 'Invalid response from CILogon'
+                            }, '*');
+                        }
+                        return;
+                    }
+
+                    showStatus('Authentication successful! Completing login...', 'success');
+
+                    // Send the authorization code back to the parent window
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'CILOGON_AUTH_SUCCESS',
+                            code: code,
+                            state: state
+                        }, '*');
+                        
+                        // Close this window after a brief delay
+                        setTimeout(() => {
+                            window.close();
+                        }, 1500);
+                    } else {
+                        showStatus('Unable to communicate with parent window', 'error');
+                    }
+
+                } catch (err) {
+                    console.error('Callback handling error:', err);
+                    showStatus(`Error processing callback: ${err.message}`, 'error');
+                    
+                    if (window.opener) {
+                        window.opener.postMessage({
+                            type: 'CILOGON_AUTH_ERROR',
+                            error: err.message
+                        }, '*');
+                    }
+                }
+            }
+
+            // Run the callback handler when the page loads
+            handleAuthCallback();
+        })();
     </script>
 </body>
 </html>
