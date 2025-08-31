@@ -24,7 +24,7 @@ async function generateCodeChallenge(verifier: string): Promise<string> {
 
 export class ORCIDProvider {
   // Generate auth URL for ORCID OAuth flow
-  getAuthUrl = async (): Promise<string> => {
+  async getAuthUrl(): Promise<string> {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
     const state = crypto.randomUUID();
@@ -36,7 +36,7 @@ export class ORCIDProvider {
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: config.orcid.clientId,
-      redirect_uri: `${window.location.origin}/auth/callback/orcid.html`,
+      redirect_uri: config.orcid.redirectUri,
       scope: config.orcid.scope,
       state,
       code_challenge: codeChallenge,
@@ -112,7 +112,7 @@ export class ORCIDProvider {
     });
   }
 
-  exchangeCodeForToken = async (code: string, state: string): Promise<TokenData> => {
+  async exchangeCodeForToken(code: string, state: string): Promise<TokenData> {
     const storedState = sessionStorage.getItem('orcid_state');
     const codeVerifier = sessionStorage.getItem('orcid_code_verifier');
 
@@ -133,7 +133,7 @@ export class ORCIDProvider {
       grant_type: 'authorization_code',
       code: code,
       client_id: config.orcid.clientId,
-      redirect_uri: `${window.location.origin}/auth/callback/orcid.html`,
+      redirect_uri: config.orcid.redirectUri,
       code_verifier: codeVerifier,
     });
 
