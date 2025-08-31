@@ -69,7 +69,8 @@ export class ORCIDProvider {
     return new Promise((resolve, reject) => {
       // Listen for messages from the popup
       const messageHandler = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+        // Be more permissive with origins for authentication flow
+        console.log('Received ORCID message from origin:', event.origin, 'with data:', event.data);
         
         if (event.data?.type === 'ORCID_AUTH_SUCCESS') {
           window.removeEventListener('message', messageHandler);

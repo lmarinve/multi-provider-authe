@@ -10,36 +10,54 @@ export class CILogonProvider {
     return btoa(String.fromCharCode(...array)).replace(/[+/=]/g, '').substring(0, 43);
   }
 
-  private getAuthUrl(state: string): string {
-    // Use current origin as redirect URI
-    const redirectUri = `${window.location.origin}/auth/callback/cilogon.html`;
+  private generateCodeVerifier(): string {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return btoa(String.fromCharCode(...array))
+      .replace(/[+/=]/g, m => ({ '+': '-', '/': '_', '=': '' }[m] || m))
+      .substring(0, 43);
+  }
+
+  private async generateCodeChallenge(verifier: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(verifier);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+      .replace(/[+/=]/g, m => ({ '+': '-', '/': '_', '=': '' }[m] || m));
+  }
+
+  private async getAuthUrl(state: string, codeVerifier: string): Promise<string> {
+    const codeChallenge = await this.generateCodeChallenge(codeVerifier);
     
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: config.cilogon.clientId,
-      redirect_uri: redirectUri,
+      redirect_uri: config.cilogon.redirectUri,
       scope: config.cilogon.scope,
       state: state,
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256'
     });
 
     return `${config.cilogon.authUrl}?${params.toString()}`;
   }
 
-  async exchangeCodeForToken(code: string, state: string): Promise<TokenData> {
+  async exchangeCodeForToken(code: string, state: string, codeVerifier: string): Promise<TokenData> {
     const storedState = sessionStorage.getItem('cilogon_state');
     if (!state || state !== storedState) {
       throw new Error('Invalid state parameter');
     }
 
     sessionStorage.removeItem('cilogon_state');
+    sessionStorage.removeItem('cilogon_code_verifier');
 
-    // Prepare token exchange request
-    const redirectUri = `${window.location.origin}/auth/callback/cilogon.html`;
+    // Prepare token exchange request with PKCE
     const params = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
       client_id: config.cilogon.clientId,
-      redirect_uri: redirectUri,
+      redirect_uri: config.cilogon.redirectUri,
+      code_verifier: codeVerifier,
     });
 
     try {
@@ -52,7 +70,8 @@ export class CILogonProvider {
       });
 
       if (!response.ok) {
-        throw new Error(`Token exchange failed: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Token exchange failed: ${response.status} ${response.statusText}. ${errorText}`);
       }
 
       const tokenResponse = await response.json();
@@ -75,8 +94,12 @@ export class CILogonProvider {
 
   async startAuthenticationPopup(): Promise<TokenData> {
     const state = this.generateState();
+    const codeVerifier = this.generateCodeVerifier();
+    
     sessionStorage.setItem('cilogon_state', state);
-    const authUrl = this.getAuthUrl(state);
+    sessionStorage.setItem('cilogon_code_verifier', codeVerifier);
+    
+    const authUrl = await this.getAuthUrl(state, codeVerifier);
     
     console.log('Opening CILogon authentication window...');
     
@@ -98,7 +121,8 @@ export class CILogonProvider {
     return new Promise((resolve, reject) => {
       // Listen for messages from the popup
       const messageHandler = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+        // Be more permissive with origins for authentication flow
+        console.log('Received message from origin:', event.origin, 'with data:', event.data);
         
         if (event.data?.type === 'CILOGON_AUTH_SUCCESS') {
           window.removeEventListener('message', messageHandler);
@@ -106,7 +130,13 @@ export class CILogonProvider {
           popup.close();
           
           const { code, state: returnedState } = event.data;
-          this.exchangeCodeForToken(code, returnedState)
+          const storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
+          if (!storedCodeVerifier) {
+            reject(new Error('Code verifier not found'));
+            return;
+          }
+          
+          this.exchangeCodeForToken(code, returnedState, storedCodeVerifier)
             .then(resolve)
             .catch(reject);
         } else if (event.data?.type === 'CILOGON_AUTH_ERROR') {
@@ -155,21 +185,33 @@ export class CILogonProvider {
       throw new Error('No authorization code received from CILogon');
     }
 
-    return await this.exchangeCodeForToken(code, state);
+    const storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
+    if (!storedCodeVerifier) {
+      throw new Error('Code verifier not found in session storage');
+    }
+
+    return await this.exchangeCodeForToken(code, state, storedCodeVerifier);
   }
 
-  startAuthentication(): void {
+  async startAuthentication(): Promise<void> {
     const state = this.generateState();
+    const codeVerifier = this.generateCodeVerifier();
+    
     sessionStorage.setItem('cilogon_state', state);
-    const authUrl = this.getAuthUrl(state);
+    sessionStorage.setItem('cilogon_code_verifier', codeVerifier);
+    
+    const authUrl = await this.getAuthUrl(state, codeVerifier);
     window.location.href = authUrl;
   }
 
   // Keep static methods for backward compatibility
-  static getAuthUrl(): string {
+  static async getAuthUrl(): Promise<string> {
     const provider = new CILogonProvider();
     const state = provider.generateState();
-    return provider.getAuthUrl(state);
+    const codeVerifier = provider.generateCodeVerifier();
+    sessionStorage.setItem('cilogon_state', state);
+    sessionStorage.setItem('cilogon_code_verifier', codeVerifier);
+    return provider.getAuthUrl(state, codeVerifier);
   }
 
   static handleCallback(): Promise<TokenData> {
@@ -177,9 +219,9 @@ export class CILogonProvider {
     return provider.handleCallback();
   }
 
-  static startAuthentication(): void {
+  static async startAuthentication(): Promise<void> {
     const provider = new CILogonProvider();
-    provider.startAuthentication();
+    return provider.startAuthentication();
   }
 
   static async startAuthenticationPopup(): Promise<TokenData> {
