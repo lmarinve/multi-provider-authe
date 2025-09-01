@@ -22,7 +22,7 @@ export const config = {
     tokenUrl: "https://cilogon.org/oauth2/token",
     jwksUrl: "https://cilogon.org/oauth2/certs",
     issuerUrl: "https://cilogon.org",
-    redirectUri: "https://lmarinve.github.io/auth/callback/cilogon", // Updated to match current GitHub Pages URL structure
+    redirectUri: "https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon", // Updated to match current GitHub Pages URL structure
     usePkce: true // PKCE is required with S256
   },
   
@@ -34,7 +34,7 @@ export const config = {
     tokenUrl: "https://orcid.org/oauth/token",
     scope: "/authenticate",
     get redirectUri() {
-      return `${config.getBaseUrl()}/auth/callback/orcid`;
+      return `${config.getBaseUrl()}/multi-provider-authe/auth/callback/orcid`;
     },
     usePkce: true
   },
