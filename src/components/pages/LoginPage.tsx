@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Provider } from "@/lib/config";
+import { Provider, config } from "@/lib/config";
 import { DeviceFlowState } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
 import { CILogonProvider } from "@/lib/providers/cilogon";
@@ -191,6 +191,43 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                       <strong>CILogon Authentication:</strong> Click the button below to open CILogon in a popup window. After completing authentication, the popup will close automatically and return your token.
                     </AlertDescription>
                   </Alert>
+                  
+                  {/* URL Information Display */}
+                  <Alert className="border-2 border-[rgb(50,135,200)] bg-white">
+                    <AlertDescription className="text-sm text-[rgb(64,143,204)]">
+                      <div className="space-y-2">
+                        <p><strong>Authentication URLs:</strong></p>
+                        <div className="space-y-1 font-mono text-xs break-all">
+                          <div>
+                            <span className="font-bold text-[rgb(50,135,200)]">Authorization:</span>
+                            <br />
+                            <span className="text-[rgb(64,143,204)]">{config.cilogon.authUrl}</span>
+                          </div>
+                          <div>
+                            <span className="font-bold text-[rgb(50,135,200)]">Token Endpoint:</span>
+                            <br />
+                            <span className="text-[rgb(64,143,204)]">{config.cilogon.tokenUrl}</span>
+                          </div>
+                          <div>
+                            <span className="font-bold text-[rgb(50,135,200)]">Client ID:</span>
+                            <br />
+                            <span className="text-[rgb(64,143,204)]">{config.cilogon.clientId}</span>
+                          </div>
+                          <div>
+                            <span className="font-bold text-[rgb(50,135,200)]">Redirect URI:</span>
+                            <br />
+                            <span className="text-[rgb(64,143,204)]">{config.cilogon.redirectUri}</span>
+                          </div>
+                          <div>
+                            <span className="font-bold text-[rgb(50,135,200)]">Scope:</span>
+                            <br />
+                            <span className="text-[rgb(64,143,204)]">{config.cilogon.scope}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                  
                   <Button 
                     onClick={startCILogonFlow} 
                     disabled={isLoading} 
