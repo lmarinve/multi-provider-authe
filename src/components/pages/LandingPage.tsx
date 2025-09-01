@@ -1,10 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Provider } from "@/lib/config";
-import { TokenStatus } from "@/components/TokenStatus";
-import { TokenStorage } from "@/lib/token-storage";
-import sdxLogo from "@/assets/images/sdx-logo.svg";
-import { useEffect, useState } from "react"; 
+import sdxLogo from "@/assets/images/sdx-logo.svg"; 
 
 interface LandingPageProps {
   selectedProvider?: Provider;
@@ -32,24 +29,6 @@ export function LandingPage({
   onProviderSelect,
   onLogin
 }: LandingPageProps) {
-  const [authStatus, setAuthStatus] = useState<Record<string, boolean>>({});
-  
-  useEffect(() => {
-    const updateAuthStatus = () => {
-      const cilogonToken = TokenStorage.getToken('cilogon');
-      const orcidToken = TokenStorage.getToken('orcid');
-      
-      setAuthStatus({
-        cilogon: cilogonToken && TokenStorage.isTokenValid(cilogonToken),
-        orcid: orcidToken && TokenStorage.isTokenValid(orcidToken)
-      });
-    };
-
-    updateAuthStatus();
-    const interval = setInterval(updateAuthStatus, 1000);
-    return () => clearInterval(interval);
-  }, []);
-  
   const canContinue = selectedProvider;
 
   return (
@@ -140,9 +119,6 @@ export function LandingPage({
                           : "Identity provider"
                         }
                       </div>
-                      <div className="text-center text-sm font-medium" style={{ color: 'rgb(200, 50, 50)' }}>
-                        {authStatus[provider] ? "Authenticated" : "Not authenticated"}
-                      </div>
                     </div>
                   </Button>
                 );
@@ -165,15 +141,6 @@ export function LandingPage({
           >
             Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}
           </Button>
-        </div>
-
-        {/* Existing Token Status (compact view) */}
-        <div className="mt-8">
-          <TokenStatus 
-            providers={['cilogon', 'orcid']}
-            showRefreshButtons={false}
-            compact={true}
-          />
         </div>
       </div>
     </div>
