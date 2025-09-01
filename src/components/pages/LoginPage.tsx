@@ -216,6 +216,82 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     }
   };
 
+  const startMEICANFlow = async () => {
+    console.log("Starting MEICAN authentication...");
+    setIsLoading(true);
+    setDeviceFlow({ status: "pending" });
+    
+    try {
+      // For now, simulate MEICAN authentication
+      // In a real implementation, this would integrate with MEICAN's auth system
+      setTimeout(() => {
+        const mockToken = {
+          access_token: "meican_mock_token_" + Date.now(),
+          token_type: "Bearer",
+          expires_in: 3600,
+          provider: "meican"
+        };
+        
+        TokenStorage.setToken("meican", mockToken);
+        toast.success("✅ MEICAN authentication successful!");
+        setDeviceFlow({ status: "success", token: mockToken });
+        
+        setTimeout(() => {
+          onComplete();
+        }, 2000);
+      }, 1500);
+      
+    } catch (error: any) {
+      console.error("MEICAN authentication failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
+      toast.error(`❌ ${errorMessage}`);
+      setDeviceFlow({ 
+        status: "error", 
+        error: errorMessage
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const startFabricConnectionFlow = async () => {
+    console.log("Starting FABRIC Connection authentication...");
+    setIsLoading(true);
+    setDeviceFlow({ status: "pending" });
+    
+    try {
+      // For now, simulate FABRIC Connection authentication
+      // In a real implementation, this would integrate with FABRIC Portal's auth system
+      setTimeout(() => {
+        const mockToken = {
+          access_token: "fabric_connection_mock_token_" + Date.now(),
+          token_type: "Bearer", 
+          expires_in: 3600,
+          provider: "fabricConnection"
+        };
+        
+        TokenStorage.setToken("fabricConnection", mockToken);
+        toast.success("✅ FABRIC Connection authentication successful!");
+        setDeviceFlow({ status: "success", token: mockToken });
+        
+        setTimeout(() => {
+          onComplete();
+        }, 2000);
+      }, 1500);
+      
+    } catch (error: any) {
+      console.error("FABRIC Connection authentication failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
+      toast.error(`❌ ${errorMessage}`);
+      setDeviceFlow({ 
+        status: "error", 
+        error: errorMessage
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
 
 
@@ -262,7 +338,12 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
         <CardHeader className="pb-8 text-center">
           <CardTitle className="text-2xl text-[rgb(64,143,204)] text-center">
-            Authenticate with {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}
+            Authenticate with {
+              provider === 'fabric' ? 'FABRIC API' : 
+              provider === 'meican' ? 'MEICAN' :
+              provider === 'fabricConnection' ? 'FABRIC Connection' :
+              provider.toUpperCase()
+            }
           </CardTitle>
           <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)] text-center">
             Complete the authentication flow to obtain your token

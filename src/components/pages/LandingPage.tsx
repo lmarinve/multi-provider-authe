@@ -171,7 +171,7 @@ export function LandingPage({
         {/* Existing Token Status (compact view) */}
         <div className="mt-8">
           <TokenStatus 
-            providers={['cilogon', 'orcid', 'fabric']}
+            providers={['cilogon', 'orcid', 'fabric', 'meican', 'fabricConnection']}
             showRefreshButtons={false}
             compact={true}
           />

@@ -34,7 +34,7 @@ function App() {
       // Handle both with and without /multi-provider-authe prefix
       if (path === "/multi-provider-authe/login" || path === "/login") {
         const provider = searchParams.get("provider") as Provider;
-        if (provider && ["cilogon", "orcid", "fabric"].includes(provider)) {
+        if (provider && ["cilogon", "orcid", "fabric", "meican", "fabricConnection"].includes(provider)) {
           setLoginProvider(provider);
         }
         setCurrentPage("login");
