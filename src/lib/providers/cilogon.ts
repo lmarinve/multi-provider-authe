@@ -58,20 +58,25 @@ export class CILogonProvider {
   private async getAuthUrl(state: string, codeVerifier: string): Promise<string> {
     const codeChallenge = await this.generateCodeChallenge(codeVerifier);
     
-    console.log('CILogon Auth URL params:', {
-      client_id: config.cilogon.clientId,
+    console.log('Building CILogon auth URL with:', {
       redirect_uri: config.cilogon.redirectUri,
-      scope: config.cilogon.scope,
-      state: state.substring(0, 10) + '...' // Log first 10 chars for security
+      client_id: config.cilogon.clientId,
+      scope: config.cilogon.scope
     });
     
-    // Build URL manually to match the exact format required by CILogon
-    // CRITICAL: code_challenge should NOT be URL encoded since it's already base64url
-    const authUrl = `https://cilogon.org/authorize?response_type=code&client_id=${encodeURIComponent(config.cilogon.clientId)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&scope=${encodeURIComponent(config.cilogon.scope)}&state=${encodeURIComponent(state)}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+    // Build URL using URLSearchParams to ensure proper encoding
+    const authUrl = new URL("https://cilogon.org/authorize");
+    authUrl.searchParams.set("response_type", "code");
+    authUrl.searchParams.set("client_id", config.cilogon.clientId);
+    authUrl.searchParams.set("redirect_uri", config.cilogon.redirectUri);
+    authUrl.searchParams.set("scope", config.cilogon.scope);
+    authUrl.searchParams.set("state", state);
+    authUrl.searchParams.set("code_challenge", codeChallenge);
+    authUrl.searchParams.set("code_challenge_method", "S256");
     
-    console.log('Complete CILogon auth URL:', authUrl);
-    console.log('Code challenge (raw, no padding):', codeChallenge);
-    return authUrl;
+    const authUrlString = authUrl.toString();
+    console.log('Final CILogon auth URL:', authUrlString);
+    return authUrlString;
   }
 
   async exchangeCodeForToken(code: string, state: string, codeVerifier: string): Promise<TokenData> {
@@ -88,11 +93,7 @@ export class CILogonProvider {
     const body = `grant_type=authorization_code&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&client_id=${encodeURIComponent(config.cilogon.clientId)}&code_verifier=${codeVerifier}`;
 
     try {
-      console.log('CILogon token exchange request:', {
-        url: config.cilogon.tokenUrl,
-        client_id: config.cilogon.clientId,
-        redirect_uri: config.cilogon.redirectUri
-      });
+      console.log('Token exchange using redirect_uri:', config.cilogon.redirectUri);
 
       const response = await fetch(config.cilogon.tokenUrl, {
         method: 'POST',
