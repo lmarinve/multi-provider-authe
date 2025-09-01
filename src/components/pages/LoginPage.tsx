@@ -51,6 +51,31 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     } catch (error: any) {
       console.error("CILogon authentication failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Authentication failed";
+      
+      // Check if this was actually a successful authentication (popup closed after success)
+      if (errorMessage.includes("window was closed") && provider === "cilogon") {
+        // Check localStorage one more time for successful authentication
+        try {
+          const authResult = localStorage.getItem('cilogon_auth_result');
+          if (authResult) {
+            const result = JSON.parse(authResult);
+            if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 300000) {
+              console.log('Found successful authentication after popup closed error');
+              localStorage.removeItem('cilogon_auth_result');
+              toast.success("✅ CILogon authentication successful!");
+              setDeviceFlow({ status: "success" });
+              setTimeout(() => {
+                onComplete();
+              }, 1500);
+              setIsLoading(false);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error('Error checking auth after popup close:', e);
+        }
+      }
+      
       toast.error(`❌ ${errorMessage}`);
       setDeviceFlow({ 
         status: "error", 
@@ -63,18 +88,31 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
 
   // Add effect to check for completed authentication when window regains focus
   useEffect(() => {
+    let authCheckInterval: NodeJS.Timeout | null = null;
+    
     const handleVisibilityChange = () => {
       if (!document.hidden && deviceFlow.status === "pending") {
-        // Check localStorage for completed authentication
-        setTimeout(() => {
+        console.log('Window regained focus, checking for completed authentication...');
+        
+        // Set up periodic check for completed authentication
+        if (authCheckInterval) {
+          clearInterval(authCheckInterval);
+        }
+        
+        authCheckInterval = setInterval(() => {
           try {
             const authResult = localStorage.getItem('cilogon_auth_result');
             if (authResult) {
               const result = JSON.parse(authResult);
               if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 120000) {
-                console.log('Found completed authentication after window regained focus');
+                console.log('Found completed authentication in localStorage');
                 // Clear the stored result
                 localStorage.removeItem('cilogon_auth_result');
+                // Clear the interval
+                if (authCheckInterval) {
+                  clearInterval(authCheckInterval);
+                  authCheckInterval = null;
+                }
                 // Trigger success state
                 setDeviceFlow({ status: "success" });
                 toast.success("✅ CILogon authentication successful!");
@@ -86,7 +124,15 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
           } catch (e) {
             console.error('Error checking for completed auth:', e);
           }
-        }, 500);
+        }, 1000);
+        
+        // Stop checking after 10 seconds
+        setTimeout(() => {
+          if (authCheckInterval) {
+            clearInterval(authCheckInterval);
+            authCheckInterval = null;
+          }
+        }, 10000);
       }
     };
 
@@ -96,6 +142,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
+      if (authCheckInterval) {
+        clearInterval(authCheckInterval);
+      }
     };
   }, [deviceFlow.status, onComplete]);
 
@@ -294,16 +343,20 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                         const authResult = localStorage.getItem('cilogon_auth_result');
                         if (authResult) {
                           const result = JSON.parse(authResult);
-                          if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 120000) {
+                          if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 300000) {
                             console.log('Manual check found completed authentication');
                             localStorage.removeItem('cilogon_auth_result');
                             setDeviceFlow({ status: "success" });
                             toast.success("✅ CILogon authentication successful!");
+                            setIsLoading(false);
                             setTimeout(() => {
                               onComplete();
                             }, 1500);
+                          } else if (result.type === 'CILOGON_AUTH_SUCCESS') {
+                            toast.info("Found authentication data but it's too old. Please try again.");
+                            localStorage.removeItem('cilogon_auth_result');
                           } else {
-                            toast.info("No completed authentication found. Please ensure you completed the login in the popup window.");
+                            toast.info("No successful authentication found. Please complete the login in the popup window.");
                           }
                         } else {
                           toast.info("No authentication data found. Please complete the login in the popup window first.");
@@ -313,9 +366,9 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                         toast.error("Error checking authentication status.");
                       }
                     }}
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-2 border-[rgb(50,135,200)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
+                    variant="default"
+                    size="lg"
+                    className="w-full bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
                   >
                     ✅ I've completed authentication - Continue
                   </Button>
