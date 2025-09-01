@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKCE Test - CILogon Integration</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .test-result {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+            background: #f0f9ff;
+        }
+        .success { border-color: #10b981; background: #f0fdf4; }
+        .error { border-color: #ef4444; background: #fef2f2; }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover { background: #0056a3; }
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>CILogon PKCE Implementation Test</h1>
+    <p>This page tests the PKCE flow implementation for CILogon authentication.</p>
+    
+    <div id="results"></div>
+    
+    <button onclick="testPKCEGeneration()">Test PKCE Generation</button>
+    <button onclick="testCILogonFlow()">Test Full CILogon Flow</button>
+    <button onclick="clearStorage()">Clear Session Storage</button>
+    
+    <h3>Session Storage Contents:</h3>
+    <div id="storage-contents"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            document.getElementById('results').appendChild(div);
+            console.log(message);
+        }
+
+        function updateStorageDisplay() {
+            const storageDiv = document.getElementById('storage-contents');
+            const storage = {};
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                storage[key] = sessionStorage.getItem(key);
+            }
+            storageDiv.innerHTML = `<pre>${JSON.stringify(storage, null, 2)}</pre>`;
+        }
+
+        function generateState() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return btoa(String.fromCharCode(...array))
+                .replace(/\+/g, "-")
+                .replace(/\//g, "_")
+                .replace(/=+/g, "");
+        }
+
+        function generateCodeVerifier() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return btoa(String.fromCharCode(...array))
+                .replace(/\+/g, "-")
+                .replace(/\//g, "_")
+                .replace(/=+/g, "");
+        }
+
+        async function generateCodeChallenge(verifier) {
+            const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+            return btoa(String.fromCharCode(...new Uint8Array(digest)))
+                .replace(/\+/g, "-")
+                .replace(/\//g, "_")
+                .replace(/=+/g, "");
+        }
+
+        async function testPKCEGeneration() {
+            document.getElementById('results').innerHTML = '';
+            
+            try {
+                // Test 1: Generate verifier
+                const verifier = generateCodeVerifier();
+                log(`✓ Generated verifier: ${verifier.substring(0, 20)}...`);
+                log(`✓ Verifier length: ${verifier.length} characters`);
+                
+                const validChars = /^[A-Za-z0-9\-._~]+$/.test(verifier);
+                log(`${validChars ? '✓' : '✗'} Verifier contains only valid characters`, validChars ? 'success' : 'error');
+                
+                // Test 2: Generate challenge
+                const challenge = await generateCodeChallenge(verifier);
+                log(`✓ Generated challenge: ${challenge.substring(0, 20)}...`);
+                log(`✓ Challenge length: ${challenge.length} characters`);
+                
+                // Test 3: Verify challenge can be regenerated
+                const challenge2 = await generateCodeChallenge(verifier);
+                const challengeMatches = challenge === challenge2;
+                log(`${challengeMatches ? '✓' : '✗'} Challenge generation is deterministic`, challengeMatches ? 'success' : 'error');
+                
+                // Test 4: State-keyed storage
+                const state = generateState();
+                const pkceMap = JSON.parse(sessionStorage.getItem('cilogon_pkce') || '{}');
+                pkceMap[state] = verifier;
+                sessionStorage.setItem('cilogon_pkce', JSON.stringify(pkceMap));
+                
+                const retrieved = JSON.parse(sessionStorage.getItem('cilogon_pkce') || '{}')[state];
+                const storageWorks = retrieved === verifier;
+                log(`${storageWorks ? '✓' : '✗'} State-keyed storage works correctly`, storageWorks ? 'success' : 'error');
+                
+                updateStorageDisplay();
+                
+            } catch (error) {
+                log(`✗ PKCE generation failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testCILogonFlow() {
+            document.getElementById('results').innerHTML = '';
+            
+            const state = generateState();
+            const verifier = generateCodeVerifier();
+            
+            // Store using state-keyed approach
+            const pkceMap = JSON.parse(sessionStorage.getItem('cilogon_pkce') || '{}');
+            pkceMap[state] = verifier;
+            sessionStorage.setItem('cilogon_pkce', JSON.stringify(pkceMap));
+            
+            log(`✓ Generated state: ${state}`);
+            log(`✓ Generated verifier: ${verifier.substring(0, 20)}...`);
+            log(`✓ Stored in state-keyed map`);
+            
+            generateCodeChallenge(verifier).then(challenge => {
+                // Build CILogon auth URL
+                const params = new URLSearchParams({
+                    response_type: 'code',
+                    client_id: 'cilogon:/client_id/e33e29a20f84e0edd144d1e9a6e2b0',
+                    redirect_uri: 'https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon',
+                    scope: 'openid',
+                    state: state,
+                    code_challenge: challenge,
+                    code_challenge_method: 'S256'
+                });
+                
+                const authUrl = `https://cilogon.org/authorize?${params.toString()}`;
+                log(`✓ Built auth URL: ${authUrl.substring(0, 100)}...`);
+                
+                // Simulate opening popup
+                log(`🔗 <a href="${authUrl}" target="_blank">Click here to test CILogon authentication</a>`);
+                log(`📝 After authentication, check the callback URL for code and state parameters`);
+                
+                updateStorageDisplay();
+            });
+        }
+
+        function clearStorage() {
+            sessionStorage.clear();
+            log('✓ Session storage cleared');
+            updateStorageDisplay();
+        }
+
+        // Update storage display on page load
+        updateStorageDisplay();
+        
+        // Listen for storage changes
+        window.addEventListener('storage', updateStorageDisplay);
+        setInterval(updateStorageDisplay, 1000); // Update every second
+    </script>
+</body>
+</html>

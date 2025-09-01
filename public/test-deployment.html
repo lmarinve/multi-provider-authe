@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Test - AtlanticWave-SDX</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgb(255, 255, 255);
+            color: rgb(50, 135, 200);
+        }
+        .test-item {
+            background: rgb(236, 244, 250);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid rgb(120, 176, 219);
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>AtlanticWave-SDX Deployment Test</h1>
+    <p>This page helps verify that your GitHub Pages deployment is working correctly.</p>
+    
+    <div id="hostname-info" class="test-item">
+        <strong>Current URL Info:</strong>
+        <br>Hostname: <span id="hostname"></span>
+        <br>Origin: <span id="origin"></span>
+        <br>Full URL: <span id="fullUrl"></span>
+    </div>
+    
+    <div id="callback-test" class="test-item">
+        <strong>Callback URL Test:</strong>
+        <br>Expected callback: <span id="callbackUrl"></span>
+        <br><a id="callbackLink" href="#">Test callback page access →</a>
+    </div>
+    
+    <div id="github-pages-test" class="test-item">
+        <strong>GitHub Pages Status:</strong>
+        <br><span id="pagesStatus"></span>
+    </div>
+
+    <script>
+        // Display current URL info
+        document.getElementById('hostname').textContent = window.location.hostname;
+        document.getElementById('origin').textContent = window.location.origin;
+        document.getElementById('fullUrl').textContent = window.location.href;
+        
+        // Set up callback test
+        const callbackUrl = window.location.origin + '/auth/callback/cilogon';
+        document.getElementById('callbackUrl').textContent = callbackUrl;
+        document.getElementById('callbackLink').href = callbackUrl;
+        
+        // Determine if this is GitHub Pages
+        const isGitHubPages = window.location.hostname.endsWith('.github.io');
+        const pagesStatusEl = document.getElementById('pagesStatus');
+        
+        if (isGitHubPages) {
+            pagesStatusEl.textContent = '✓ Running on GitHub Pages';
+            pagesStatusEl.parentElement.classList.add('success');
+        } else {
+            pagesStatusEl.textContent = '⚠ Not on GitHub Pages (development environment)';
+            pagesStatusEl.parentElement.classList.add('error');
+        }
+    </script>
+</body>
+</html>

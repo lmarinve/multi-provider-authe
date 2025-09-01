@@ -58,24 +58,29 @@ export class CILogonProvider {
   private async getAuthUrl(state: string, codeVerifier: string): Promise<string> {
     const codeChallenge = await this.generateCodeChallenge(codeVerifier);
     
-    console.log('Building CILogon auth URL with:', {
-      redirect_uri: config.cilogon.redirectUri,
-      client_id: config.cilogon.clientId,
-      scope: config.cilogon.scope
-    });
+    // Use the exact registered redirect URI without any modifications
+    const exactRedirectUri = "https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon";
     
-    // Build URL using URLSearchParams to ensure proper encoding
-    const authUrl = new URL("https://cilogon.org/authorize");
-    authUrl.searchParams.set("response_type", "code");
-    authUrl.searchParams.set("client_id", config.cilogon.clientId);
-    authUrl.searchParams.set("redirect_uri", config.cilogon.redirectUri);
-    authUrl.searchParams.set("scope", config.cilogon.scope);
-    authUrl.searchParams.set("state", state);
-    authUrl.searchParams.set("code_challenge", codeChallenge);
-    authUrl.searchParams.set("code_challenge_method", "S256");
+    console.log('Building CILogon auth URL with registered redirect URI:', exactRedirectUri);
+    console.log('Config redirect URI:', config.cilogon.redirectUri);
+    console.log('URIs match:', exactRedirectUri === config.cilogon.redirectUri);
     
-    const authUrlString = authUrl.toString();
+    // Build URL manually using the exact registered URI
+    const params = [
+      `response_type=code`,
+      `client_id=${encodeURIComponent(config.cilogon.clientId)}`,
+      `redirect_uri=${encodeURIComponent(exactRedirectUri)}`,
+      `scope=${encodeURIComponent(config.cilogon.scope)}`,
+      `state=${encodeURIComponent(state)}`,
+      `code_challenge=${encodeURIComponent(codeChallenge)}`,
+      `code_challenge_method=S256`
+    ];
+    
+    const authUrlString = `https://cilogon.org/authorize?${params.join('&')}`;
+    
     console.log('Final CILogon auth URL:', authUrlString);
+    console.log('Extracted redirect_uri from URL:', decodeURIComponent(authUrlString.match(/redirect_uri=([^&]+)/)?.[1] || ''));
+    
     return authUrlString;
   }
 
@@ -88,12 +93,15 @@ export class CILogonProvider {
     sessionStorage.removeItem('cilogon_state');
     sessionStorage.removeItem('cilogon_code_verifier');
 
+    // Use the exact same redirect URI that was used in the authorization request
+    const exactRedirectUri = "https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon";
+
     // Prepare token exchange request with PKCE using exact format required
     // CRITICAL: code_verifier should NOT be URL encoded since it's already base64url
-    const body = `grant_type=authorization_code&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&client_id=${encodeURIComponent(config.cilogon.clientId)}&code_verifier=${codeVerifier}`;
+    const body = `grant_type=authorization_code&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(exactRedirectUri)}&client_id=${encodeURIComponent(config.cilogon.clientId)}&code_verifier=${codeVerifier}`;
 
     try {
-      console.log('Token exchange using redirect_uri:', config.cilogon.redirectUri);
+      console.log('Token exchange using exact redirect_uri:', exactRedirectUri);
 
       const response = await fetch(config.cilogon.tokenUrl, {
         method: 'POST',
