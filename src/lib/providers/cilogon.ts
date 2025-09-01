@@ -13,8 +13,11 @@ export class CILogonProvider {
   private generateCodeVerifier(): string {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
+    // Generate base64url string with no padding
     return btoa(String.fromCharCode(...array))
-      .replace(/[+/=]/g, m => ({ '+': '-', '/': '_', '=': '' }[m] || m))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '')
       .substring(0, 43);
   }
 
@@ -22,8 +25,11 @@ export class CILogonProvider {
     const encoder = new TextEncoder();
     const data = encoder.encode(verifier);
     const digest = await crypto.subtle.digest('SHA-256', data);
+    // Convert to base64url format (no padding)
     return btoa(String.fromCharCode(...new Uint8Array(digest)))
-      .replace(/[+/=]/g, m => ({ '+': '-', '/': '_', '=': '' }[m] || m));
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
   }
 
   private async getAuthUrl(state: string, codeVerifier: string): Promise<string> {
@@ -36,17 +42,9 @@ export class CILogonProvider {
       state: state.substring(0, 10) + '...' // Log first 10 chars for security
     });
     
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: config.cilogon.clientId,
-      redirect_uri: config.cilogon.redirectUri,
-      scope: config.cilogon.scope,
-      state: state,
-      code_challenge: codeChallenge,
-      code_challenge_method: 'S256'
-    });
-
-    const authUrl = `${config.cilogon.authUrl}?${params.toString()}`;
+    // Build URL manually to match the exact format required by CILogon
+    const authUrl = `https://cilogon.org/authorize?response_type=code&client_id=${encodeURIComponent(config.cilogon.clientId)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&scope=${encodeURIComponent(config.cilogon.scope)}&state=${encodeURIComponent(state)}&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`;
+    
     console.log('Complete CILogon auth URL:', authUrl);
     return authUrl;
   }
@@ -60,30 +58,36 @@ export class CILogonProvider {
     sessionStorage.removeItem('cilogon_state');
     sessionStorage.removeItem('cilogon_code_verifier');
 
-    // Prepare token exchange request with PKCE
-    const params = new URLSearchParams({
-      grant_type: 'authorization_code',
-      code: code,
-      client_id: config.cilogon.clientId,
-      redirect_uri: config.cilogon.redirectUri,
-      code_verifier: codeVerifier,
-    });
+    // Prepare token exchange request with PKCE using exact format required
+    const body = `grant_type=authorization_code&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&client_id=${encodeURIComponent(config.cilogon.clientId)}&code_verifier=${encodeURIComponent(codeVerifier)}`;
 
     try {
+      console.log('CILogon token exchange request:', {
+        url: config.cilogon.tokenUrl,
+        client_id: config.cilogon.clientId,
+        redirect_uri: config.cilogon.redirectUri
+      });
+
       const response = await fetch(config.cilogon.tokenUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: params.toString(),
+        body: body,
       });
 
       if (!response.ok) {
         const errorText = await response.text();
+        console.error('CILogon token exchange failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        });
         throw new Error(`Token exchange failed: ${response.status} ${response.statusText}. ${errorText}`);
       }
 
       const tokenResponse = await response.json();
+      console.log('CILogon token exchange successful:', { has_id_token: !!tokenResponse.id_token, has_access_token: !!tokenResponse.access_token });
       
       const tokenData: TokenData = {
         id_token: tokenResponse.id_token || tokenResponse.access_token,
