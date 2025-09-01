@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Authentication</title>
+</head>
+<body>
+    <h1>Debug Authentication Storage</h1>
+    <button onclick="checkStorage()">Check localStorage</button>
+    <button onclick="clearStorage()">Clear localStorage</button>
+    <pre id="output"></pre>
+
+    <script>
+        function checkStorage() {
+            const output = document.getElementById('output');
+            const storage = {};
+            
+            // Check all localStorage keys
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key) {
+                    storage[key] = localStorage.getItem(key);
+                }
+            }
+            
+            output.textContent = JSON.stringify(storage, null, 2);
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            document.getElementById('output').textContent = 'Storage cleared';
+        }
+        
+        // Auto-check on load
+        checkStorage();
+    </script>
+</body>
+</html>

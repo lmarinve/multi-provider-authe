@@ -34,6 +34,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
   const startCILogonFlow = async () => {
     console.log("Starting CILogon authentication...");
     setIsLoading(true);
+    setDeviceFlow({ status: "pending" });
     
     try {
       const token = await CILogonProvider.startAuthenticationPopup();
@@ -42,10 +43,10 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       toast.success("CILogon authentication successful!");
       setDeviceFlow({ status: "success", token });
       
-      // Complete the login process
+      // Show success message briefly, then complete
       setTimeout(() => {
         onComplete();
-      }, 1000);
+      }, 1500);
       
     } catch (error: any) {
       console.error("CILogon authentication failed:", error);
@@ -199,6 +200,14 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     {isLoading ? "Opening Authentication..." : "Login with CILogon"}
                   </Button>
                 </div>
+              )}
+              {deviceFlow.status === "pending" && (
+                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                  <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
+                  <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
+                    Waiting for authentication to complete in the popup window...
+                  </AlertDescription>
+                </Alert>
               )}
 
               {deviceFlow.status === "success" && (

@@ -25,8 +25,46 @@ export function TokenPage({ onBack }: TokenPageProps) {
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
+    // Initial load
     loadTokens();
-  }, []);
+    
+    // Listen for storage changes in case tokens are added from another tab/window
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key && e.key.includes('auth.')) {
+        console.log('Storage change detected for auth tokens, reloading');
+        setTimeout(loadTokens, 100); // Small delay to ensure consistency
+      }
+    };
+
+    // Listen for window focus (user returns from auth popup)
+    const handleWindowFocus = () => {
+      console.log('Window focused, checking for new tokens');
+      loadTokens();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', handleWindowFocus);
+    
+    // Also check for new tokens periodically
+    const checkInterval = setInterval(() => {
+      const currentTokenCount = Object.keys(tokens).length;
+      const cilogon = TokenStorage.getToken("cilogon");
+      const orcid = TokenStorage.getToken("orcid");  
+      const fabric = TokenStorage.getToken("fabric");
+      const validCount = [cilogon, orcid, fabric].filter(t => t && TokenStorage.isTokenValid(t)).length;
+      
+      if (validCount > currentTokenCount) {
+        console.log('New valid token detected, reloading');
+        loadTokens();
+      }
+    }, 2000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleWindowFocus);
+      clearInterval(checkInterval);
+    };
+  }, [tokens]);
 
   useEffect(() => {
     if (selectedToken) {
@@ -38,28 +76,62 @@ export function TokenPage({ onBack }: TokenPageProps) {
   }, [selectedToken]);
 
   const loadTokens = () => {
+    console.log('Loading tokens from storage...');
     const cilogon = TokenStorage.getToken("cilogon");
     const orcid = TokenStorage.getToken("orcid");
     const fabric = TokenStorage.getToken("fabric");
+
+    console.log('Found tokens:', { 
+      cilogon: cilogon ? 'present' : 'missing',
+      orcid: orcid ? 'present' : 'missing', 
+      fabric: fabric ? 'present' : 'missing'
+    });
 
     const validTokens: any = {};
     
     if (cilogon && TokenStorage.isTokenValid(cilogon)) {
       validTokens.cilogon = cilogon;
+      console.log('CILogon token is valid');
+    } else if (cilogon) {
+      console.log('CILogon token is expired');
     }
+    
     if (orcid && TokenStorage.isTokenValid(orcid)) {
       validTokens.orcid = orcid;
+      console.log('ORCID token is valid');
+    } else if (orcid) {
+      console.log('ORCID token is expired');
     }
+    
     if (fabric && TokenStorage.isTokenValid(fabric)) {
       validTokens.fabric = fabric;
+      console.log('FABRIC token is valid');
+    } else if (fabric) {
+      console.log('FABRIC token is expired');
     }
 
+    console.log('Valid tokens count:', Object.keys(validTokens).length);
     setTokens(validTokens);
 
-    // Auto-select the first valid token
-    const firstToken = Object.values(validTokens)[0] as TokenData | undefined;
-    if (firstToken && !selectedToken) {
-      setSelectedToken(firstToken);
+    // Show success message if we just got new tokens
+    const previousCount = Object.keys(tokens).length;
+    const newCount = Object.keys(validTokens).length;
+    if (newCount > previousCount) {
+      const newProviders = Object.keys(validTokens).filter(provider => !tokens[provider as keyof typeof tokens]);
+      if (newProviders.length > 0) {
+        toast.success(`Successfully authenticated with ${newProviders.join(', ').toUpperCase()}!`);
+      }
+    }
+
+    // Auto-select the most recently created valid token
+    const tokensByTimestamp = Object.entries(validTokens)
+      .sort(([,a], [,b]) => (b as TokenData).issued_at - (a as TokenData).issued_at);
+    
+    const mostRecentToken = tokensByTimestamp[0]?.[1] as TokenData | undefined;
+    
+    if (mostRecentToken && (!selectedToken || mostRecentToken.issued_at > selectedToken.issued_at)) {
+      console.log('Auto-selecting most recent token:', mostRecentToken.provider);
+      setSelectedToken(mostRecentToken);
     }
   };
 

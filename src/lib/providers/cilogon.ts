@@ -157,6 +157,7 @@ export class CILogonProvider {
           const authResult = localStorage.getItem('cilogon_auth_result');
           if (authResult) {
             const result = JSON.parse(authResult);
+            console.log('Found stored auth result:', result);
             // Only process recent results (within 2 minutes)
             if (Date.now() - result.timestamp < 120000) {
               localStorage.removeItem('cilogon_auth_result');
@@ -165,6 +166,7 @@ export class CILogonProvider {
               clearInterval(fallbackCheck);
               
               if (result.type === 'CILOGON_AUTH_SUCCESS') {
+                console.log('Processing stored successful auth result');
                 const storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
                 if (!storedCodeVerifier) {
                   reject(new Error('Code verifier not found'));
@@ -172,17 +174,26 @@ export class CILogonProvider {
                 }
                 
                 this.exchangeCodeForToken(result.code, result.state, storedCodeVerifier)
-                  .then(resolve)
-                  .catch(reject);
+                  .then((tokenData) => {
+                    console.log('Token exchange successful from localStorage fallback:', tokenData);
+                    resolve(tokenData);
+                  })
+                  .catch((error) => {
+                    console.error('Token exchange failed from localStorage fallback:', error);
+                    reject(error);
+                  });
               } else if (result.type === 'CILOGON_AUTH_ERROR') {
+                console.log('Processing stored error auth result:', result.error);
                 reject(new Error(result.error || 'Authentication failed'));
               }
+            } else {
+              console.log('Stored auth result is too old, ignoring');
             }
           }
         } catch (e) {
           console.error('Error checking localStorage fallback:', e);
         }
-      }, 2000);
+      }, 1000);
       
       // Check if popup is closed every second
       const checkClosed = setInterval(() => {

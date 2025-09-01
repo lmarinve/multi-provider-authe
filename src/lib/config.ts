@@ -6,6 +6,14 @@ export const config = {
   },
   tokenHandoffPath: "/auth/oidc-token",
   
+  // Get the current base URL dynamically
+  getBaseUrl: () => {
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+    return "https://lmarinve.github.io/multi-provider-authe";
+  },
+  
   // CILogon - Updated with correct OIDC settings
   cilogon: {
     clientId: "cilogon:/client_id/e33e29a20f84e0edd144d1e9a6e2b0",
@@ -14,7 +22,9 @@ export const config = {
     tokenUrl: "https://cilogon.org/oauth2/token",
     jwksUrl: "https://cilogon.org/oauth2/certs",
     issuerUrl: "https://cilogon.org",
-    redirectUri: "https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon",
+    get redirectUri() {
+      return `${config.getBaseUrl()}/auth/callback/cilogon`;
+    },
     usePkce: true // PKCE is required with S256
   },
   
@@ -25,7 +35,9 @@ export const config = {
     authUrl: "https://orcid.org/oauth/authorize", 
     tokenUrl: "https://orcid.org/oauth/token",
     scope: "/authenticate",
-    redirectUri: "https://lmarinve.github.io/multi-provider-authe/auth/callback/orcid",
+    get redirectUri() {
+      return `${config.getBaseUrl()}/auth/callback/orcid`;
+    },
     usePkce: true
   },
   
