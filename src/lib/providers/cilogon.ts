@@ -29,6 +29,13 @@ export class CILogonProvider {
   private async getAuthUrl(state: string, codeVerifier: string): Promise<string> {
     const codeChallenge = await this.generateCodeChallenge(codeVerifier);
     
+    console.log('CILogon Auth URL params:', {
+      client_id: config.cilogon.clientId,
+      redirect_uri: config.cilogon.redirectUri,
+      scope: config.cilogon.scope,
+      state: state.substring(0, 10) + '...' // Log first 10 chars for security
+    });
+    
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: config.cilogon.clientId,
@@ -39,7 +46,9 @@ export class CILogonProvider {
       code_challenge_method: 'S256'
     });
 
-    return `${config.cilogon.authUrl}?${params.toString()}`;
+    const authUrl = `${config.cilogon.authUrl}?${params.toString()}`;
+    console.log('Complete CILogon auth URL:', authUrl);
+    return authUrl;
   }
 
   async exchangeCodeForToken(code: string, state: string, codeVerifier: string): Promise<TokenData> {

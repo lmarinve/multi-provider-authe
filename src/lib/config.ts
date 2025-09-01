@@ -22,9 +22,7 @@ export const config = {
     tokenUrl: "https://cilogon.org/oauth2/token",
     jwksUrl: "https://cilogon.org/oauth2/certs",
     issuerUrl: "https://cilogon.org",
-    get redirectUri() {
-      return `${config.getBaseUrl()}/auth/callback/cilogon`;
-    },
+    redirectUri: "https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon", // Fixed redirect URI as registered
     usePkce: true // PKCE is required with S256
   },
   
