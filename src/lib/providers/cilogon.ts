@@ -127,6 +127,7 @@ export class CILogonProvider {
         if (event.data?.type === 'CILOGON_AUTH_SUCCESS') {
           window.removeEventListener('message', messageHandler);
           clearInterval(checkClosed);
+          clearInterval(fallbackCheck);
           popup.close();
           
           const { code, state: returnedState } = event.data;
@@ -142,6 +143,7 @@ export class CILogonProvider {
         } else if (event.data?.type === 'CILOGON_AUTH_ERROR') {
           window.removeEventListener('message', messageHandler);
           clearInterval(checkClosed);
+          clearInterval(fallbackCheck);
           popup.close();
           reject(new Error(event.data.error || 'Authentication failed'));
         }
@@ -149,10 +151,44 @@ export class CILogonProvider {
       
       window.addEventListener('message', messageHandler);
       
+      // Fallback mechanism: check localStorage for auth result
+      const fallbackCheck = setInterval(() => {
+        try {
+          const authResult = localStorage.getItem('cilogon_auth_result');
+          if (authResult) {
+            const result = JSON.parse(authResult);
+            // Only process recent results (within 2 minutes)
+            if (Date.now() - result.timestamp < 120000) {
+              localStorage.removeItem('cilogon_auth_result');
+              window.removeEventListener('message', messageHandler);
+              clearInterval(checkClosed);
+              clearInterval(fallbackCheck);
+              
+              if (result.type === 'CILOGON_AUTH_SUCCESS') {
+                const storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
+                if (!storedCodeVerifier) {
+                  reject(new Error('Code verifier not found'));
+                  return;
+                }
+                
+                this.exchangeCodeForToken(result.code, result.state, storedCodeVerifier)
+                  .then(resolve)
+                  .catch(reject);
+              } else if (result.type === 'CILOGON_AUTH_ERROR') {
+                reject(new Error(result.error || 'Authentication failed'));
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Error checking localStorage fallback:', e);
+        }
+      }, 2000);
+      
       // Check if popup is closed every second
       const checkClosed = setInterval(() => {
         if (popup.closed) {
           clearInterval(checkClosed);
+          clearInterval(fallbackCheck);
           window.removeEventListener('message', messageHandler);
           reject(new Error('Authentication window was closed before completion'));
         }
@@ -161,6 +197,7 @@ export class CILogonProvider {
       // Timeout after 10 minutes
       setTimeout(() => {
         clearInterval(checkClosed);
+        clearInterval(fallbackCheck);
         window.removeEventListener('message', messageHandler);
         if (!popup.closed) {
           popup.close();
