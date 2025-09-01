@@ -490,29 +490,6 @@ export function TokenPage({ onBack }: TokenPageProps) {
                   {isSending ? "Sending..." : "Send Token to Backend"}
                 </Button>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    onClick={() => {
-                      window.open("http://190.103.184.199", "_blank");
-                    }}
-                    className="py-3 text-base font-semibold bg-[rgb(120,176,219)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                    size="lg"
-                  >
-                    Connect using MEICAN
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      toast.info("Connecting to FABRIC...");
-                      // TODO: Implement FABRIC connection
-                    }}
-                    className="py-3 text-base font-semibold bg-[rgb(120,176,219)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                    size="lg"
-                  >
-                    Connect using FABRIC
-                  </Button>
-                </div>
-
                 <Button 
                   variant="outline" 
                   onClick={handleClearAllTokens}

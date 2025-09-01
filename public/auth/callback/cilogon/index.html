@@ -54,8 +54,17 @@
     <div class="container">
         <div class="spinner"></div>
         <h2>🔐 Processing CILogon Authentication</h2>
-        <p>Please complete the login process in this window. Once successful, this popup will close automatically and you'll be returned to the main application.</p>
+        <p>Please wait while we complete your authentication. If this is a callback after successful login, this window will close automatically.</p>
         <div id="status"></div>
+        <div class="instructions" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.85em; line-height: 1.4;">
+            <p><strong>Instructions:</strong></p>
+            <ol style="text-align: left; padding-left: 1.5rem;">
+                <li>Complete the authentication process on this page if prompted</li>
+                <li>If you see a success message, wait for the window to close automatically</li>
+                <li>If the window doesn't close after 5 seconds, you can close it manually</li>
+                <li>Return to the main application window to continue</li>
+            </ol>
+        </div>
     </div>
 
     <script>
@@ -144,12 +153,16 @@
                             state: state
                         }, '*');
                         
-                        showStatus('✅ Authentication completed! This window will close automatically.', 'success');
+                        showStatus('✅ Authentication completed! This window will close automatically in 2 seconds.', 'success');
                         
                         // Close this window after a brief delay
                         setTimeout(() => {
-                            window.close();
-                        }, 3000);
+                            try {
+                                window.close();
+                            } catch (e) {
+                                console.log('Could not auto-close popup:', e);
+                            }
+                        }, 2000);
                     } else if (window.parent && window.parent !== window) {
                         console.log('Sending success message to parent frame');
                         window.parent.postMessage({

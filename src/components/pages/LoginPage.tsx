@@ -73,13 +73,20 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
         } catch (e) {
           console.error('Error checking auth after popup close:', e);
         }
+        
+        // Set a special state for this case
+        setDeviceFlow({ 
+          status: "window_closed",
+          error: errorMessage
+        });
+        toast.info("🔄 Authentication window was closed. If you completed the login, click the Continue button below.");
+      } else {
+        toast.error(`❌ ${errorMessage}`);
+        setDeviceFlow({ 
+          status: "error", 
+          error: errorMessage
+        });
       }
-      
-      toast.error(`❌ ${errorMessage}`);
-      setDeviceFlow({ 
-        status: "error", 
-        error: errorMessage
-      });
     } finally {
       setIsLoading(false);
     }
@@ -348,6 +355,64 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                     ✅ Authentication successful! Redirecting to your token page...
                   </AlertDescription>
                 </Alert>
+              )}
+
+              {deviceFlow.status === "window_closed" && (
+                <div className="space-y-4">
+                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
+                      <strong>Authentication window was closed.</strong> If you completed the authentication process in the popup window, please click the button below to continue.
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <Button 
+                    onClick={() => {
+                      // Manual check for completed authentication
+                      try {
+                        const authResult = localStorage.getItem('cilogon_auth_result');
+                        if (authResult) {
+                          const result = JSON.parse(authResult);
+                          if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 300000) {
+                            console.log('Manual check found completed authentication');
+                            localStorage.removeItem('cilogon_auth_result');
+                            setDeviceFlow({ status: "success" });
+                            toast.success("✅ CILogon authentication successful!");
+                            setIsLoading(false);
+                            setTimeout(() => {
+                              onComplete();
+                            }, 1500);
+                          } else if (result.type === 'CILOGON_AUTH_SUCCESS') {
+                            toast.info("Found authentication data but it's too old. Please try again.");
+                            localStorage.removeItem('cilogon_auth_result');
+                          } else {
+                            toast.info("No successful authentication found. Please complete the login in the popup window.");
+                          }
+                        } else {
+                          toast.info("No authentication data found. Please complete the login in the popup window first.");
+                        }
+                      } catch (e) {
+                        console.error('Error checking for completed auth:', e);
+                        toast.error("Error checking authentication status.");
+                      }
+                    }}
+                    variant="default"
+                    size="lg"
+                    className="w-full bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
+                  >
+                    ✅ I've completed authentication - Continue
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => {
+                      setDeviceFlow({ status: "idle" });
+                      setIsLoading(false);
+                    }}
+                    variant="outline"
+                    className="w-full border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
+                  >
+                    Try Again
+                  </Button>
+                </div>
               )}
 
               {deviceFlow.status === "error" && (

@@ -1,6 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Provider } from "@/lib/config";
+import { TokenStorage } from "@/lib/token-storage";
+import { useEffect, useState } from "react";
 import sdxLogo from "@/assets/images/sdx-logo.svg"; 
 
 interface LandingPageProps {
@@ -30,6 +32,29 @@ export function LandingPage({
   onLogin
 }: LandingPageProps) {
   const canContinue = selectedProvider;
+  const [authStatuses, setAuthStatuses] = useState<Record<Provider, boolean>>({
+    cilogon: false,
+    orcid: false
+  });
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const cilogonToken = TokenStorage.getToken("cilogon");
+      const orcidToken = TokenStorage.getToken("orcid");
+      
+      setAuthStatuses({
+        cilogon: !!cilogonToken,
+        orcid: !!orcidToken
+      });
+    };
+
+    checkAuthStatus();
+    
+    // Check periodically for token updates
+    const interval = setInterval(checkAuthStatus, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-white p-3 pt-8">
@@ -110,14 +135,27 @@ export function LandingPage({
                     onClick={() => onProviderSelect(provider)}
                   >
                     <div className="text-center flex-1 space-y-2">
-                      <div className="font-semibold text-base text-[rgb(64,143,204)]">{info.name}</div>
-                      <div className="text-sm text-[rgb(50,135,200)]">
-                        {info.name === "ORCID" 
-                          ? "Researcher identifiers" 
-                          : info.name === "CILogon"
-                          ? "Academic federation"
-                          : "Identity provider"
-                        }
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="font-semibold text-base text-[rgb(64,143,204)]">{info.name}</div>
+                          <div className="text-sm text-[rgb(50,135,200)]">
+                            {info.name === "ORCID" 
+                              ? "Researcher identifiers" 
+                              : info.name === "CILogon"
+                              ? "Academic federation"
+                              : "Identity provider"
+                            }
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <div className={`text-xs px-2 py-1 rounded-full ${
+                            authStatuses[provider] 
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {authStatuses[provider] ? 'Authenticated' : 'Not authenticated'}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </Button>

@@ -212,8 +212,8 @@ export class CILogonProvider {
           if (authResult) {
             const result = JSON.parse(authResult);
             console.log('Found stored auth result:', result);
-            // Only process recent results (within 2 minutes)
-            if (Date.now() - result.timestamp < 120000) {
+            // Only process recent results (within 5 minutes)
+            if (Date.now() - result.timestamp < 300000) {
               localStorage.removeItem('cilogon_auth_result');
               window.removeEventListener('message', messageHandler);
               clearInterval(checkClosed);
@@ -252,13 +252,13 @@ export class CILogonProvider {
       // Check if popup is closed manually (user closed it)
       const checkClosed = setInterval(() => {
         if (popup.closed) {
-          // Give a few seconds to check if auth was completed before closing
+          // Give more time to check if auth was completed before closing
           setTimeout(() => {
             try {
               const authResult = localStorage.getItem('cilogon_auth_result');
               if (authResult) {
                 const result = JSON.parse(authResult);
-                if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 120000) {
+                if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 300000) {
                   console.log('Found completed auth after popup closed');
                   localStorage.removeItem('cilogon_auth_result');
                   window.removeEventListener('message', messageHandler);
@@ -282,15 +282,15 @@ export class CILogonProvider {
               clearInterval(checkClosed);
               clearInterval(fallbackCheck);
               window.removeEventListener('message', messageHandler);
-              reject(new Error('Authentication window was closed before completion'));
+              reject(new Error('Authentication window was closed. If you completed authentication, please wait a moment and use the "Continue" button below.'));
             } catch (e) {
               console.error('Error checking final auth status:', e);
               clearInterval(checkClosed);
               clearInterval(fallbackCheck);
               window.removeEventListener('message', messageHandler);
-              reject(new Error('Authentication window was closed before completion'));
+              reject(new Error('Authentication window was closed. If you completed authentication, please wait a moment and use the "Continue" button below.'));
             }
-          }, 3000); // Wait 3 seconds after popup closes to check for auth
+          }, 5000); // Wait 5 seconds after popup closes to check for auth
         }
       }, 1000);
 
