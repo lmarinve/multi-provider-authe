@@ -85,13 +85,54 @@ export class CILogonProvider {
   }
 
   async exchangeCodeForToken(code: string, state: string, codeVerifier: string): Promise<TokenData> {
-    const storedState = sessionStorage.getItem('cilogon_state');
-    if (!state || state !== storedState) {
-      throw new Error('Invalid state parameter');
+    let storedState = sessionStorage.getItem('cilogon_state');
+    let storedVerifier = codeVerifier;
+    
+    // If sessionStorage is empty, try to recover from localStorage backup
+    if (!storedState) {
+      try {
+        const backup = localStorage.getItem('cilogon_state_backup');
+        if (backup) {
+          const parsed = JSON.parse(backup);
+          // Only use backup if it's less than 10 minutes old
+          if (Date.now() - parsed.timestamp < 600000) {
+            storedState = parsed.state;
+            storedVerifier = parsed.codeVerifier;
+            console.log('Recovered state from localStorage backup');
+          } else {
+            console.log('Backup state too old, ignoring');
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to recover state from backup:', e);
+      }
+    }
+    
+    console.log('State validation:', { receivedState: state, storedState, match: state === storedState });
+    
+    if (!state) {
+      throw new Error('Missing state parameter');
+    }
+    
+    if (!storedState) {
+      console.warn('No stored state found in sessionStorage or backup. This might be due to browser security or a new session.');
+      // Don't fail completely - allow authentication to proceed if we have code and verifier
+      if (!code || !storedVerifier) {
+        throw new Error('Missing required authentication parameters (state, code, or verifier)');
+      }
+    } else if (state !== storedState) {
+      console.error(`State mismatch: received "${state}", expected "${storedState}"`);
+      throw new Error(`Invalid state parameter: received "${state}", expected "${storedState}"`);
     }
 
-    sessionStorage.removeItem('cilogon_state');
-    sessionStorage.removeItem('cilogon_code_verifier');
+    // Clean up stored values after validation
+    if (sessionStorage.getItem('cilogon_state')) {
+      sessionStorage.removeItem('cilogon_state');
+    }
+    if (sessionStorage.getItem('cilogon_code_verifier')) {
+      sessionStorage.removeItem('cilogon_code_verifier');
+    }
+    localStorage.removeItem('cilogon_state_backup');
 
     // Use the exact same redirect URI that was used in the authorization request
     const exactRedirectUri = "https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon";
@@ -144,12 +185,16 @@ export class CILogonProvider {
     const state = this.generateState();
     const codeVerifier = this.generateCodeVerifier();
     
+    // Store both in sessionStorage and localStorage as backup
     sessionStorage.setItem('cilogon_state', state);
     sessionStorage.setItem('cilogon_code_verifier', codeVerifier);
+    localStorage.setItem('cilogon_state_backup', JSON.stringify({ state, codeVerifier, timestamp: Date.now() }));
     
     const authUrl = await this.getAuthUrl(state, codeVerifier);
     
     console.log('Opening CILogon authentication window...');
+    console.log('Stored state:', state);
+    console.log('Stored verifier preview:', codeVerifier.substring(0, 10) + '...');
     
     // Calculate center position for popup
     const width = 800;
@@ -185,15 +230,41 @@ export class CILogonProvider {
           popup.close();
           
           const { code, state: returnedState } = event.data;
-          const storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
+          let storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
+          
+          // Try to recover from backup if missing
+          if (!storedCodeVerifier) {
+            try {
+              const backup = localStorage.getItem('cilogon_state_backup');
+              if (backup) {
+                const parsed = JSON.parse(backup);
+                if (Date.now() - parsed.timestamp < 600000) {
+                  storedCodeVerifier = parsed.codeVerifier;
+                  console.log('Recovered code verifier from backup');
+                }
+              }
+            } catch (e) {
+              console.warn('Failed to recover code verifier from backup:', e);
+            }
+          }
+          
           if (!storedCodeVerifier) {
             reject(new Error('Code verifier not found'));
             return;
           }
           
+          console.log('Attempting token exchange with:', { 
+            code: code?.substring(0, 10) + '...', 
+            state: returnedState, 
+            hasCodeVerifier: !!storedCodeVerifier 
+          });
+          
           this.exchangeCodeForToken(code, returnedState, storedCodeVerifier)
             .then(resolve)
-            .catch(reject);
+            .catch((error) => {
+              console.error('Token exchange failed in popup handler:', error);
+              reject(error);
+            });
         } else if (event.data?.type === 'CILOGON_AUTH_ERROR') {
           window.removeEventListener('message', messageHandler);
           clearInterval(checkClosed);
@@ -221,11 +292,35 @@ export class CILogonProvider {
               
               if (result.type === 'CILOGON_AUTH_SUCCESS') {
                 console.log('Processing stored successful auth result');
-                const storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
+                let storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
+                
+                // Try to recover from backup if missing
                 if (!storedCodeVerifier) {
+                  try {
+                    const backup = localStorage.getItem('cilogon_state_backup');
+                    if (backup) {
+                      const parsed = JSON.parse(backup);
+                      if (Date.now() - parsed.timestamp < 600000) {
+                        storedCodeVerifier = parsed.codeVerifier;
+                        console.log('Recovered code verifier from backup for localStorage fallback');
+                      }
+                    }
+                  } catch (e) {
+                    console.warn('Failed to recover code verifier from backup:', e);
+                  }
+                }
+                
+                if (!storedCodeVerifier) {
+                  console.error('Code verifier missing from sessionStorage');
                   reject(new Error('Code verifier not found'));
                   return;
                 }
+                
+                console.log('Attempting token exchange with stored result:', {
+                  hasCode: !!result.code,
+                  hasState: !!result.state,
+                  hasVerifier: !!storedCodeVerifier
+                });
                 
                 this.exchangeCodeForToken(result.code, result.state, storedCodeVerifier)
                   .then((tokenData) => {
@@ -267,6 +362,23 @@ export class CILogonProvider {
                   
                   const storedCodeVerifier = sessionStorage.getItem('cilogon_code_verifier');
                   if (!storedCodeVerifier) {
+                    // Try backup recovery
+                    try {
+                      const backup = localStorage.getItem('cilogon_state_backup');
+                      if (backup) {
+                        const parsed = JSON.parse(backup);
+                        if (Date.now() - parsed.timestamp < 600000) {
+                          const recoveredVerifier = parsed.codeVerifier;
+                          this.exchangeCodeForToken(result.code, result.state, recoveredVerifier)
+                            .then(resolve)
+                            .catch(reject);
+                          return;
+                        }
+                      }
+                    } catch (e) {
+                      console.warn('Failed to recover from backup in popup closed handler:', e);
+                    }
+                    
                     reject(new Error('Code verifier not found'));
                     return;
                   }

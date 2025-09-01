@@ -56,6 +56,7 @@
         <h2>🔐 Processing CILogon Authentication</h2>
         <p>Please wait while we complete your authentication. If this is a callback after successful login, this window will close automatically.</p>
         <div id="status"></div>
+        <div id="debug" style="margin-top: 1rem; padding: 0.5rem; background: rgba(255,255,255,0.2); border-radius: 4px; font-size: 0.7em; font-family: monospace; text-align: left; max-height: 100px; overflow-y: auto;"></div>
         <div class="instructions" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.85em; line-height: 1.4;">
             <p><strong>Instructions:</strong></p>
             <ol style="text-align: left; padding-left: 1.5rem;">
@@ -70,9 +71,17 @@
     <script>
         (function() {
             const statusEl = document.getElementById('status');
+            const debugEl = document.getElementById('debug');
             
             function showStatus(message, type = 'info') {
                 statusEl.innerHTML = `<div class="${type}">${message}</div>`;
+            }
+            
+            function showDebug(message) {
+                if (debugEl) {
+                    debugEl.innerHTML += `<div>${new Date().toISOString().slice(11, 23)}: ${message}</div>`;
+                    debugEl.scrollTop = debugEl.scrollHeight;
+                }
             }
 
             function handleAuthCallback() {
@@ -84,7 +93,16 @@
                     const error = urlParams.get('error');
                     const errorDescription = urlParams.get('error_description');
 
-                    console.log('CILogon callback received:', { code: !!code, state: !!state, error });
+                    console.log('CILogon callback received:', { 
+                        hasCode: !!code, 
+                        hasState: !!state, 
+                        error,
+                        codePreview: code ? code.substring(0, 10) + '...' : null,
+                        statePreview: state ? state.substring(0, 10) + '...' : null
+                    });
+                    
+                    showDebug(`URL params: code=${code ? 'present' : 'missing'}, state=${state ? 'present' : 'missing'}, error=${error || 'none'}`);
+                    showDebug(`Full URL: ${window.location.href}`);
 
                     if (error) {
                         const errorMsg = errorDescription || error || 'Unknown authentication error';
