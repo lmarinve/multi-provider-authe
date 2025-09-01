@@ -31,13 +31,13 @@ function App() {
       const path = window.location.pathname;
       const searchParams = new URLSearchParams(window.location.search);
       
-      if (path === "/login") {
+      if (path === "/multi-provider-authe/login") {
         const provider = searchParams.get("provider") as Provider;
         if (provider && ["cilogon", "orcid", "fabric"].includes(provider)) {
           setLoginProvider(provider);
         }
         setCurrentPage("login");
-      } else if (path === "/token") {
+      } else if (path === "/multi-provider-authe/token") {
         setCurrentPage("token");
       } else {
         setCurrentPage("landing");
@@ -50,15 +50,18 @@ function App() {
   }, []);
 
   const navigateTo = (page: Page, provider?: Provider) => {
-    let path = "/";
+    let path = "/multi-provider-authe";
     
     switch (page) {
       case "login":
-        path = `/login${provider ? `?provider=${provider}` : ""}`;
+        path = `/multi-provider-authe/login${provider ? `?provider=${provider}` : ""}`;
         if (provider) setLoginProvider(provider);
         break;
       case "token":
-        path = "/token";
+        path = "/multi-provider-authe/token";
+        break;
+      case "landing":
+        path = "/multi-provider-authe";
         break;
     }
     
