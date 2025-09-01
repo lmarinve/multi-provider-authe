@@ -40,18 +40,18 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       const token = await CILogonProvider.startAuthenticationPopup();
       console.log("CILogon authentication successful:", token);
       
-      toast.success("CILogon authentication successful!");
+      toast.success("✅ CILogon authentication successful!");
       setDeviceFlow({ status: "success", token });
       
       // Show success message briefly, then complete
       setTimeout(() => {
         onComplete();
-      }, 1500);
+      }, 2000);
       
     } catch (error: any) {
       console.error("CILogon authentication failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Authentication failed";
-      toast.error(errorMessage);
+      toast.error(`❌ ${errorMessage}`);
       setDeviceFlow({ 
         status: "error", 
         error: errorMessage
@@ -188,7 +188,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <div className="space-y-6">
                   <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                     <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>CILogon Authentication:</strong> Click the button below to authenticate with your institution via CILogon.
+                      <strong>CILogon Authentication:</strong> Click the button below to open CILogon in a popup window. After completing authentication, the popup will close automatically and return your token.
                     </AlertDescription>
                   </Alert>
                   <Button 
@@ -205,7 +205,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
                   <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
                   <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    Waiting for authentication to complete in the popup window...
+                    <strong>Please complete authentication in the popup window.</strong> If you don't see a popup, check if your browser blocked it and allow popups for this site.
                   </AlertDescription>
                 </Alert>
               )}
@@ -214,7 +214,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 <Alert className="border-2 border-green-200 bg-green-50">
                   <CheckCircle className="h-5 w-5 text-green-600" />
                   <AlertDescription className="text-base ml-2 text-green-800">
-                    Authentication successful! Redirecting to your token...
+                    ✅ Authentication successful! Redirecting to your token page...
                   </AlertDescription>
                 </Alert>
               )}

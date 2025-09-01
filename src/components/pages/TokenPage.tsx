@@ -116,10 +116,10 @@ export function TokenPage({ onBack }: TokenPageProps) {
     // Show success message if we just got new tokens
     const previousCount = Object.keys(tokens).length;
     const newCount = Object.keys(validTokens).length;
-    if (newCount > previousCount) {
+    if (newCount > previousCount && newCount > 0) {
       const newProviders = Object.keys(validTokens).filter(provider => !tokens[provider as keyof typeof tokens]);
       if (newProviders.length > 0) {
-        toast.success(`Successfully authenticated with ${newProviders.join(', ').toUpperCase()}!`);
+        toast.success(`🎉 Successfully authenticated with ${newProviders.map(p => p === 'fabric' ? 'FABRIC API' : p.toUpperCase()).join(', ')}!`);
       }
     }
 

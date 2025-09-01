@@ -107,7 +107,7 @@ export class CILogonProvider {
     const popup = window.open(
       authUrl,
       'cilogon_auth',
-      'width=900,height=700,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=yes'
+      'width=1000,height=800,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=yes,centerscreen=yes'
     );
 
     if (!popup) {
