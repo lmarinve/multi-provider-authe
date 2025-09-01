@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CILogon PKCE Test</title>
+</head>
+<body>
+    <div style="padding: 2rem; font-family: monospace;">
+        <h2>CILogon PKCE Flow Test</h2>
+        <button onclick="testPKCE()">Test PKCE Generation</button>
+        <button onclick="testAuth()">Test Auth URL</button>
+        <div id="output" style="margin-top: 1rem; white-space: pre-wrap; background: #f5f5f5; padding: 1rem; border-radius: 4px;"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            document.getElementById('output').textContent += message + '\n';
+        }
+
+        async function testPKCE() {
+            document.getElementById('output').textContent = '';
+            log('Testing PKCE generation...\n');
+            
+            try {
+                // Generate code verifier (43 chars minimum)
+                const array = new Uint8Array(32);
+                crypto.getRandomValues(array);
+                const verifier = btoa(String.fromCharCode(...array))
+                    .replace(/\+/g, "-")
+                    .replace(/\//g, "_")
+                    .replace(/=+/g, "");
+                
+                log('Code verifier: ' + verifier);
+                log('Verifier length: ' + verifier.length);
+                log('Valid chars: ' + /^[A-Za-z0-9\-._~]+$/.test(verifier));
+                
+                // Generate code challenge
+                const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier));
+                const challenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
+                    .replace(/\+/g, "-")
+                    .replace(/\//g, "_")
+                    .replace(/=+/g, "");
+                
+                log('Code challenge: ' + challenge);
+                log('Challenge length: ' + challenge.length);
+                
+                // Store in sessionStorage
+                sessionStorage.setItem('test_verifier', verifier);
+                sessionStorage.setItem('test_challenge', challenge);
+                
+                log('\nPKCE values stored in sessionStorage');
+                
+            } catch (error) {
+                log('Error: ' + error.message);
+            }
+        }
+
+        function testAuth() {
+            const verifier = sessionStorage.getItem('test_verifier');
+            const challenge = sessionStorage.getItem('test_challenge');
+            
+            if (!verifier || !challenge) {
+                log('Please run PKCE test first');
+                return;
+            }
+            
+            const state = 'test-state-' + Date.now();
+            
+            const params = new URLSearchParams({
+                response_type: 'code',
+                client_id: 'cilogon:/client_id/e33e29a20f84e0edd144d1e9a6e2b0',
+                redirect_uri: 'https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon',
+                scope: 'openid',
+                state: state,
+                code_challenge: challenge,
+                code_challenge_method: 'S256'
+            });
+
+            const authUrl = `https://cilogon.org/authorize?${params.toString()}`;
+            log('Generated auth URL:');
+            log(authUrl);
+            log('\nClick to test: ');
+            
+            const link = document.createElement('a');
+            link.href = authUrl;
+            link.target = '_blank';
+            link.textContent = 'Open CILogon Auth';
+            document.getElementById('output').appendChild(link);
+        }
+    </script>
+</body>
+</html>
