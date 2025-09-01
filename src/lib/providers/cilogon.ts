@@ -13,23 +13,46 @@ export class CILogonProvider {
   private generateCodeVerifier(): string {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
-    // Generate base64url string with no padding
-    return btoa(String.fromCharCode(...array))
+    
+    // Convert to string
+    let binary = '';
+    for (let i = 0; i < array.length; i++) {
+      binary += String.fromCharCode(array[i]);
+    }
+    
+    // Generate base64url string with no padding - CRITICAL for PKCE S256
+    const base64 = btoa(binary);
+    const base64url = base64
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
-      .replace(/=/g, '')
-      .substring(0, 43);
+      .replace(/=/g, '') // Remove ALL padding
+      .substring(0, 43); // Ensure proper length
+    
+    console.log('Generated code verifier (no padding):', base64url);
+    return base64url;
   }
 
   private async generateCodeChallenge(verifier: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(verifier);
     const digest = await crypto.subtle.digest('SHA-256', data);
-    // Convert to base64url format (no padding)
-    return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    
+    // Convert ArrayBuffer to base64url format (no padding)
+    const bytes = new Uint8Array(digest);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    
+    // Convert to base64url format - CRITICAL: no padding
+    const base64 = btoa(binary);
+    const base64url = base64
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
-      .replace(/=/g, '');
+      .replace(/=/g, ''); // Remove ALL padding
+    
+    console.log('Generated code challenge (no padding):', base64url);
+    return base64url;
   }
 
   private async getAuthUrl(state: string, codeVerifier: string): Promise<string> {
@@ -43,9 +66,11 @@ export class CILogonProvider {
     });
     
     // Build URL manually to match the exact format required by CILogon
-    const authUrl = `https://cilogon.org/authorize?response_type=code&client_id=${encodeURIComponent(config.cilogon.clientId)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&scope=${encodeURIComponent(config.cilogon.scope)}&state=${encodeURIComponent(state)}&code_challenge=${encodeURIComponent(codeChallenge)}&code_challenge_method=S256`;
+    // CRITICAL: code_challenge should NOT be URL encoded since it's already base64url
+    const authUrl = `https://cilogon.org/authorize?response_type=code&client_id=${encodeURIComponent(config.cilogon.clientId)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&scope=${encodeURIComponent(config.cilogon.scope)}&state=${encodeURIComponent(state)}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
     
     console.log('Complete CILogon auth URL:', authUrl);
+    console.log('Code challenge (raw, no padding):', codeChallenge);
     return authUrl;
   }
 
@@ -59,7 +84,8 @@ export class CILogonProvider {
     sessionStorage.removeItem('cilogon_code_verifier');
 
     // Prepare token exchange request with PKCE using exact format required
-    const body = `grant_type=authorization_code&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&client_id=${encodeURIComponent(config.cilogon.clientId)}&code_verifier=${encodeURIComponent(codeVerifier)}`;
+    // CRITICAL: code_verifier should NOT be URL encoded since it's already base64url
+    const body = `grant_type=authorization_code&code=${encodeURIComponent(code)}&redirect_uri=${encodeURIComponent(config.cilogon.redirectUri)}&client_id=${encodeURIComponent(config.cilogon.clientId)}&code_verifier=${codeVerifier}`;
 
     try {
       console.log('CILogon token exchange request:', {
