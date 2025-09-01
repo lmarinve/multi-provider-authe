@@ -1,9 +1,11 @@
+export type Provider = "cilogon" | "orcid" | "fabric" | "meican" | "fabricConnection";
+
 export interface TokenData {
   id_token: string;
   refresh_token?: string;
   expires_in: number;
   issued_at: number;
-  provider: "cilogon" | "orcid" | "fabric";
+  provider: Provider;
 }
 
 export interface TokenClaims {
@@ -34,7 +36,7 @@ export interface TokenResponse {
 }
 
 export interface BackendPayload {
-  provider: "cilogon" | "orcid" | "fabric";
+  provider: Provider;
   id_token: string;
   refresh_token?: string;
   expires_in: number;
@@ -44,12 +46,8 @@ export interface BackendPayload {
 }
 
 export type AuthState = {
-  selectedProvider?: "cilogon" | "orcid" | "fabric";
-  tokens: {
-    cilogon?: TokenData;
-    orcid?: TokenData;
-    fabric?: TokenData;
-  };
+  selectedProvider?: Provider;
+  tokens: Partial<Record<Provider, TokenData>>;
 };
 
 export type DeviceFlowState = {

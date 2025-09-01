@@ -18,11 +18,7 @@ export function TokenStatus({
   showRefreshButtons = true,
   compact = false 
 }: TokenStatusProps) {
-  const [tokens, setTokens] = useState<Record<Provider, TokenData | null>>({
-    cilogon: null,
-    orcid: null,
-    fabric: null
-  });
+  const [tokens, setTokens] = useState<Record<string, TokenData | null>>({});
   
   const { refreshStatus, manualRefresh, isTokenNearExpiry } = useTokenRefresh({
     showNotifications: true,
@@ -32,18 +28,17 @@ export function TokenStatus({
   // Update token status every second
   useEffect(() => {
     const updateTokens = () => {
-      const newTokens: Record<Provider, TokenData | null> = {
-        cilogon: TokenStorage.getToken('cilogon'),
-        orcid: TokenStorage.getToken('orcid'),
-        fabric: TokenStorage.getToken('fabric')
-      };
+      const newTokens: Record<string, TokenData | null> = {};
+      providers.forEach(provider => {
+        newTokens[provider] = TokenStorage.getToken(provider);
+      });
       setTokens(newTokens);
     };
 
     updateTokens();
     const interval = setInterval(updateTokens, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [providers]);
 
   const getTokenStatusInfo = (provider: Provider, token: TokenData | null) => {
     if (!token) {
@@ -109,7 +104,9 @@ export function TokenStatus({
               className={`${statusInfo.bgColor} ${statusInfo.color} border-current`}
             >
               <Icon className="w-3 h-3 mr-1" />
-              {provider.toUpperCase()}: {statusInfo.message}
+              {provider === 'fabricConnection' ? 'FABRIC-CONN' : 
+               provider === 'meican' ? 'MEICAN' :
+               provider.toUpperCase()}: {statusInfo.message}
               {token && (
                 <span className="ml-1 text-xs">
                   ({TokenStorage.formatTimeUntilExpiry(token)})
@@ -147,7 +144,12 @@ export function TokenStatus({
               <div className="flex items-center gap-3">
                 <Icon className={`w-5 h-5 ${statusInfo.color}`} />
                 <div>
-                  <div className="font-medium">{provider.toUpperCase()}</div>
+                  <div className="font-medium">
+                    {provider === 'fabricConnection' ? 'FABRIC Connection' : 
+                     provider === 'meican' ? 'MEICAN' :
+                     provider === 'fabric' ? 'FABRIC API' :
+                     provider.toUpperCase()}
+                  </div>
                   <div className={`text-sm ${statusInfo.color}`}>
                     {statusInfo.message}
                   </div>
