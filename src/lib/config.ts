@@ -11,7 +11,7 @@ export const config = {
     if (typeof window !== 'undefined') {
       return window.location.origin;
     }
-    return "https://lmarinve.github.io/multi-provider-authe";
+    return "https://lmarinve.github.io";
   },
   
   // CILogon - Updated with correct OIDC settings
@@ -22,7 +22,7 @@ export const config = {
     tokenUrl: "https://cilogon.org/oauth2/token",
     jwksUrl: "https://cilogon.org/oauth2/certs",
     issuerUrl: "https://cilogon.org",
-    redirectUri: "https://lmarinve.github.io/multi-provider-authe/auth/callback/cilogon", // Fixed redirect URI as registered
+    redirectUri: "https://lmarinve.github.io/auth/callback/cilogon", // Updated to match current GitHub Pages URL structure
     usePkce: true // PKCE is required with S256
   },
   
