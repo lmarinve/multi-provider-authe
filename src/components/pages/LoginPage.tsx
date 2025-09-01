@@ -61,6 +61,44 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     }
   };
 
+  // Add effect to check for completed authentication when window regains focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && deviceFlow.status === "pending") {
+        // Check localStorage for completed authentication
+        setTimeout(() => {
+          try {
+            const authResult = localStorage.getItem('cilogon_auth_result');
+            if (authResult) {
+              const result = JSON.parse(authResult);
+              if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 120000) {
+                console.log('Found completed authentication after window regained focus');
+                // Clear the stored result
+                localStorage.removeItem('cilogon_auth_result');
+                // Trigger success state
+                setDeviceFlow({ status: "success" });
+                toast.success("✅ CILogon authentication successful!");
+                setTimeout(() => {
+                  onComplete();
+                }, 1500);
+              }
+            }
+          } catch (e) {
+            console.error('Error checking for completed auth:', e);
+          }
+        }, 500);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+    };
+  }, [deviceFlow.status, onComplete]);
+
 
 
   const startORCIDFlow = async () => {
@@ -239,12 +277,49 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                 </div>
               )}
               {deviceFlow.status === "pending" && (
-                <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                  <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
-                  <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                    <strong>Please complete authentication in the popup window.</strong> If you don't see a popup, check if your browser blocked it and allow popups for this site.
-                  </AlertDescription>
-                </Alert>
+                <div className="space-y-4">
+                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
+                    <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
+                    <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
+                      <strong>Please complete authentication in the popup window.</strong> If you don't see a popup, check if your browser blocked it and allow popups for this site.
+                      <br />
+                      <small className="text-xs mt-2 block opacity-75">If you've completed authentication and see "Authentication data saved locally" message, please click the button below to continue.</small>
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <Button 
+                    onClick={() => {
+                      // Manual check for completed authentication
+                      try {
+                        const authResult = localStorage.getItem('cilogon_auth_result');
+                        if (authResult) {
+                          const result = JSON.parse(authResult);
+                          if (result.type === 'CILOGON_AUTH_SUCCESS' && Date.now() - result.timestamp < 120000) {
+                            console.log('Manual check found completed authentication');
+                            localStorage.removeItem('cilogon_auth_result');
+                            setDeviceFlow({ status: "success" });
+                            toast.success("✅ CILogon authentication successful!");
+                            setTimeout(() => {
+                              onComplete();
+                            }, 1500);
+                          } else {
+                            toast.info("No completed authentication found. Please ensure you completed the login in the popup window.");
+                          }
+                        } else {
+                          toast.info("No authentication data found. Please complete the login in the popup window first.");
+                        }
+                      } catch (e) {
+                        console.error('Error checking for completed auth:', e);
+                        toast.error("Error checking authentication status.");
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-2 border-[rgb(50,135,200)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
+                  >
+                    ✅ I've completed authentication - Continue
+                  </Button>
+                </div>
               )}
 
               {deviceFlow.status === "success" && (
