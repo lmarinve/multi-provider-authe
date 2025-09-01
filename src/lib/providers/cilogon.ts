@@ -103,11 +103,17 @@ export class CILogonProvider {
     
     console.log('Opening CILogon authentication window...');
     
-    // Open the actual CILogon OAuth URL in a new window
+    // Calculate center position for popup
+    const width = 800;
+    const height = 600;
+    const left = (window.screen.width / 2) - (width / 2);
+    const top = (window.screen.height / 2) - (height / 2);
+    
+    // Open the actual CILogon OAuth URL in a popup window
     const popup = window.open(
       authUrl,
       'cilogon_auth',
-      'width=1000,height=800,scrollbars=yes,resizable=yes,status=yes,location=yes,toolbar=yes,menubar=yes,centerscreen=yes'
+      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes,status=no,location=no,toolbar=no,menubar=no`
     );
 
     if (!popup) {
