@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 
 type Page = "landing" | "login" | "token";
-type Provider = "cilogon" | "orcid" | "fabric";
+type Provider = "cilogon" | "orcid";
 
 function SimpleApp() {
   const [currentPage, setCurrentPage] = useState<Page>("landing");

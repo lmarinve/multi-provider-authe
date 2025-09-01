@@ -2,10 +2,10 @@
 
 ## Core Purpose & Success
 
-**Mission Statement**: Provide a secure, user-friendly authentication gateway that enables researchers to access SDX services using their preferred identity provider (CILogon, ORCID, or FABRIC API) across test and production environments.
+**Mission Statement**: Provide a secure, user-friendly authentication gateway that enables researchers to access SDX services using their preferred identity provider (CILogon or ORCID) across test and production environments.
 
 **Success Indicators**: 
-- Successful token acquisition and backend handoff for all three providers
+- Successful token acquisition and backend handoff for both identity providers
 - Zero token leakage or security vulnerabilities
 - Clear user experience with minimal confusion during provider selection
 - Seamless integration with existing SDX backend infrastructure
@@ -26,7 +26,7 @@
 - **Success Criteria**: Selected environment persists across sessions and correctly targets backend URLs
 
 ### Identity Provider Selection
-- **Functionality**: Three distinct authentication pathways with provider-specific flows
+- **Functionality**: Two distinct authentication pathways with provider-specific flows
 - **Purpose**: Accommodates different institutional and research identity preferences
 - **Success Criteria**: Each provider successfully returns valid JWT tokens
 
@@ -40,10 +40,13 @@
 - **Purpose**: Maintains seamless user experience by preventing token expiration interruptions
 - **Success Criteria**: Tokens refreshed automatically 5 minutes before expiry with user notifications
 
-### Multi-Provider Support
+### Identity Provider Support
 - **CILogon**: Academic and research identity federation using device flow
-- **ORCID**: Persistent researcher identifiers with PKCE OAuth flow  
-- **FABRIC API**: Adaptive programmable research infrastructure requiring CILogon prerequisite
+- **ORCID**: Persistent researcher identifiers with PKCE OAuth flow
+
+### Connection Services (Post-Authentication)
+- **FABRIC API**: Research infrastructure connection services that use CILogon tokens
+- **MEICAN**: Inter-domain circuit activation services that use identity provider tokens
 
 ## Design Direction
 

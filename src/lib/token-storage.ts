@@ -2,8 +2,7 @@ import { TokenData, TokenClaims } from "@/lib/types";
 
 const TOKEN_KEYS = {
   cilogon: "auth.cilogon",
-  orcid: "auth.orcid",
-  fabric: "auth.fabric"
+  orcid: "auth.orcid"
 } as const;
 
 export class TokenStorage {
@@ -54,7 +53,7 @@ export class TokenStorage {
   }
 
   static canRefreshToken(token: TokenData): boolean {
-    return !!token.refresh_token || token.provider === 'fabric';
+    return !!token.refresh_token;
   }
 
   static formatTimeUntilExpiry(token: TokenData): string {

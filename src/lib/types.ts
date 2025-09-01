@@ -1,4 +1,4 @@
-export type Provider = "cilogon" | "orcid" | "fabric" | "meican" | "fabricConnection";
+export type Provider = "cilogon" | "orcid";
 
 export interface TokenData {
   id_token: string;

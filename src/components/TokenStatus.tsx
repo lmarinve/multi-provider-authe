@@ -14,7 +14,7 @@ interface TokenStatusProps {
 }
 
 export function TokenStatus({ 
-  providers = ['cilogon', 'orcid', 'fabric'], 
+  providers = ['cilogon', 'orcid'], 
   showRefreshButtons = true,
   compact = false 
 }: TokenStatusProps) {
@@ -104,9 +104,7 @@ export function TokenStatus({
               className={`${statusInfo.bgColor} ${statusInfo.color} border-current`}
             >
               <Icon className="w-3 h-3 mr-1" />
-              {provider === 'fabricConnection' ? 'FABRIC-CONN' : 
-               provider === 'meican' ? 'MEICAN' :
-               provider.toUpperCase()}: {statusInfo.message}
+              {provider === provider.toUpperCase()}: {statusInfo.message}
               {token && (
                 <span className="ml-1 text-xs">
                   ({TokenStorage.formatTimeUntilExpiry(token)})
@@ -145,10 +143,7 @@ export function TokenStatus({
                 <Icon className={`w-5 h-5 ${statusInfo.color}`} />
                 <div>
                   <div className="font-medium">
-                    {provider === 'fabricConnection' ? 'FABRIC Connection' : 
-                     provider === 'meican' ? 'MEICAN' :
-                     provider === 'fabric' ? 'FABRIC API' :
-                     provider.toUpperCase()}
+                    {provider.toUpperCase()}
                   </div>
                   <div className={`text-sm ${statusInfo.color}`}>
                     {statusInfo.message}

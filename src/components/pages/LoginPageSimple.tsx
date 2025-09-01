@@ -18,7 +18,6 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
     switch (provider) {
       case "cilogon": return "CILogon";
       case "orcid": return "ORCID";
-      case "fabric": return "FABRIC API";
       default: return provider;
     }
   };
@@ -38,11 +37,6 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
           const { ORCIDProvider } = await import("@/lib/providers/orcid");
           const orcidProvider = new ORCIDProvider();
           tokenData = await orcidProvider.startAuthenticationPopup();
-          break;
-        case "fabric":
-          const { FABRICProvider } = await import("@/lib/providers/fabric");
-          const fabricProvider = new FABRICProvider();
-          tokenData = await fabricProvider.createToken();
           break;
         default:
           throw new Error(`Unknown provider: ${provider}`);

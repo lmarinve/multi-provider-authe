@@ -24,7 +24,7 @@ function App() {
       
       if (path === "/login") {
         const provider = searchParams.get("provider") as Provider;
-        if (provider && ["cilogon", "orcid", "fabric"].includes(provider)) {
+        if (provider && ["cilogon", "orcid"].includes(provider)) {
           setLoginProvider(provider);
         }
         setCurrentPage("login");

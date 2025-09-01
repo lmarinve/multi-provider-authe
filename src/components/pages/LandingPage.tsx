@@ -22,24 +22,6 @@ const providerInfo = {
     color: "bg-[rgb(50,135,200)]",
     bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(236,244,250)] border-[rgb(120,176,219)]",
     selectedBgColor: "bg-[rgb(236,244,250)] border-[rgb(64,143,204)]"
-  },
-  fabric: {
-    name: "FABRIC API",
-    color: "bg-[rgb(50,135,200)]",
-    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(236,244,250)] border-[rgb(120,176,219)]",
-    selectedBgColor: "bg-[rgb(236,244,250)] border-[rgb(64,143,204)]"
-  },
-  meican: {
-    name: "MEICAN",
-    color: "bg-[rgb(50,135,200)]",
-    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(236,244,250)] border-[rgb(120,176,219)]",
-    selectedBgColor: "bg-[rgb(236,244,250)] border-[rgb(64,143,204)]"
-  },
-  fabricConnection: {
-    name: "FABRIC Connection",
-    color: "bg-[rgb(50,135,200)]",
-    bgColor: "bg-[rgb(236,244,250)] hover:bg-[rgb(236,244,250)] border-[rgb(120,176,219)]",
-    selectedBgColor: "bg-[rgb(236,244,250)] border-[rgb(64,143,204)]"
   }
 } as const;
 
@@ -133,14 +115,8 @@ export function LandingPage({
                       <div className="text-sm text-[rgb(50,135,200)]">
                         {info.name === "ORCID" 
                           ? "Researcher identifiers" 
-                          : info.name === "FABRIC API" 
-                          ? "Research infrastructure" 
                           : info.name === "CILogon"
                           ? "Academic federation"
-                          : info.name === "MEICAN"
-                          ? "Inter-domain circuit management"
-                          : info.name === "FABRIC Connection"
-                          ? "Network slice management"
                           : "Identity provider"
                         }
                       </div>
@@ -171,7 +147,7 @@ export function LandingPage({
         {/* Existing Token Status (compact view) */}
         <div className="mt-8">
           <TokenStatus 
-            providers={['cilogon', 'orcid', 'fabric', 'meican', 'fabricConnection']}
+            providers={['cilogon', 'orcid']}
             showRefreshButtons={false}
             compact={true}
           />

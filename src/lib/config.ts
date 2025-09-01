@@ -39,35 +39,22 @@ export const config = {
     usePkce: true
   },
   
-  // FABRIC API
-  fabric: {
-    cmBase: "https://cm.fabric-testbed.net",
-    createPath: "/tokens/create",
-    refreshPath: "/tokens/refresh",
-    projectId: "1ecd9d6a-7701-40fa-b78e-b2293c9526ed",
-    projectName: "AtlanticWave-SDX",
-    tokenPath: "/home/fabric/.tokens.json"
-  },
-  
-  // MEICAN - Management Environment for Inter-domain Circuit Activation and Network monitoring
-  meican: {
-    baseUrl: "https://meican.rnp.br",
-    authUrl: "https://meican.rnp.br/auth/login",
-    apiUrl: "https://meican.rnp.br/api/v1",
-    get redirectUri() {
-      return `${config.getBaseUrl()}/multi-provider-authe/auth/callback/meican`;
-    }
-  },
-  
-  // FABRIC Connection Service
-  fabricConnection: {
-    baseUrl: "https://portal.fabric-testbed.net",
-    authUrl: "https://portal.fabric-testbed.net/auth/login",
-    apiUrl: "https://portal.fabric-testbed.net/api/v1",
-    get redirectUri() {
-      return `${config.getBaseUrl()}/multi-provider-authe/auth/callback/fabricConnection`;
+  // Connection services (used after obtaining identity tokens)
+  connections: {
+    fabric: {
+      cmBase: "https://cm.fabric-testbed.net",
+      createPath: "/tokens/create",
+      refreshPath: "/tokens/refresh",
+      projectId: "1ecd9d6a-7701-40fa-b78e-b2293c9526ed",
+      projectName: "AtlanticWave-SDX",
+      tokenPath: "/home/fabric/.tokens.json"
+    },
+    meican: {
+      baseUrl: "https://meican.rnp.br",
+      authUrl: "https://meican.rnp.br/auth/login",
+      apiUrl: "https://meican.rnp.br/api/v1"
     }
   }
 } as const;
 
-export type Provider = "cilogon" | "orcid" | "fabric" | "meican" | "fabricConnection";
+export type Provider = "cilogon" | "orcid";

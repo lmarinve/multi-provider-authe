@@ -23,7 +23,7 @@ export function TokenExpiryNotification({
 
   useEffect(() => {
     const checkTokens = () => {
-      const providers: Provider[] = ['cilogon', 'orcid', 'fabric'];
+      const providers: Provider[] = ['cilogon', 'orcid'];
       const expiring: Array<{ provider: Provider; token: TokenData; timeLeft: string }> = [];
 
       providers.forEach(provider => {

@@ -20,7 +20,6 @@ export function TokenPage({ onBack }: TokenPageProps) {
   const [tokens, setTokens] = useState<{
     cilogon?: TokenData;
     orcid?: TokenData;
-    fabric?: TokenData;
   }>({});
   const [selectedToken, setSelectedToken] = useState<TokenData | null>(null);
   const [claims, setClaims] = useState<TokenClaims | null>(null);
@@ -59,8 +58,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
       const currentTokenCount = Object.keys(tokens).length;
       const cilogon = TokenStorage.getToken("cilogon");
       const orcid = TokenStorage.getToken("orcid");  
-      const fabric = TokenStorage.getToken("fabric");
-      const validCount = [cilogon, orcid, fabric].filter(t => t && TokenStorage.isTokenValid(t)).length;
+      const validCount = [cilogon, orcid].filter(t => t && TokenStorage.isTokenValid(t)).length;
       
       if (validCount > currentTokenCount) {
         console.log('New valid token detected, reloading');
@@ -88,12 +86,10 @@ export function TokenPage({ onBack }: TokenPageProps) {
     console.log('Loading tokens from storage...');
     const cilogon = TokenStorage.getToken("cilogon");
     const orcid = TokenStorage.getToken("orcid");
-    const fabric = TokenStorage.getToken("fabric");
 
     console.log('Found tokens:', { 
       cilogon: cilogon ? 'present' : 'missing',
-      orcid: orcid ? 'present' : 'missing', 
-      fabric: fabric ? 'present' : 'missing'
+      orcid: orcid ? 'present' : 'missing'
     });
 
     const validTokens: any = {};
@@ -111,13 +107,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
     } else if (orcid) {
       console.log('ORCID token is expired');
     }
-    
-    if (fabric && TokenStorage.isTokenValid(fabric)) {
-      validTokens.fabric = fabric;
-      console.log('FABRIC token is valid');
-    } else if (fabric) {
-      console.log('FABRIC token is expired');
-    }
+
 
     console.log('Valid tokens count:', Object.keys(validTokens).length);
     setTokens(validTokens);
@@ -128,7 +118,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
     if (newCount > previousCount && newCount > 0) {
       const newProviders = Object.keys(validTokens).filter(provider => !tokens[provider as keyof typeof tokens]);
       if (newProviders.length > 0) {
-        toast.success(`🎉 Successfully authenticated with ${newProviders.map(p => p === 'fabric' ? 'FABRIC API' : p.toUpperCase()).join(', ')}!`);
+        toast.success(`🎉 Successfully authenticated with ${newProviders.map(p => p.toUpperCase()).join(', ')}!`);
       }
     }
 
@@ -376,7 +366,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
                     <div className="flex items-center gap-4">
                       <div>
                         <div className="font-semibold text-lg" style={{ color: 'rgb(64, 143, 204)' }}>
-                          {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}
+                          {provider.toUpperCase()}
                         </div>
                         <div className="text-sm mt-1" style={{ color: 'rgb(50, 135, 200)' }}>
                           {status.formattedTime} remaining
@@ -413,7 +403,7 @@ export function TokenPage({ onBack }: TokenPageProps) {
             <CardHeader className="pb-8">
               <CardTitle className="text-2xl text-[rgb(64,143,204)]">Token Details & Actions</CardTitle>
               <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
-                Claims and metadata for {selectedToken.provider === 'fabric' ? 'FABRIC API' : selectedToken.provider.toUpperCase()} token
+                Claims and metadata for {selectedToken.provider.toUpperCase()} token
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8 pt-0">

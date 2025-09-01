@@ -2,7 +2,6 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useKV } from '@github/spark/hooks';
 import { TokenData, Provider } from '@/lib/types';
 import { TokenStorage } from '@/lib/token-storage';
-import { FabricProvider } from '@/lib/providers/fabric';
 import { CILogonProvider } from '@/lib/providers/cilogon';
 import { ORCIDProvider } from '@/lib/providers/orcid';
 import { toast } from 'sonner';
@@ -34,8 +33,8 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
 
   const [refreshStatus, setRefreshStatus] = useKV<TokenRefreshStatus>('token-refresh-status', {
     isRefreshing: false,
-    lastRefresh: { cilogon: 0, orcid: 0, fabric: 0 },
-    refreshErrors: { cilogon: null, orcid: null, fabric: null }
+    lastRefresh: { cilogon: 0, orcid: 0 },
+    refreshErrors: { cilogon: null, orcid: null }
   });
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,11 +59,6 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
       let newToken: TokenData;
 
       switch (provider) {
-        case 'fabric':
-          // FABRIC has explicit refresh token support
-          newToken = await FabricProvider.refreshToken();
-          break;
-        
         case 'cilogon':
           // CILogon tokens typically have long expiry, but we can try to refresh if refresh_token exists
           const cilogonToken = TokenStorage.getToken('cilogon');
@@ -127,7 +121,7 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
   }, [setRefreshStatus, showNotifications]);
 
   const checkTokens = useCallback(async () => {
-    const providers: Provider[] = ['cilogon', 'orcid', 'fabric'];
+    const providers: Provider[] = ['cilogon', 'orcid'];
     const now = Math.floor(Date.now() / 1000);
     const refreshThreshold = refreshBeforeExpiryMinutes * 60; // Convert to seconds
 
@@ -143,8 +137,8 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
       if (timeUntilExpiry <= refreshThreshold && timeUntilExpiry > 0) {
         console.log(`Token for ${provider} expires in ${Math.floor(timeUntilExpiry / 60)} minutes, attempting refresh...`);
         
-        // Only attempt refresh if we have a refresh token or it's FABRIC (which supports refresh)
-        if (token.refresh_token || provider === 'fabric') {
+        // Only attempt refresh if we have a refresh token
+        if (token.refresh_token) {
           await refreshToken(provider);
         } else {
           console.log(`No refresh token available for ${provider}, manual re-authentication will be required`);

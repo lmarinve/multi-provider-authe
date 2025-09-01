@@ -8,7 +8,6 @@ import { DeviceFlowState } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
 import { CILogonProvider } from "@/lib/providers/cilogon";
 import { ORCIDProvider } from "@/lib/providers/orcid";
-import { FabricProvider } from "@/lib/providers/fabric";
 import sdxLogo from "@/assets/images/sdx-logo.svg";
 import { 
   CheckCircle, 
@@ -181,116 +180,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
 
 
 
-  const startFabricFlow = async () => {
-    console.log("Starting FABRIC API authentication...");
-    setIsLoading(true);
-    
-    try {
-      // Check if CILogon token exists first (FABRIC requires CILogon)
-      const cilogonToken = TokenStorage.getToken("cilogon");
-      if (!cilogonToken) {
-        throw new Error("FABRIC API authentication requires a valid CILogon token. Please authenticate with CILogon first.");
-      }
-      
-      const token = await FabricProvider.createToken(cilogonToken);
-      console.log("FABRIC authentication successful:", token);
-      
-      toast.success("FABRIC API authentication successful!");
-      setDeviceFlow({ status: "success", token });
-      
-      // Complete the login process
-      setTimeout(() => {
-        onComplete();
-      }, 1000);
-      
-    } catch (error: any) {
-      console.error("FABRIC authentication failed:", error);
-      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
-      toast.error(errorMessage);
-      setDeviceFlow({ 
-        status: "error", 
-        error: errorMessage
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const startMEICANFlow = async () => {
-    console.log("Starting MEICAN authentication...");
-    setIsLoading(true);
-    setDeviceFlow({ status: "pending" });
-    
-    try {
-      // For now, simulate MEICAN authentication
-      // In a real implementation, this would integrate with MEICAN's auth system
-      setTimeout(() => {
-        const mockToken = {
-          access_token: "meican_mock_token_" + Date.now(),
-          token_type: "Bearer",
-          expires_in: 3600,
-          provider: "meican"
-        };
-        
-        TokenStorage.setToken("meican", mockToken);
-        toast.success("✅ MEICAN authentication successful!");
-        setDeviceFlow({ status: "success", token: mockToken });
-        
-        setTimeout(() => {
-          onComplete();
-        }, 2000);
-      }, 1500);
-      
-    } catch (error: any) {
-      console.error("MEICAN authentication failed:", error);
-      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
-      toast.error(`❌ ${errorMessage}`);
-      setDeviceFlow({ 
-        status: "error", 
-        error: errorMessage
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const startFabricConnectionFlow = async () => {
-    console.log("Starting FABRIC Connection authentication...");
-    setIsLoading(true);
-    setDeviceFlow({ status: "pending" });
-    
-    try {
-      // For now, simulate FABRIC Connection authentication
-      // In a real implementation, this would integrate with FABRIC Portal's auth system
-      setTimeout(() => {
-        const mockToken = {
-          access_token: "fabric_connection_mock_token_" + Date.now(),
-          token_type: "Bearer", 
-          expires_in: 3600,
-          provider: "fabricConnection"
-        };
-        
-        TokenStorage.setToken("fabricConnection", mockToken);
-        toast.success("✅ FABRIC Connection authentication successful!");
-        setDeviceFlow({ status: "success", token: mockToken });
-        
-        setTimeout(() => {
-          onComplete();
-        }, 2000);
-      }, 1500);
-      
-    } catch (error: any) {
-      console.error("FABRIC Connection authentication failed:", error);
-      const errorMessage = error instanceof Error ? error.message : "Authentication failed";
-      toast.error(`❌ ${errorMessage}`);
-      setDeviceFlow({ 
-        status: "error", 
-        error: errorMessage
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
 
 
@@ -338,12 +228,7 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
       <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
         <CardHeader className="pb-8 text-center">
           <CardTitle className="text-2xl text-[rgb(64,143,204)] text-center">
-            Authenticate with {
-              provider === 'fabric' ? 'FABRIC API' : 
-              provider === 'meican' ? 'MEICAN' :
-              provider === 'fabricConnection' ? 'FABRIC Connection' :
-              provider.toUpperCase()
-            }
+            Authenticate with {provider.toUpperCase()}
           </CardTitle>
           <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)] text-center">
             Complete the authentication flow to obtain your token
@@ -557,187 +442,11 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
             </>
           )}
 
-          {provider === "fabric" && (
-            <>
-              {deviceFlow.status === "idle" && (
-                <div className="space-y-6">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>FABRIC API Authentication:</strong> FABRIC API authentication requires a valid CILogon token. 
-                      Please authenticate with CILogon first if you haven't already.
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={startFabricFlow} 
-                    disabled={isLoading} 
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                  >
-                    {isLoading ? "Creating Token..." : "Login with FABRIC API"}
-                  </Button>
-                </div>
-              )}
 
-              {deviceFlow.status === "success" && (
-                <Alert className="border-2 border-green-200 bg-green-50">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <AlertDescription className="text-base ml-2 text-green-800">
-                    Authentication successful! Redirecting to your token...
-                  </AlertDescription>
-                </Alert>
-              )}
 
-              {deviceFlow.status === "error" && (
-                <div className="space-y-4">
-                  <Alert variant="destructive" className="border-2 border-destructive/20">
-                    <XCircle className="h-5 w-5" />
-                    <AlertDescription className="text-base ml-2">
-                      {deviceFlow.error}
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <Button 
-                    onClick={() => {
-                      setDeviceFlow({ status: "idle" });
-                      setIsLoading(false);
-                    }}
-                    variant="outline"
-                    className="w-full border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                  >
-                    Try Again
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
 
-          {provider === "meican" && (
-            <>
-              {deviceFlow.status === "idle" && (
-                <div className="space-y-6">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>MEICAN Authentication:</strong> Connect to the Management Environment for Inter-domain Circuit Activation and Network monitoring.
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={startMEICANFlow} 
-                    disabled={isLoading} 
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                  >
-                    {isLoading ? "Connecting..." : "Connect with MEICAN"}
-                  </Button>
-                </div>
-              )}
 
-              {deviceFlow.status === "pending" && (
-                <div className="space-y-4">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
-                    <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                      <strong>Connecting to MEICAN...</strong> Please wait while we establish your connection.
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              )}
 
-              {deviceFlow.status === "success" && (
-                <Alert className="border-2 border-green-200 bg-green-50">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <AlertDescription className="text-base ml-2 text-green-800">
-                    ✅ MEICAN connection successful! Redirecting to your token page...
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {deviceFlow.status === "error" && (
-                <div className="space-y-4">
-                  <Alert variant="destructive">
-                    <XCircle className="h-5 w-5" />
-                    <AlertDescription>
-                      {deviceFlow.error}
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <Button 
-                    onClick={() => {
-                      setDeviceFlow({ status: "idle" });
-                      setIsLoading(false);
-                    }}
-                    variant="outline"
-                    className="w-full border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                  >
-                    Try Again
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-
-          {provider === "fabricConnection" && (
-            <>
-              {deviceFlow.status === "idle" && (
-                <div className="space-y-6">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <AlertDescription className="text-base text-[rgb(64,143,204)]">
-                      <strong>FABRIC Connection Authentication:</strong> Connect to FABRIC's network slice management platform for advanced network operations.
-                    </AlertDescription>
-                  </Alert>
-                  <Button 
-                    onClick={startFabricConnectionFlow} 
-                    disabled={isLoading} 
-                    size="lg" 
-                    className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                  >
-                    {isLoading ? "Connecting..." : "Connect with FABRIC Portal"}
-                  </Button>
-                </div>
-              )}
-
-              {deviceFlow.status === "pending" && (
-                <div className="space-y-4">
-                  <Alert className="border-2 border-[rgb(120,176,219)] bg-[rgb(236,244,250)]">
-                    <Clock className="h-5 w-5 text-[rgb(50,135,200)]" />
-                    <AlertDescription className="text-base ml-2 text-[rgb(64,143,204)]">
-                      <strong>Connecting to FABRIC Portal...</strong> Please wait while we establish your connection.
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              )}
-
-              {deviceFlow.status === "success" && (
-                <Alert className="border-2 border-green-200 bg-green-50">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <AlertDescription className="text-base ml-2 text-green-800">
-                    ✅ FABRIC Connection successful! Redirecting to your token page...
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {deviceFlow.status === "error" && (
-                <div className="space-y-4">
-                  <Alert variant="destructive">
-                    <XCircle className="h-5 w-5" />
-                    <AlertDescription>
-                      {deviceFlow.error}
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <Button 
-                    onClick={() => {
-                      setDeviceFlow({ status: "idle" });
-                      setIsLoading(false);
-                    }}
-                    variant="outline"
-                    className="w-full border-2 border-[rgb(120,176,219)] text-[rgb(50,135,200)] hover:bg-[rgb(236,244,250)]"
-                  >
-                    Try Again
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
         </CardContent>
       </Card>
     </div>
