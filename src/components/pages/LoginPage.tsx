@@ -234,32 +234,32 @@ export function LoginPage({ provider, onComplete, onBack }: LoginPageProps) {
                   <Alert className="border-2 border-[rgb(50,135,200)] bg-white">
                     <AlertDescription className="text-sm text-[rgb(64,143,204)]">
                       <div className="space-y-2">
-                        <p><strong>Authentication URLs:</strong></p>
+                        <p><strong>Debug Information:</strong></p>
                         <div className="space-y-1 font-mono text-xs break-all">
-                          <div>
-                            <span className="font-bold text-[rgb(50,135,200)]">Authorization:</span>
-                            <br />
-                            <span className="text-[rgb(64,143,204)]">{config.cilogon.authUrl}</span>
-                          </div>
-                          <div>
-                            <span className="font-bold text-[rgb(50,135,200)]">Token Endpoint:</span>
-                            <br />
-                            <span className="text-[rgb(64,143,204)]">{config.cilogon.tokenUrl}</span>
-                          </div>
                           <div>
                             <span className="font-bold text-[rgb(50,135,200)]">Client ID:</span>
                             <br />
                             <span className="text-[rgb(64,143,204)]">{config.cilogon.clientId}</span>
                           </div>
                           <div>
-                            <span className="font-bold text-[rgb(50,135,200)]">Redirect URI:</span>
+                            <span className="font-bold text-[rgb(50,135,200)]">Registered Redirect URI:</span>
                             <br />
                             <span className="text-[rgb(64,143,204)]">{config.cilogon.redirectUri}</span>
+                          </div>
+                          <div>
+                            <span className="font-bold text-[rgb(50,135,200)]">Current Window Location:</span>
+                            <br />
+                            <span className="text-[rgb(64,143,204)]">{typeof window !== 'undefined' ? window.location.origin + window.location.pathname : 'N/A'}</span>
                           </div>
                           <div>
                             <span className="font-bold text-[rgb(50,135,200)]">Scope:</span>
                             <br />
                             <span className="text-[rgb(64,143,204)]">{config.cilogon.scope}</span>
+                          </div>
+                          <div className="mt-2 p-2 bg-[rgb(236,244,250)] rounded">
+                            <span className="font-bold text-[rgb(50,135,200)]">Callback Status:</span>
+                            <br />
+                            <span className="text-[rgb(64,143,204)]">✓ Callback file exists at both /auth/callback/cilogon/ and /multi-provider-authe/auth/callback/cilogon/</span>
                           </div>
                         </div>
                       </div>
