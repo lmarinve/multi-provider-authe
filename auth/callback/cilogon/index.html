@@ -53,8 +53,8 @@
 <body>
     <div class="container">
         <div class="spinner"></div>
-        <h2>Processing CILogon Authentication...</h2>
-        <p>This window will close automatically once authentication is complete.</p>
+        <h2>🔐 Processing CILogon Authentication</h2>
+        <p>Please complete the login process in this window. Once successful, this popup will close automatically and you'll be returned to the main application.</p>
         <div id="status"></div>
     </div>
 
@@ -133,7 +133,7 @@
                         return;
                     }
 
-                    showStatus('Authentication successful! Completing login...', 'success');
+                    showStatus('✅ Authentication successful! Completing login...', 'success');
 
                     // Send the authorization code back to the parent window
                     if (window.opener && !window.opener.closed) {
@@ -144,12 +144,12 @@
                             state: state
                         }, '*');
                         
-                        showStatus('Authentication successful! You can close this window.', 'success');
+                        showStatus('✅ Authentication completed! This window will close automatically.', 'success');
                         
                         // Close this window after a brief delay
                         setTimeout(() => {
                             window.close();
-                        }, 2000);
+                        }, 3000);
                     } else if (window.parent && window.parent !== window) {
                         console.log('Sending success message to parent frame');
                         window.parent.postMessage({
@@ -158,7 +158,7 @@
                             state: state
                         }, '*');
                         
-                        showStatus('Authentication successful! You can close this window.', 'success');
+                        showStatus('✅ Authentication completed! Please return to the main window.', 'success');
                     } else {
                         console.error('No parent window or opener found');
                         showStatus(`Unable to communicate with parent window. Code: ${code.substring(0, 10)}...`, 'error');
@@ -171,7 +171,7 @@
                                 state: state,
                                 timestamp: Date.now()
                             }));
-                            showStatus('Authentication data saved locally. Please return to the main window.', 'success');
+                            showStatus('✅ Authentication data saved! Please return to the main window.', 'success');
                         } catch (e) {
                             console.error('Failed to save to localStorage:', e);
                         }
