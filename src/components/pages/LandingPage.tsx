@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Provider } from "@/lib/config";
+import { TokenStatus } from "@/components/TokenStatus";
 import sdxLogo from "@/assets/images/sdx-logo.svg"; 
 
 interface LandingPageProps {
@@ -147,6 +148,15 @@ export function LandingPage({
           >
             Continue with {selectedProvider ? providerInfo[selectedProvider].name : "Provider"}
           </Button>
+        </div>
+
+        {/* Existing Token Status (compact view) */}
+        <div className="mt-8">
+          <TokenStatus 
+            providers={['cilogon', 'orcid', 'fabric']}
+            showRefreshButtons={false}
+            compact={true}
+          />
         </div>
       </div>
     </div>

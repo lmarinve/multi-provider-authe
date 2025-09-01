@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { TokenData, TokenClaims } from "@/lib/types";
 import { TokenStorage, decodeJWT } from "@/lib/token-storage";
 import { sendTokenToBackend } from "@/lib/backend";
+import { TokenStatus } from "@/components/TokenStatus";
+import { useTokenRefresh } from "@/hooks/useTokenRefresh";
 import sdxLogo from "@/assets/images/sdx-logo.svg";
 
 interface TokenPageProps {
@@ -23,6 +25,13 @@ export function TokenPage({ onBack }: TokenPageProps) {
   const [selectedToken, setSelectedToken] = useState<TokenData | null>(null);
   const [claims, setClaims] = useState<TokenClaims | null>(null);
   const [isSending, setIsSending] = useState(false);
+
+  // Initialize token refresh system
+  const { refreshStatus, isTokenNearExpiry } = useTokenRefresh({
+    refreshBeforeExpiryMinutes: 5,
+    checkIntervalMinutes: 1,
+    showNotifications: true
+  });
 
   useEffect(() => {
     // Initial load
@@ -173,16 +182,18 @@ export function TokenPage({ onBack }: TokenPageProps) {
   };
 
   const getTokenStatus = (token: TokenData) => {
-    const now = Math.floor(Date.now() / 1000);
-    const expiresAt = token.issued_at + token.expires_in;
-    const isValid = expiresAt > now;
-    const timeUntilExpiry = expiresAt - now;
+    const isValid = TokenStorage.isTokenValid(token);
+    const timeUntilExpiry = TokenStorage.getTimeUntilExpiry(token);
+    const isNearExpiry = TokenStorage.isTokenNearExpiry(token, 15); // 15 minute warning
+    const canRefresh = TokenStorage.canRefreshToken(token);
 
     return {
       isValid,
-      expiresAt: new Date(expiresAt * 1000),
+      expiresAt: TokenStorage.getTokenExpiryDate(token),
       timeUntilExpiry,
-      isExpiringSoon: timeUntilExpiry < 300 // Less than 5 minutes
+      isExpiringSoon: isNearExpiry,
+      canRefresh,
+      formattedTime: TokenStorage.formatTimeUntilExpiry(token)
     };
   };
 
@@ -328,13 +339,22 @@ export function TokenPage({ onBack }: TokenPageProps) {
         ← Back to selection
       </Button>
 
-      <div className="grid lg:grid-cols-2 gap-10">
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Token Refresh Status */}
+        <div className="lg:col-span-3">
+          <TokenStatus 
+            providers={Object.keys(tokens) as any[]}
+            showRefreshButtons={true}
+            compact={false}
+          />
+        </div>
+
         {/* Token Selection */}
-        <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
+        <Card className="lg:col-span-1 shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
           <CardHeader className="pb-8">
             <CardTitle className="text-2xl text-[rgb(64,143,204)]">Available Tokens</CardTitle>
             <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
-              Select a token to view details and send to backend
+              Select a token to view details
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-0">
@@ -356,23 +376,28 @@ export function TokenPage({ onBack }: TokenPageProps) {
                     <div className="flex items-center gap-4">
                       <div>
                         <div className="font-semibold text-lg" style={{ color: 'rgb(64, 143, 204)' }}>
-                          {provider === 'fabric' ? 'Login with FABRIC API' : provider.toUpperCase()}
+                          {provider === 'fabric' ? 'FABRIC API' : provider.toUpperCase()}
                         </div>
-                        <div className="text-base mt-1" style={{ color: 'rgb(50, 135, 200)' }}>
-                          Expires {status.expiresAt.toLocaleDateString()}
+                        <div className="text-sm mt-1" style={{ color: 'rgb(50, 135, 200)' }}>
+                          {status.formattedTime} remaining
                         </div>
+                        {status.canRefresh && (
+                          <div className="text-xs text-green-600 mt-1">
+                            Auto-refresh enabled
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       {status.isExpiringSoon && (
-                        <Badge variant="destructive" className="text-sm px-3 py-1">
-                          Expiring Soon
+                        <Badge variant="destructive" className="text-xs">
+                          {status.canRefresh ? 'Refreshing' : 'Expires Soon'}
                         </Badge>
                       )}
                       {status.isValid ? (
-                        <span style={{ color: 'rgb(50, 135, 200)' }} className="text-2xl">✓</span>
+                        <span style={{ color: 'rgb(50, 135, 200)' }} className="text-xl">✓</span>
                       ) : (
-                        <span className="text-destructive text-2xl">✗</span>
+                        <span className="text-destructive text-xl">✗</span>
                       )}
                     </div>
                   </div>
@@ -384,11 +409,11 @@ export function TokenPage({ onBack }: TokenPageProps) {
 
         {/* Token Details */}
         {selectedToken && claims && (
-          <Card className="shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
+          <Card className="lg:col-span-2 shadow-lg border-2 border-[rgb(120,176,219)] bg-[rgb(255,255,255)]">
             <CardHeader className="pb-8">
-              <CardTitle className="text-2xl text-[rgb(64,143,204)]">Token Details</CardTitle>
+              <CardTitle className="text-2xl text-[rgb(64,143,204)]">Token Details & Actions</CardTitle>
               <CardDescription className="text-lg mt-2 text-[rgb(50,135,200)]">
-                Claims and metadata for the selected token
+                Claims and metadata for {selectedToken.provider === 'fabric' ? 'FABRIC API' : selectedToken.provider.toUpperCase()} token
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8 pt-0">
@@ -426,20 +451,38 @@ export function TokenPage({ onBack }: TokenPageProps) {
                   </div>
                 )}
 
-                <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
-                  <div className="min-w-0 flex-1">
-                    <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Issued At</div>
-                    <div className="text-base" style={{ color: 'rgb(50, 135, 200)' }}>
-                      {formatDate(selectedToken.issued_at)}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Issued At</div>
+                      <div className="text-sm" style={{ color: 'rgb(50, 135, 200)' }}>
+                        {formatDate(selectedToken.issued_at)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
+                    <div className="min-w-0 flex-1">
+                      <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Expires At</div>
+                      <div className="text-sm" style={{ color: 'rgb(50, 135, 200)' }}>
+                        {formatDate(selectedToken.issued_at + selectedToken.expires_in)}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-4 p-4 rounded-xl bg-[rgb(236,244,250)] border border-[rgb(120,176,219)]">
                   <div className="min-w-0 flex-1">
-                    <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Expires At</div>
-                    <div className="text-base" style={{ color: 'rgb(50, 135, 200)' }}>
-                      {formatDate(selectedToken.issued_at + selectedToken.expires_in)}
+                    <div className="text-base font-semibold mb-2" style={{ color: 'rgb(64, 143, 204)' }}>Token Status</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm" style={{ color: 'rgb(50, 135, 200)' }}>
+                        {TokenStorage.formatTimeUntilExpiry(selectedToken)} remaining
+                      </div>
+                      {TokenStorage.canRefreshToken(selectedToken) && (
+                        <Badge variant="secondary" className="text-xs">
+                          Auto-refresh enabled
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -447,44 +490,38 @@ export function TokenPage({ onBack }: TokenPageProps) {
 
               <Separator className="my-8" />
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <Button
                   onClick={handleSendToBackend}
-                  disabled={isSending}
-                  className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
+                  disabled={isSending || !TokenStorage.isTokenValid(selectedToken)}
+                  className="w-full py-4 text-lg font-semibold bg-[rgb(50,135,200)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)] disabled:opacity-50"
                   size="lg"
                 >
-                  {isSending ? (
-                    <>
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      Send Token to Backend
-                    </>
-                  )}
+                  {isSending ? "Sending..." : "Send Token to Backend"}
                 </Button>
 
-                <Button
-                  onClick={() => {
-                    window.open("http://190.103.184.199", "_blank");
-                  }}
-                  className="w-full py-4 text-lg font-semibold bg-[rgb(120,176,219)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                  size="lg"
-                >
-                  Connect using MEICAN
-                </Button>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    onClick={() => {
+                      window.open("http://190.103.184.199", "_blank");
+                    }}
+                    className="py-3 text-base font-semibold bg-[rgb(120,176,219)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
+                    size="lg"
+                  >
+                    Connect using MEICAN
+                  </Button>
 
-                <Button
-                  onClick={() => {
-                    toast.info("Connecting to FABRIC...");
-                    // TODO: Implement FABRIC connection
-                  }}
-                  className="w-full py-4 text-lg font-semibold bg-[rgb(120,176,219)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
-                  size="lg"
-                >
-                  Connect using FABRIC
-                </Button>
+                  <Button
+                    onClick={() => {
+                      toast.info("Connecting to FABRIC...");
+                      // TODO: Implement FABRIC connection
+                    }}
+                    className="py-3 text-base font-semibold bg-[rgb(120,176,219)] hover:bg-[rgb(64,143,204)] text-[rgb(255,255,255)]"
+                    size="lg"
+                  >
+                    Connect using FABRIC
+                  </Button>
+                </div>
 
                 <Button 
                   variant="outline" 

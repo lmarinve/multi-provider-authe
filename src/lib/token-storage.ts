@@ -41,6 +41,38 @@ export class TokenStorage {
   static getTokenExpiryDate(token: TokenData): Date {
     return new Date((token.issued_at + token.expires_in) * 1000);
   }
+
+  static getTimeUntilExpiry(token: TokenData): number {
+    const now = Math.floor(Date.now() / 1000);
+    const expiresAt = token.issued_at + token.expires_in;
+    return Math.max(0, expiresAt - now);
+  }
+
+  static isTokenNearExpiry(token: TokenData, warningMinutes: number = 5): boolean {
+    const timeUntilExpiry = this.getTimeUntilExpiry(token);
+    return timeUntilExpiry <= (warningMinutes * 60) && timeUntilExpiry > 0;
+  }
+
+  static canRefreshToken(token: TokenData): boolean {
+    return !!token.refresh_token || token.provider === 'fabric';
+  }
+
+  static formatTimeUntilExpiry(token: TokenData): string {
+    const seconds = this.getTimeUntilExpiry(token);
+    if (seconds <= 0) return 'Expired';
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`;
+    } else {
+      return `${remainingSeconds}s`;
+    }
+  }
 }
 
 export function decodeJWT(token: string): any {

@@ -31,9 +31,14 @@
 - **Success Criteria**: Each provider successfully returns valid JWT tokens
 
 ### Token Management
-- **Functionality**: Secure storage, display of token information, and backend handoff
-- **Purpose**: Provides users with token details and enables backend integration
-- **Success Criteria**: Tokens stored securely in localStorage with clear expiry information
+- **Functionality**: Secure storage, display of token information, automatic refresh, and backend handoff
+- **Purpose**: Provides users with token details, maintains valid tokens, and enables backend integration
+- **Success Criteria**: Tokens stored securely with automatic refresh before expiry and clear status information
+
+### Automatic Token Refresh
+- **Functionality**: Background monitoring and automatic refresh of tokens before expiry
+- **Purpose**: Maintains seamless user experience by preventing token expiration interruptions
+- **Success Criteria**: Tokens refreshed automatically 5 minutes before expiry with user notifications
 
 ### Multi-Provider Support
 - **CILogon**: Academic and research identity federation using device flow
@@ -110,9 +115,17 @@
 
 **Security Focus**: 
 - No client secrets in browser code
-- Tokens stored only in localStorage
+- Tokens stored only in localStorage with automatic refresh capability
 - Secure token handoff with proper HTTP headers
-- Clear token lifecycle management
+- Clear token lifecycle management with expiry monitoring
+- Automatic refresh tokens prevent service interruption
+
+**Token Refresh System**:
+- Background monitoring checks token expiry every minute
+- Automatic refresh attempts 5 minutes before expiry
+- Visual indicators show refresh status and token health
+- Graceful handling of refresh failures with user notifications
+- Support for provider-specific refresh mechanisms
 
 **Critical Questions**: 
 - Token refresh strategies for long-running sessions
