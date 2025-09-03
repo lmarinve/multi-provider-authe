@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { X, RefreshCw, AlertTriangle } from 'lucide-react';
 import { TokenStorage } from '@/lib/token-storage';
 import { TokenData, Provider } from '@/lib/types';
-import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 
 interface TokenExpiryNotificationProps {
   warningMinutes?: number;
@@ -18,8 +17,6 @@ export function TokenExpiryNotification({
 }: TokenExpiryNotificationProps) {
   const [expiringTokens, setExpiringTokens] = useState<Array<{ provider: Provider; token: TokenData; timeLeft: string }>>([]);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  
-  const { manualRefresh, refreshStatus } = useTokenRefresh();
 
   useEffect(() => {
     const checkTokens = () => {
@@ -56,17 +53,9 @@ export function TokenExpiryNotification({
     setDismissed(prev => new Set([...prev, dismissKey]));
   };
 
-  const handleRefresh = async (provider: Provider) => {
-    const token = expiringTokens.find(t => t.provider === provider)?.token;
-    if (token && TokenStorage.canRefreshToken(token)) {
-      try {
-        await manualRefresh(provider);
-        // Remove from expiring tokens on successful refresh
-        setExpiringTokens(prev => prev.filter(t => t.provider !== provider));
-      } catch (error) {
-        console.error(`Failed to refresh ${provider} token:`, error);
-      }
-    }
+  const handleRefresh = (provider: Provider) => {
+    // Simple refresh by redirecting to login page
+    window.location.href = `/multi-provider-authe/login?provider=${provider}`;
   };
 
   if (expiringTokens.length === 0) {
@@ -85,7 +74,7 @@ export function TokenExpiryNotification({
               </span>
               {TokenStorage.canRefreshToken(token) && (
                 <Badge variant="secondary" className="text-xs">
-                  Auto-refresh enabled
+                  Refresh available
                 </Badge>
               )}
             </div>
@@ -95,17 +84,10 @@ export function TokenExpiryNotification({
                   size="sm"
                   variant="outline"
                   onClick={() => handleRefresh(provider)}
-                  disabled={refreshStatus.isRefreshing}
                   className="h-6 px-2 text-xs"
                 >
-                  {refreshStatus.isRefreshing ? (
-                    <RefreshCw className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <>
-                      <RefreshCw className="h-3 w-3 mr-1" />
-                      Refresh Now
-                    </>
-                  )}
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Refresh Now
                 </Button>
               )}
               <Button

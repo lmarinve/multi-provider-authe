@@ -1,15 +1,10 @@
 import { useState, useEffect } from "react";
-import { useKV } from "@github/spark/hooks";
 import { Toaster } from "@/components/ui/sonner";
-import { toast } from "sonner";
 import { LandingPage } from "@/components/pages/LandingPage";
 import { LoginPage } from "@/components/pages/LoginPage";
 import { TokenPage } from "@/components/pages/TokenPage";
 import { TokenExpiryNotification } from "@/components/TokenExpiryNotification";
-import { config } from "@/lib/config";
-import { Provider } from "@/lib/config";
-import { TokenStorage } from "@/lib/token-storage";
-import { useTokenRefresh } from "@/hooks/useTokenRefresh";
+import { Provider } from "@/lib/types";
 
 type Page = "landing" | "login" | "token";
 
@@ -17,13 +12,6 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>("landing");
   const [selectedProvider, setSelectedProvider] = useState<Provider | undefined>();
   const [loginProvider, setLoginProvider] = useState<Provider | undefined>();
-
-  // Initialize automatic token refresh system
-  const tokenRefresh = useTokenRefresh({
-    refreshBeforeExpiryMinutes: 5,
-    checkIntervalMinutes: 1,
-    showNotifications: true
-  });
 
   // Handle URL navigation
   useEffect(() => {

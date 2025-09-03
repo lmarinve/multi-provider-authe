@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Provider, config } from "@/lib/config";
-import { DeviceFlowState } from "@/lib/types";
+import { Provider, DeviceFlowState } from "@/lib/types";
+import { config } from "@/lib/config";
 import { TokenStorage } from "@/lib/token-storage";
 import { CILogonProvider } from "@/lib/providers/cilogon";
 import { ORCIDProvider } from "@/lib/providers/orcid";
