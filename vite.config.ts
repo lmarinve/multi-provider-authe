@@ -15,11 +15,6 @@ const projectRoot = process.env.PROJECT_ROOT || dirname(fileURLToPath(import.met
 
 // https://vite.dev/config/
 export default defineConfig({
-<<<<<<< HEAD
-  base: "/multi-provider-authe/",
-=======
-  base: repoBase,
->>>>>>> ef0f222 (vite config)
   plugins: [
     react(),
     tailwindcss(),
