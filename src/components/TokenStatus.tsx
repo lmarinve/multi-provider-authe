@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, CheckCircle2, RefreshCw, Clock, AlertCircle } from 'lucide-react';
+import { Warning, CheckCircle, ArrowClockwise, Clock, WarningCircle } from '@phosphor-icons/react';
 import { TokenStorage } from '@/lib/token-storage';
 import { TokenData, Provider } from '@/lib/types';
 import { useTokenRefresh } from '@/hooks/useTokenRefresh';
@@ -46,7 +46,7 @@ export function TokenStatus({
         status: 'missing' as const,
         color: 'text-muted-foreground',
         bgColor: 'bg-muted',
-        icon: AlertCircle,
+        icon: WarningCircle,
         message: 'Not authenticated'
       };
     }
@@ -60,7 +60,7 @@ export function TokenStatus({
         status: 'expired' as const,
         color: 'text-destructive',
         bgColor: 'bg-destructive/10',
-        icon: AlertTriangle,
+        icon: Warning,
         message: 'Token expired'
       };
     }
@@ -70,7 +70,7 @@ export function TokenStatus({
         status: 'warning' as const,
         color: 'text-orange-600',
         bgColor: 'bg-orange-50',
-        icon: AlertTriangle,
+        icon: Warning,
         message: canRefresh ? 'Expires soon (auto-refresh enabled)' : 'Expires soon (manual auth required)'
       };
     }
@@ -79,7 +79,7 @@ export function TokenStatus({
       status: 'valid' as const,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
-      icon: CheckCircle2,
+      icon: CheckCircle,
       message: 'Valid'
     };
   };
@@ -124,7 +124,7 @@ export function TokenStatus({
           <Clock className="w-5 h-5" />
           Token Status
           {refreshStatus.isRefreshing && (
-            <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+            <ArrowClockwise className="w-4 h-4 animate-spin text-blue-600" />
           )}
         </CardTitle>
       </CardHeader>

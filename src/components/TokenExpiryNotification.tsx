@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, RefreshCw, AlertTriangle } from 'lucide-react';
+import { X, ArrowClockwise, Warning } from '@phosphor-icons/react';
 import { TokenStorage } from '@/lib/token-storage';
 import { TokenData, Provider } from '@/lib/types';
 
@@ -66,7 +66,7 @@ export function TokenExpiryNotification({
     <div className={`space-y-2 ${className}`}>
       {expiringTokens.map(({ provider, token, timeLeft }) => (
         <Alert key={`${provider}-${token.issued_at}`} className="border-orange-200 bg-orange-50">
-          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <Warning className="h-4 w-4 text-orange-600" />
           <AlertDescription className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="text-orange-800">
@@ -86,7 +86,7 @@ export function TokenExpiryNotification({
                   onClick={() => handleRefresh(provider)}
                   className="h-6 px-2 text-xs"
                 >
-                  <RefreshCw className="h-3 w-3 mr-1" />
+                  <ArrowClockwise className="h-3 w-3 mr-1" />
                   Refresh Now
                 </Button>
               )}
