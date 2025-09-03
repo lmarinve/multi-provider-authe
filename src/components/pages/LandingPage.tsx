@@ -37,6 +37,9 @@ export function LandingPage({
   const [email, setEmail] = useState("");
   const [isEmailVerified, setIsEmailVerified] = useKV("auth.email-verified", false);
   const [verifiedEmail, setVerifiedEmail] = useKV("auth.verified-email", "");
+  
+  // Debug logging to check state
+  console.log("LandingPage render - isEmailVerified:", isEmailVerified, "verifiedEmail:", verifiedEmail);
   const [isLoading, setIsLoading] = useState(false);
   const [waitingForVerification, setWaitingForVerification] = useState(false);
 
