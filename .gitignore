@@ -32,3 +32,5 @@ packages
 
 .spark-workbench-id
 vite.config.ts
+pids/
+
