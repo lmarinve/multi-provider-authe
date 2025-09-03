@@ -9,7 +9,7 @@ import { TokenData, TokenClaims } from "@/lib/types";
 import { TokenStorage, decodeJWT } from "@/lib/token-storage";
 import { sendTokenToBackend } from "@/lib/backend";
 import { TokenStatus } from "@/components/TokenStatus";
-import { useTokenRefresh } from "@/hooks/useTokenRefresh";
+// import { useTokenRefresh } from "@/hooks/useTokenRefresh"; // temporarily disabled
 import sdxLogo from "@/assets/images/sdx-logo.svg";
 
 interface TokenPageProps {
@@ -25,12 +25,12 @@ export function TokenPage({ onBack }: TokenPageProps) {
   const [claims, setClaims] = useState<TokenClaims | null>(null);
   const [isSending, setIsSending] = useState(false);
 
-  // Initialize token refresh system
-  const { refreshStatus, isTokenNearExpiry } = useTokenRefresh({
-    refreshBeforeExpiryMinutes: 5,
-    checkIntervalMinutes: 1,
-    showNotifications: true
-  });
+  // Initialize token refresh system (temporarily disabled for debugging)
+  // const { refreshStatus, isTokenNearExpiry } = useTokenRefresh({
+  //   refreshBeforeExpiryMinutes: 5,
+  //   checkIntervalMinutes: 1,
+  //   showNotifications: true
+  // });
 
   useEffect(() => {
     // Initial load

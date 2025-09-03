@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Provider } from "@/lib/config";
+import { Provider } from "@/lib/types";
 import { useKV } from "@github/spark/hooks";
 import { toast } from "sonner";
 import sdxLogo from "@/assets/images/sdx-logo.svg"; 

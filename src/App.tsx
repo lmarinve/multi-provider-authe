@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { LandingPage } from "@/components/pages/LandingPage";
 import { LoginPage } from "@/components/pages/LoginPage";
 import { TokenPage } from "@/components/pages/TokenPage";
-import { TokenExpiryNotification } from "@/components/TokenExpiryNotification";
 import { Provider } from "@/lib/types";
 
 type Page = "landing" | "login" | "token";
@@ -19,33 +18,17 @@ function App() {
       const path = window.location.pathname;
       const searchParams = new URLSearchParams(window.location.search);
       
-      // Handle both with and without /multi-provider-authe prefix
-      if (path === "/multi-provider-authe/login" || path === "/login") {
+      // Simplified routing that works with both dev and production
+      if (path.endsWith("/login")) {
         const provider = searchParams.get("provider") as Provider;
         if (provider && ["cilogon", "orcid"].includes(provider)) {
           setLoginProvider(provider);
         }
         setCurrentPage("login");
-        
-        // If accessing without prefix, redirect to correct URL
-        if (path === "/login") {
-          const correctPath = `/multi-provider-authe/login${provider ? `?provider=${provider}` : ""}`;
-          window.history.replaceState({}, "", correctPath);
-        }
-      } else if (path === "/multi-provider-authe/token" || path === "/token") {
+      } else if (path.endsWith("/token")) {
         setCurrentPage("token");
-        
-        // If accessing without prefix, redirect to correct URL
-        if (path === "/token") {
-          window.history.replaceState({}, "", "/multi-provider-authe/token");
-        }
       } else {
         setCurrentPage("landing");
-        
-        // Ensure we're on the correct landing URL
-        if (path !== "/multi-provider-authe" && path !== "/") {
-          window.history.replaceState({}, "", "/multi-provider-authe");
-        }
       }
     };
 
@@ -92,12 +75,6 @@ function App() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
       <Toaster />
-      
-      {/* Token expiry notifications - shown on all pages */}
-      <TokenExpiryNotification 
-        warningMinutes={15}
-        className="fixed top-4 left-4 right-4 z-50 max-w-4xl mx-auto"
-      />
       
       {currentPage === "landing" && (
         <LandingPage
