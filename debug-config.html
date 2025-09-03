@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .config-section {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Configuration Debug Information</h1>
+    
+    <div class="config-section">
+        <h2>Environment Information</h2>
+        <p><strong>Current URL:</strong> <span id="current-url"></span></p>
+        <p><strong>Origin:</strong> <span id="origin"></span></p>
+        <p><strong>Pathname:</strong> <span id="pathname"></span></p>
+        <p><strong>NODE_ENV:</strong> <span id="node-env"></span></p>
+    </div>
+
+    <div class="config-section">
+        <h2>Expected Paths</h2>
+        <div id="expected-paths"></div>
+    </div>
+
+    <div class="config-section">
+        <h2>Configuration Values</h2>
+        <div id="config-values"></div>
+    </div>
+
+    <script>
+        // Display environment info
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('origin').textContent = window.location.origin;
+        document.getElementById('pathname').textContent = window.location.pathname;
+        document.getElementById('node-env').textContent = process?.env?.NODE_ENV || 'undefined';
+
+        // Expected paths based on environment
+        const isProduction = process?.env?.NODE_ENV === 'production';
+        const basePath = isProduction ? "/multi-provider-authe" : "";
+        
+        document.getElementById('expected-paths').innerHTML = `
+            <p><strong>Is Production:</strong> ${isProduction}</p>
+            <p><strong>Base Path:</strong> "${basePath}"</p>
+            <p><strong>Expected Landing:</strong> ${window.location.origin}${basePath}</p>
+            <p><strong>Expected Login:</strong> ${window.location.origin}${basePath}/login</p>
+            <p><strong>Expected Token:</strong> ${window.location.origin}${basePath}/token</p>
+        `;
+
+        // Try to access config if available
+        const config = {
+            cilogonRedirect: `${window.location.origin}${basePath}/auth/callback/cilogon`,
+            orcidRedirect: `${window.location.origin}${basePath}/auth/callback/orcid`
+        };
+
+        document.getElementById('config-values').innerHTML = `
+            <p><strong>CILogon Redirect URI:</strong> ${config.cilogonRedirect}</p>
+            <p><strong>ORCID Redirect URI:</strong> ${config.orcidRedirect}</p>
+        `;
+
+        console.log('Debug Config:', {
+            currentUrl: window.location.href,
+            isProduction,
+            basePath,
+            config
+        });
+    </script>
+</body>
+</html>

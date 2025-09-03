@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { LandingPage } from "@/components/pages/LandingPage";
 import { LoginPage } from "@/components/pages/LoginPage";
@@ -10,51 +10,12 @@ type Page = "landing" | "login" | "token";
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("landing");
   const [selectedProvider, setSelectedProvider] = useState<Provider | undefined>();
-  const [loginProvider, setLoginProvider] = useState<Provider | undefined>();
-
-  // Handle URL navigation
-  useEffect(() => {
-    const updatePageFromURL = () => {
-      const path = window.location.pathname;
-      const searchParams = new URLSearchParams(window.location.search);
-      
-      // Simplified routing that works with both dev and production
-      if (path.endsWith("/login")) {
-        const provider = searchParams.get("provider") as Provider;
-        if (provider && ["cilogon", "orcid"].includes(provider)) {
-          setLoginProvider(provider);
-        }
-        setCurrentPage("login");
-      } else if (path.endsWith("/token")) {
-        setCurrentPage("token");
-      } else {
-        setCurrentPage("landing");
-      }
-    };
-
-    updatePageFromURL();
-    window.addEventListener("popstate", updatePageFromURL);
-    return () => window.removeEventListener("popstate", updatePageFromURL);
-  }, []);
 
   const navigateTo = (page: Page, provider?: Provider) => {
-    let path = "/multi-provider-authe";
-    
-    switch (page) {
-      case "login":
-        path = `/multi-provider-authe/login${provider ? `?provider=${provider}` : ""}`;
-        if (provider) setLoginProvider(provider);
-        break;
-      case "token":
-        path = "/multi-provider-authe/token";
-        break;
-      case "landing":
-        path = "/multi-provider-authe";
-        break;
-    }
-    
-    window.history.pushState({}, "", path);
     setCurrentPage(page);
+    if (provider) {
+      setSelectedProvider(provider);
+    }
   };
 
   const handleLogin = (provider: Provider) => {
@@ -68,12 +29,11 @@ function App() {
 
   const handleBackToLanding = () => {
     setSelectedProvider(undefined);
-    setLoginProvider(undefined);
     navigateTo("landing");
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
+    <div className="min-h-screen bg-white">
       <Toaster />
       
       {currentPage === "landing" && (
@@ -84,9 +44,9 @@ function App() {
         />
       )}
       
-      {currentPage === "login" && loginProvider && (
+      {currentPage === "login" && selectedProvider && (
         <LoginPage
-          provider={loginProvider}
+          provider={selectedProvider}
           onComplete={handleLoginComplete}
           onBack={handleBackToLanding}
         />

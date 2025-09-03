@@ -1,9 +1,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useKV } from '@github/spark/hooks';
-import { TokenData, Provider } from '@/lib/types';
-import { TokenStorage } from '@/lib/token-storage';
-import { CILogonProvider } from '@/lib/providers/cilogon';
-import { ORCIDProvider } from '@/lib/providers/orcid';
+import { AuthToken, Provider } from '@/lib/types';
+import { getToken, saveToken } from '@/lib/token-storage';
 import { toast } from 'sonner';
 
 interface TokenRefreshConfig {
@@ -56,12 +54,12 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
         refreshErrors: { ...prev.refreshErrors, [provider]: null }
       }));
 
-      let newToken: TokenData;
+      let newToken: AuthToken;
 
       switch (provider) {
         case 'cilogon':
           // CILogon tokens typically have long expiry, but we can try to refresh if refresh_token exists
-          const cilogonToken = TokenStorage.getToken('cilogon');
+          const cilogonToken = getToken('cilogon');
           if (cilogonToken?.refresh_token) {
             // Implement CILogon refresh token flow
             newToken = await refreshCILogonToken(cilogonToken.refresh_token);
@@ -72,7 +70,7 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
           
         case 'orcid':
           // ORCID tokens can be refreshed if refresh_token exists
-          const orcidToken = TokenStorage.getToken('orcid');
+          const orcidToken = getToken('orcid');
           if (orcidToken?.refresh_token) {
             newToken = await refreshORCIDToken(orcidToken.refresh_token);
           } else {
@@ -126,7 +124,7 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
     const refreshThreshold = refreshBeforeExpiryMinutes * 60; // Convert to seconds
 
     for (const provider of providers) {
-      const token = TokenStorage.getToken(provider);
+      const token = getToken(provider);
       
       if (!token) continue;
 
@@ -173,7 +171,7 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
   }, [refreshToken]);
 
   const isTokenNearExpiry = useCallback((provider: Provider, warningMinutes: number = refreshBeforeExpiryMinutes): boolean => {
-    const token = TokenStorage.getToken(provider);
+    const token = getToken(provider);
     if (!token) return false;
 
     const now = Math.floor(Date.now() / 1000);
@@ -194,7 +192,7 @@ export function useTokenRefresh(config: TokenRefreshConfig = {}) {
 /**
  * Refresh CILogon token using refresh token
  */
-async function refreshCILogonToken(refreshToken: string): Promise<TokenData> {
+async function refreshCILogonToken(refreshToken: string): Promise<AuthToken> {
   const response = await fetch('https://cilogon.org/oauth2/token', {
     method: 'POST',
     headers: {
@@ -214,7 +212,7 @@ async function refreshCILogonToken(refreshToken: string): Promise<TokenData> {
 
   const tokenResponse = await response.json();
 
-  const tokenData: TokenData = {
+  const tokenData: AuthToken = {
     id_token: tokenResponse.id_token || tokenResponse.access_token,
     refresh_token: tokenResponse.refresh_token || refreshToken, // Keep existing if not provided
     expires_in: tokenResponse.expires_in || 3600,
@@ -222,14 +220,14 @@ async function refreshCILogonToken(refreshToken: string): Promise<TokenData> {
     provider: 'cilogon',
   };
 
-  TokenStorage.setToken('cilogon', tokenData);
+  saveToken('cilogon', tokenData);
   return tokenData;
 }
 
 /**
  * Refresh ORCID token using refresh token
  */
-async function refreshORCIDToken(refreshToken: string): Promise<TokenData> {
+async function refreshORCIDToken(refreshToken: string): Promise<AuthToken> {
   const response = await fetch('https://orcid.org/oauth/token', {
     method: 'POST',
     headers: {
@@ -249,7 +247,7 @@ async function refreshORCIDToken(refreshToken: string): Promise<TokenData> {
 
   const tokenResponse = await response.json();
 
-  const tokenData: TokenData = {
+  const tokenData: AuthToken = {
     id_token: tokenResponse.id_token || tokenResponse.access_token,
     refresh_token: tokenResponse.refresh_token || refreshToken, // Keep existing if not provided
     expires_in: tokenResponse.expires_in || 3600,
@@ -257,6 +255,6 @@ async function refreshORCIDToken(refreshToken: string): Promise<TokenData> {
     provider: 'orcid',
   };
 
-  TokenStorage.setToken('orcid', tokenData);
+  saveToken('orcid', tokenData);
   return tokenData;
 }
