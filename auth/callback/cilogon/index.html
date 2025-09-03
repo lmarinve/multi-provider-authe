@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CILogon Authentication</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #3287c8 0%, #4093cc 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: #dc3545;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .success {
+            background: #28a745;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>🔐 Processing CILogon Authentication</h2>
+        <p>Please wait while we complete your authentication. If this is a callback after successful login, this window will close automatically.</p>
+        <div id="status"></div>
+        <div id="debug" style="margin-top: 1rem; padding: 0.5rem; background: rgba(255,255,255,0.2); border-radius: 4px; font-size: 0.7em; font-family: monospace; text-align: left; max-height: 100px; overflow-y: auto;"></div>
+        <div class="instructions" style="margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.85em; line-height: 1.4;">
+            <p><strong>Instructions:</strong></p>
+            <ol style="text-align: left; padding-left: 1.5rem;">
+                <li>Complete the authentication process on this page if prompted</li>
+                <li>If you see a success message, wait for the window to close automatically</li>
+                <li>If the window doesn't close after 5 seconds, you can close it manually</li>
+                <li>Return to the main application window to continue</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const statusEl = document.getElementById('status');
+            const debugEl = document.getElementById('debug');
+            
+            function showStatus(message, type = 'info') {
+                statusEl.innerHTML = `<div class="${type}">${message}</div>`;
+            }
+            
+            function showDebug(message) {
+                if (debugEl) {
+                    debugEl.innerHTML += `<div>${new Date().toISOString().slice(11, 23)}: ${message}</div>`;
+                    debugEl.scrollTop = debugEl.scrollHeight;
+                }
+            }
+
+            function handleAuthCallback() {
+                try {
+                    // Extract authorization code and state from URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const code = urlParams.get('code');
+                    const state = urlParams.get('state');
+                    const error = urlParams.get('error');
+                    const errorDescription = urlParams.get('error_description');
+
+                    console.log('CILogon callback received:', { 
+                        hasCode: !!code, 
+                        hasState: !!state, 
+                        error,
+                        codePreview: code ? code.substring(0, 10) + '...' : null,
+                        statePreview: state ? state.substring(0, 10) + '...' : null
+                    });
+                    
+                    showDebug(`URL params: code=${code ? 'present' : 'missing'}, state=${state ? 'present' : 'missing'}, error=${error || 'none'}`);
+                    showDebug(`Full URL: ${window.location.href}`);
+
+                    if (error) {
+                        const errorMsg = errorDescription || error || 'Unknown authentication error';
+                        showStatus(`Authentication failed: ${errorMsg}`, 'error');
+                        
+                        // Try multiple ways to communicate the error
+                        const errorData = {
+                            type: 'CILOGON_AUTH_ERROR',
+                            error: errorMsg
+                        };
+                        
+                        if (window.opener && !window.opener.closed) {
+                            console.log('Sending error to opener');
+                            window.opener.postMessage(errorData, '*');
+                        } else if (window.parent && window.parent !== window) {
+                            console.log('Sending error to parent frame');
+                            window.parent.postMessage(errorData, '*');
+                        } else {
+                            console.log('Storing error in localStorage');
+                            try {
+                                localStorage.setItem('cilogon_auth_result', JSON.stringify({
+                                    ...errorData,
+                                    timestamp: Date.now()
+                                }));
+                            } catch (e) {
+                                console.error('Failed to save error to localStorage:', e);
+                            }
+                        }
+                        return;
+                    }
+
+                    if (!code || !state) {
+                        const errorMsg = 'Invalid response from CILogon - missing code or state';
+                        showStatus(errorMsg, 'error');
+                        
+                        const errorData = {
+                            type: 'CILOGON_AUTH_ERROR',
+                            error: errorMsg
+                        };
+                        
+                        if (window.opener && !window.opener.closed) {
+                            window.opener.postMessage(errorData, '*');
+                        } else if (window.parent && window.parent !== window) {
+                            window.parent.postMessage(errorData, '*');
+                        } else {
+                            try {
+                                localStorage.setItem('cilogon_auth_result', JSON.stringify({
+                                    ...errorData,
+                                    timestamp: Date.now()
+                                }));
+                            } catch (e) {
+                                console.error('Failed to save error to localStorage:', e);
+                            }
+                        }
+                        return;
+                    }
+
+                    showStatus('✅ Authentication successful! Completing login...', 'success');
+
+                    // Send the authorization code back to the parent window
+                    if (window.opener && !window.opener.closed) {
+                        console.log('Sending success message to opener');
+                        window.opener.postMessage({
+                            type: 'CILOGON_AUTH_SUCCESS',
+                            code: code,
+                            state: state
+                        }, '*');
+                        
+                        showStatus('✅ Authentication completed! This window will close automatically in 2 seconds.', 'success');
+                        
+                        // Close this window after a brief delay
+                        setTimeout(() => {
+                            try {
+                                window.close();
+                            } catch (e) {
+                                console.log('Could not auto-close popup:', e);
+                            }
+                        }, 2000);
+                    } else if (window.parent && window.parent !== window) {
+                        console.log('Sending success message to parent frame');
+                        window.parent.postMessage({
+                            type: 'CILOGON_AUTH_SUCCESS',
+                            code: code,
+                            state: state
+                        }, '*');
+                        
+                        showStatus('✅ Authentication completed! Please return to the main window.', 'success');
+                    } else {
+                        console.error('No parent window or opener found');
+                        showStatus(`Unable to communicate with parent window. Code: ${code.substring(0, 10)}...`, 'error');
+                        
+                        // Store the result in localStorage as a fallback
+                        try {
+                            localStorage.setItem('cilogon_auth_result', JSON.stringify({
+                                type: 'CILOGON_AUTH_SUCCESS',
+                                code: code,
+                                state: state,
+                                timestamp: Date.now()
+                            }));
+                            showStatus('✅ Authentication data saved! Please return to the main window.', 'success');
+                        } catch (e) {
+                            console.error('Failed to save to localStorage:', e);
+                        }
+                    }
+
+                } catch (err) {
+                    console.error('Callback handling error:', err);
+                    const errorMsg = `Error processing callback: ${err.message}`;
+                    showStatus(errorMsg, 'error');
+                    
+                    const errorData = {
+                        type: 'CILOGON_AUTH_ERROR',
+                        error: err.message
+                    };
+                    
+                    if (window.opener && !window.opener.closed) {
+                        window.opener.postMessage(errorData, '*');
+                    } else if (window.parent && window.parent !== window) {
+                        window.parent.postMessage(errorData, '*');
+                    } else {
+                        try {
+                            localStorage.setItem('cilogon_auth_result', JSON.stringify({
+                                ...errorData,
+                                timestamp: Date.now()
+                            }));
+                        } catch (e) {
+                            console.error('Failed to save error to localStorage:', e);
+                        }
+                    }
+                }
+            }
+
+            // Run the callback handler when the page loads
+            handleAuthCallback();
+        })();
+    </script>
+</body>
+</html>

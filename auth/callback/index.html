@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CILogon Callback - AtlanticWave-SDX</title>
+</head>
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: system-ui;">
+        <div style="text-align: center;">
+            <h2>Processing CILogon Authentication...</h2>
+            <p>Please wait while we complete your authentication.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Get the current URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        const error = urlParams.get('error');
+        
+        console.log('CILogon callback received:', { 
+            hasCode: !!code, 
+            hasState: !!state, 
+            error: error,
+            fullUrl: window.location.href
+        });
+        
+        // Function to send message to parent window
+        function sendMessageToParent(data) {
+            // Try to send to various parent window origins
+            const possibleOrigins = [
+                'https://lmarinve.github.io',
+                'https://multi-provider-authe--lmarinve.github.app',
+                window.location.origin
+            ];
+            
+            for (const origin of possibleOrigins) {
+                try {
+                    if (window.opener) {
+                        window.opener.postMessage(data, origin);
+                        console.log('Sent message to opener with origin:', origin, data);
+                    } else if (window.parent && window.parent !== window) {
+                        window.parent.postMessage(data, origin);
+                        console.log('Sent message to parent with origin:', origin, data);
+                    }
+                } catch (e) {
+                    console.log('Failed to send message to origin:', origin, e);
+                }
+            }
+        }
+        
+        if (error) {
+            // Handle error case
+            const errorDescription = urlParams.get('error_description') || 'Authentication failed';
+            const errorData = {
+                type: 'CILOGON_AUTH_ERROR',
+                error: error,
+                error_description: errorDescription
+            };
+            
+            console.log('Sending error message:', errorData);
+            sendMessageToParent(errorData);
+            
+            // Also store in localStorage as fallback
+            localStorage.setItem('cilogon_error', JSON.stringify({
+                error: error,
+                error_description: errorDescription
+            }));
+            
+            // Give time for message to be sent, then close or redirect
+            setTimeout(() => {
+                if (window.opener) {
+                    window.close();
+                } else {
+                    window.location.href = '/multi-provider-authe/login?provider=cilogon&error=true';
+                }
+            }, 1000);
+            
+        } else if (code && state) {
+            // Handle success case
+            const successData = {
+                type: 'CILOGON_AUTH_SUCCESS',
+                code: code,
+                state: state
+            };
+            
+            console.log('Sending success message:', successData);
+            sendMessageToParent(successData);
+            
+            // Also store as fallback
+            localStorage.setItem('cilogon_callback', JSON.stringify({
+                code: code,
+                state: state,
+                timestamp: Date.now()
+            }));
+            
+            // Give time for message to be sent, then close or redirect
+            setTimeout(() => {
+                if (window.opener) {
+                    window.close();
+                } else {
+                    window.location.href = '/multi-provider-authe/login?provider=cilogon&callback=true';
+                }
+            }, 1000);
+            
+        } else {
+            // Invalid callback
+            const errorData = {
+                type: 'CILOGON_AUTH_ERROR',
+                error: 'invalid_callback',
+                error_description: 'Missing required parameters'
+            };
+            
+            console.log('Sending invalid callback error:', errorData);
+            sendMessageToParent(errorData);
+            
+            localStorage.setItem('cilogon_error', JSON.stringify({
+                error: 'invalid_callback',
+                error_description: 'Missing required parameters'
+            }));
+            
+            setTimeout(() => {
+                if (window.opener) {
+                    window.close();
+                } else {
+                    window.location.href = '/multi-provider-authe/login?provider=cilogon&error=true';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
