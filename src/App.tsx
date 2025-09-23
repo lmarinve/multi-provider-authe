@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { LandingPage } from "@/components/pages/LandingPage";
 import { LoginPage } from "@/components/pages/LoginPage";
 import { TokenPage } from "@/components/pages/TokenPage";
-import { config } from "@/lib/config";
-import { Provider } from "@/lib/config";
+import { Provider } from "@/lib/types";
 import { TokenStorage } from "@/lib/token-storage";
 import { CILogonProvider } from "@/lib/providers/cilogon";
 

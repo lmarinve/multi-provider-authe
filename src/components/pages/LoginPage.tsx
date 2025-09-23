@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle, XCircle } from "@phosphor-icons/react";
-import { Provider } from "@/lib/config";
+import { Provider } from "@/lib/types";
 import { CILogonProvider } from "@/lib/providers/cilogon";
 import { toast } from "sonner";
 

@@ -1,4 +1,4 @@
-export type Provider = "cilogon" | "orcid";
+export type Provider = "cilogon" | "orcid" | "fabric";
 
 export interface AuthToken {
   id_token: string;
