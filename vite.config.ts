@@ -4,17 +4,13 @@ import { defineConfig, PluginOption } from "vite";
 
 import sparkPlugin from "@github/spark/spark-vite-plugin";
 import createIconImportProxy from "@github/spark/vitePhosphorIconProxyPlugin";
-import { fileURLToPath } from "url";
-import { dirname, resolve } from "path";
+import { resolve } from 'path'
 
-
-// const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname;
-
-const repoBase = "/multi-provider-authe/";
-const projectRoot = process.env.PROJECT_ROOT || dirname(fileURLToPath(import.meta.url));
+const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "/multi-provider-authe/",
   plugins: [
     react(),
     tailwindcss(),
